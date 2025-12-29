@@ -7,9 +7,9 @@ const theme = {
         return `${mobile} border flex flex-row justify-center items-center gap-md cursor-pointer disabled:cursor-default font-medium ${additionalClassName}`.trim();
     },
     variant: {
-        primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark disabled:bg-primary-light text-white',
-        secondary: 'bg-secondary border-transparent rounded-sm  hover:bg-secondary-dark disabled:bg-secondary-light text-white',
-        danger: 'bg-danger border-transparent rounded-sm  hover:bg-danger-dark disabled:bg-danger-light text-white',
+        primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark disabled:bg-primary-light text-white fill-white',
+        secondary: 'bg-secondary border-transparent rounded-sm  hover:bg-secondary-dark disabled:bg-secondary-light text-white fill-white',
+        danger: 'bg-danger border-transparent rounded-sm  hover:bg-danger-dark disabled:bg-danger-light text-white fill-white',
         outline: 'bg-transparent rounded-sm hover:border-dark disabled:border-light disabled:text-disabled',
         transparent:
             'bg-transparent focus:outline-none focus:bg-primary-light border-transparent disabled:text-disabled hover:text-primary-dark'
@@ -18,7 +18,7 @@ const theme = {
         underline: 'underline underline-offset-2',
         none: ''
     },
-    icon: 'w-xl'
+    icon: 'w-xl fill-inherit'
 } as const;
 
 /**
@@ -49,8 +49,8 @@ export const Button = <T extends ElementType = 'button'>({
     }, [children, showChildren]);
 
     return (
-        <Component type={isButton ? 'button' : undefined} {...props} className={className} ref={ref}>
-            {hasIcon && <Icon className={theme.icon} title={title} />}
+        <Component type={isButton ? 'button' : undefined} {...props} className={className} ref={ref} title={title}>
+            {hasIcon && <Icon className={theme.icon} />}
             {showChildren && children}
         </Component>
     );

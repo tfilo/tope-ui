@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { fn } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 
 import { Button } from './Button';
 import { UserIcon, PlayIcon, TrashIcon } from '@heroicons/react/16/solid';
@@ -33,10 +33,32 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
+    play: async ({ args, canvas, userEvent }) => {
+        await expect(canvas.getByText('Button').tagName).toBe('BUTTON');
+        await expect(canvas.getByText('Button')).toHaveClass('min-w-[32px] min-h-[32px]');
+        await userEvent.click(canvas.getByText('Button'));
+        await expect(canvas.getByText('Button')).not.toBeDisabled();
+        await expect(args.onClick).toHaveBeenCalled();
+    },
     args: {
         children: 'Button',
         variant: 'primary',
-        disabled: false
+        disabled: false,
+        onClick: fn()
+    }
+};
+
+export const Disabled: Story = {
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.click(canvas.getByText('Button'));
+        await expect(canvas.getByText('Button')).toBeDisabled();
+        await expect(args.onClick).not.toHaveBeenCalled();
+    },
+    args: {
+        children: 'Button',
+        variant: 'primary',
+        disabled: true,
+        onClick: fn()
     }
 };
 
@@ -82,6 +104,9 @@ export const PrimaryWithIcon: Story = {
 };
 
 export const TransparentIconOnly: Story = {
+    play: async ({ canvas }) => {
+        await expect(canvas.getByTitle('Button')).toBeVisible();
+    },
     args: {
         children: 'Button',
         variant: 'transparent',
@@ -92,6 +117,10 @@ export const TransparentIconOnly: Story = {
 };
 
 export const PrimaryAsLink: Story = {
+    play: async ({ canvas }) => {
+        await expect(canvas.getByText('Button').tagName).toBe('A');
+        await expect(canvas.getByText('Button')).toHaveAttribute('href', '#');
+    },
     args: {
         as: 'a',
         children: 'Button',
@@ -102,6 +131,10 @@ export const PrimaryAsLink: Story = {
 };
 
 export const IconWithCustomWidth: Story = {
+    play: async ({ canvas }) => {
+        await expect(canvas.getByTitle('Button')).toHaveClass('min-w-[24px] min-h-[24px]');
+        await expect(canvas.getByTitle('Button')).not.toHaveClass('min-w-[32px] min-h-[32px]');
+    },
     args: {
         children: 'Button',
         variant: 'outline',

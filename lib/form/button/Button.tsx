@@ -1,57 +1,57 @@
-import type React from 'react';
-import { useMemo, type ElementType, type PropsWithChildren } from 'react';
-import type { UserIcon } from '@heroicons/react/16/solid';
-
-type ButtonBaseProps<T extends ElementType> = PropsWithChildren<{
-    as?: T;
-    variant?: 'primary' | 'secondary' | 'danger' | 'outline' | 'transparent';
-    icon?: typeof UserIcon;
-    hideChildren?: boolean;
-    textDecoration?: 'underline' | 'none';
-}>;
-
-type ButtonProps<T extends ElementType> = ButtonBaseProps<T> & Omit<React.ComponentPropsWithRef<T>, keyof ButtonBaseProps<T>>;
-
-const base =
-    'mobile:w-auto w-full flex flex-row justify-center gap-md cursor-pointer disabled:cursor-default px-md py-sm font-medium rounded-sm min-w-[34px] min-h-[34px]';
+import React, { useMemo, type ElementType } from 'react';
+import type { ButtonProps } from './Button.types';
 
 const theme = {
-    primary: 'bg-primary border border-transparent hover:bg-primary-dark disabled:bg-primary-light text-white',
-    secondary: 'bg-secondary border border-transparent hover:bg-secondary-dark disabled:bg-secondary-light text-white',
-    danger: 'bg-danger border border-transparent hover:bg-danger-dark disabled:bg-danger-light text-white',
-    outline: 'bg-transparent border hover:border-dark disabled:border-light disabled:text-disabled',
-    transparent: 'bg-transparent border border-transparent disabled:text-disabled hover:text-primary-dark'
+    base: (showChildren: boolean, additionalClassName: string) => {
+        const mobile = showChildren ? 'mobile:w-fit w-full px-md' : 'w-fit';
+        return `${mobile} border flex flex-row justify-center items-center gap-md cursor-pointer disabled:cursor-default font-medium ${additionalClassName}`.trim();
+    },
+    variant: {
+        primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark disabled:bg-primary-light text-white',
+        secondary: 'bg-secondary border-transparent rounded-sm  hover:bg-secondary-dark disabled:bg-secondary-light text-white',
+        danger: 'bg-danger border-transparent rounded-sm  hover:bg-danger-dark disabled:bg-danger-light text-white',
+        outline: 'bg-transparent rounded-sm hover:border-dark disabled:border-light disabled:text-disabled',
+        transparent:
+            'bg-transparent focus:outline-none focus:bg-primary-light border-transparent disabled:text-disabled hover:text-primary-dark'
+    },
+    textDecoration: {
+        underline: 'underline underline-offset-2',
+        none: ''
+    },
+    icon: 'w-xl'
 } as const;
 
-const textDecoration = {
-    underline: 'underline underline-offset-2',
-    none: ''
-} as const;
-
+/**
+ * Button component that can render as any HTML element or custom component.
+ */
 export const Button = <T extends ElementType = 'button'>({
     as,
     variant = 'primary',
     children,
     icon,
-    hideChildren = false,
-    underline = 'none',
-    className = [theme[variant], textDecoration[underline], base].join(' '),
+    textDecoration = 'none',
+    showChildren = true,
+    additionalClassName = 'min-w-[32px] min-h-[32px]',
+    className = [theme.variant[variant], theme.textDecoration[textDecoration], theme.base(showChildren, additionalClassName)].join(' '),
+    ref,
     ...props
 }: ButtonProps<T>) => {
     const Component = (as ?? 'button') as ElementType;
     const Icon = icon ?? null;
+    const hasIcon = Icon !== null;
+    const isButton = as === undefined || as === 'button';
 
     const title = useMemo(() => {
-        if (hideChildren === true && typeof children === 'string') {
+        if (showChildren === false && typeof children === 'string') {
             return children;
         }
         return undefined;
-    }, [children, hideChildren]);
+    }, [children, showChildren]);
 
     return (
-        <Component {...props} className={className}>
-            {Icon !== null && <Icon className='w-xl' title={title} />}
-            {hideChildren !== true && children}
+        <Component type={isButton ? 'button' : undefined} {...props} className={className} ref={ref}>
+            {hasIcon && <Icon className={theme.icon} title={title} />}
+            {showChildren && children}
         </Component>
     );
 };

@@ -1,22 +1,29 @@
 @layer base {
-    :root {
-        --text-color-base: #000;
-        --border-color-base: #d1d5db;
+    *:focus {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
     }
 
     *,
     *::before,
     *::after {
-        border-color: var(--border-color-base);
+        border-color: var(--border-color-default);
     }
 
-    body {
-        color: var(--text-color-base);
+    * {
+        color: var(--text-color-default);
+        font-size: var(--text-base);
+        line-height: var(--tw-leading, var(--text-base--line-height));
     }
 }
 
 @theme static {
-    --*: initial;
+    --color-*: initial;
+    --radius-*: initial;
+    --spacing-*: initial;
+    --breakpoint-*: initial;
+    --text-*: initial;
+    --font-weight-*: initial;
 
     --font-body: 'Source Sans Pro', sans-serif;
 
@@ -48,10 +55,10 @@
     --font-weight-medium: 500;
     --font-weight-bold: 700;
 
-    --text-color-base: #222;
+    --text-color-default: #222;
     --text-color-disabled: #999;
 
-    --border-color-base: #d1d5db;
+    --border-color-default: #d1d5db;
     --border-color-dark: #9ca3af;
     --border-color-light: #e5e7eb;
 
@@ -75,8 +82,8 @@
     --text-headline-5--line-height: 1.75rem; /* 28px */
     --text-headline-5--font-weight: var(--font-weight-bold);
 
-    --text-sm: 0.85rem; /* 14px */
-    --text-sm--line-height: 1rem; /* 16px */
+    --text-sm: 0.75rem; /* 12px */
+    --text-sm--line-height: 0.875rem; /* 14px */
 
     --text-base: 1rem; /* 16px */
     --text-base--line-height: 1.25rem; /* 20px */
@@ -85,6 +92,7 @@
     --text-lg--line-height: 1.5rem; /* 24px */
 
     --radius-none: 0rem; /* 0px */
+    --radius-xs: 0.125rem; /* 2px */
     --radius-sm: 0.25rem; /* 4px */
     --radius-md: 0.5rem; /* 8px */
     --radius-lg: 0.75rem; /* 12px */
@@ -92,6 +100,7 @@
     --radius-full: calc(infinity * 1px);
 
     --spacing-none: 0rem; /* 0px */
+    --spacing-xs: 0.125rem; /* 2px */
     --spacing-sm: 0.25rem; /* 4px */
     --spacing-md: 0.5rem; /* 8px */
     --spacing-lg: 0.75rem; /* 12px */

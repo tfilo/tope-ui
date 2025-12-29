@@ -1,18 +1,4 @@
-import type { PropsWithChildren } from 'react';
-
-type FlexBase =
-    | {
-          direction?: 'row';
-          justify?: 'start' | 'center' | 'end' | 'between';
-          gap?: 'sm' | 'md' | 'lg' | 'xl';
-      }
-    | {
-          direction?: 'column';
-          justify?: never;
-          gap?: 'sm' | 'md' | 'lg' | 'xl';
-      };
-
-type FlexProps = PropsWithChildren<FlexBase>;
+import type { FlexProps } from './Flex.types';
 
 const theme = {
     direction: {
@@ -20,12 +6,15 @@ const theme = {
         column: 'flex-col'
     },
     gap: {
+        none: '',
+        xs: 'gap-xs',
         sm: 'gap-sm',
         md: 'gap-md',
         lg: 'gap-lg',
         xl: 'gap-xl'
     },
     justify: {
+        none: '',
         start: 'justify-start',
         center: 'justify-center',
         end: 'justify-end',
@@ -33,6 +22,21 @@ const theme = {
     }
 } as const;
 
-export const Flex: React.FC<FlexProps> = ({ direction = 'row', gap = 'md', justify = 'end', children }) => {
-    return <div className={`w-full flex ${theme.direction[direction]} ${theme.gap[gap]} ${theme.justify[justify]}`}>{children}</div>;
+/**
+ * Flex component renders as HTMLDivElement element with defined flex classes to ensure unified behavior across app use this instead of specifying flex class everywhere
+ */
+export const Flex: React.FC<FlexProps> = ({
+    direction = 'row',
+    gap = 'md',
+    justify = direction === 'row' ? 'end' : 'none',
+    additionalClassName = '',
+    children
+}) => {
+    return (
+        <div
+            className={`w-full flex ${theme.direction[direction]} ${theme.gap[gap]} ${theme.justify[justify]} ${additionalClassName}`.trim()}
+        >
+            {children}
+        </div>
+    );
 };

@@ -11,8 +11,6 @@ const meta = {
     tags: ['autodocs'],
     argTypes: {
         children: { control: 'text' },
-        disabled: { control: 'boolean' },
-        as: { control: 'select', options: [undefined, 'button', 'a'] },
         variant: {
             control: 'select',
             options: ['primary', 'secondary', 'danger', 'outline', 'transparent']
@@ -22,8 +20,11 @@ const meta = {
             options: [undefined, 'UserIcon', 'PlayIcon', 'TrashIcon'],
             mapping: { UserIcon: UserIcon, PlayIcon: PlayIcon, TrashIcon: TrashIcon }
         },
-        hideChildren: { control: 'boolean' },
-        underline: { control: 'boolean' }
+        textDecoration: { control: 'boolean' },
+        showChildren: { control: 'boolean' },
+        additionalClassName: { control: 'text' },
+        disabled: { control: 'boolean' },
+        as: { control: 'select', options: [undefined, 'button', 'a'] }
     },
     args: { onClick: fn() }
 } satisfies Meta<typeof Button>;
@@ -86,6 +87,27 @@ export const TransparentIconOnly: Story = {
         variant: 'transparent',
         disabled: false,
         icon: UserIcon,
-        hideChildren: true
+        showChildren: false
+    }
+};
+
+export const PrimaryAsLink: Story = {
+    args: {
+        as: 'a',
+        children: 'Button',
+        variant: 'primary',
+        disabled: false,
+        href: '#'
+    }
+};
+
+export const IconWithCustomWidth: Story = {
+    args: {
+        children: 'Button',
+        variant: 'outline',
+        disabled: false,
+        icon: UserIcon,
+        showChildren: false,
+        additionalClassName: 'min-w-[24px] min-h-[24px]'
     }
 };

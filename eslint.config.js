@@ -16,7 +16,7 @@ export default defineConfig([
             tseslint.configs.recommended,
             reactHooks.configs.flat.recommended,
             reactRefresh.configs.vite,
-            storybook.configs.vite
+            storybook.configs['flat/recommended']
         ],
         languageOptions: {
             ecmaVersion: 2020,

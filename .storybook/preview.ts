@@ -8,6 +8,11 @@ const preview: Preview = {
                 color: /(background|color)$/i,
                 date: /Date$/i
             }
+        },
+        a11y: {
+            context: 'body',
+            config: {},
+            options: {}
         }
     },
     tags: ['autodocs']

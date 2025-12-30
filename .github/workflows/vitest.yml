@@ -1,9 +1,30 @@
-name: UI Tests
+name: Lint, Prettier, Build and Tests
 
 on: [push]
 
 jobs:
-  test:
+  build:
+    permissions:
+      actions: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+          cache-dependency-path: "./package-lock.json"
+      - name: Check syntax, formatting and build
+        run: |
+          npm ci
+          npm run lint
+          npm run prettier
+          npm run build
+          npm run build-storybook
+  tests:
+    needs: build
     permissions:
       actions: read
     runs-on: ubuntu-latest

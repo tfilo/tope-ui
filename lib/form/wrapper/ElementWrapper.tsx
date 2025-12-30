@@ -35,14 +35,20 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
     return (
         <div className={theme.wrapper}>
             {hasLabel && (
-                <label htmlFor={elementId} className={theme.label(disabled)}>
+                <label
+                    htmlFor={elementId}
+                    className={theme.label(disabled)}
+                >
                     {label}
                     {required && <span className={theme.star(disabled)}>*</span>}
                 </label>
             )}
             <div className={`${theme.component} ${theme.state[state](disabled)} ${theme.base}`}>{children}</div>
             {hasError && (
-                <label htmlFor={elementId} className={theme.error(disabled)}>
+                <label
+                    htmlFor={elementId}
+                    className={theme.error(disabled)}
+                >
                     {error}
                 </label>
             )}

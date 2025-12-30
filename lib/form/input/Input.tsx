@@ -32,7 +32,10 @@ const InputAction: React.FC<InputActionProps> = (props) => {
         const Icon = props.icon;
         return (
             <div className={theme.action.iconWrapper}>
-                <Icon className={theme.action.icon} title={props.title} />
+                <Icon
+                    className={theme.action.icon}
+                    title={props.title}
+                />
             </div>
         );
     }
@@ -64,19 +67,38 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
     const endActionsArray = Array.isArray(endAction) ? endAction : endAction ? [endAction] : [];
 
     return (
-        <ElementWrapper label={label} error={error} required={props.required} disabled={props.disabled} elementId={inputId}>
+        <ElementWrapper
+            label={label}
+            error={error}
+            required={props.required}
+            disabled={props.disabled}
+            elementId={inputId}
+        >
             {startActionsArray.length > 0 && (
                 <div className={theme.action.leftWrapper}>
-                    {startActionsArray.map((action) => (
-                        <InputAction {...action} disabled={action.disabled || props.disabled} />
+                    {startActionsArray.map((action, idx) => (
+                        <InputAction
+                            {...action}
+                            key={`${action.title}_${idx}`}
+                            disabled={action.disabled || props.disabled}
+                        />
                     ))}
                 </div>
             )}
-            <input id={inputId} className={theme.input} {...props} ref={ref} />
+            <input
+                id={inputId}
+                className={theme.input}
+                {...props}
+                ref={ref}
+            />
             {endActionsArray.length > 0 && (
                 <div className={theme.action.rightWrapper}>
-                    {endActionsArray.map((action) => (
-                        <InputAction {...action} disabled={action.disabled || props.disabled} />
+                    {endActionsArray.map((action, idx) => (
+                        <InputAction
+                            {...action}
+                            key={`${action.title}_${idx}`}
+                            disabled={action.disabled || props.disabled}
+                        />
                     ))}
                 </div>
             )}

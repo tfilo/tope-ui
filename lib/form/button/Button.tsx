@@ -49,7 +49,13 @@ export const Button = <T extends ElementType = 'button'>({
     }, [children, showChildren]);
 
     return (
-        <Component type={isButton ? 'button' : undefined} {...props} className={className} ref={ref} title={title}>
+        <Component
+            type={isButton ? 'button' : undefined}
+            {...props}
+            className={className}
+            ref={ref}
+            title={title}
+        >
             {hasIcon && <Icon className={theme.icon} />}
             {showChildren && children}
         </Component>

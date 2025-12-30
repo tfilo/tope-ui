@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { expect, fn, userEvent, waitFor } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import { Input } from './Input';
 import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/16/solid';
@@ -100,7 +100,7 @@ export const WithEndAction: Story = {
 };
 
 export const WithMultipleActions: Story = {
-    play: async ({ args, canvas }) => {
+    play: async ({ args, canvas, userEvent }) => {
         const plusButton = canvas.getByTitle('Click me');
         await expect(canvas.getByRole('textbox').previousSibling).toHaveTextContent('I am just icon');
         await expect(canvas.getByRole('textbox').previousSibling).toContainElement(plusButton);
@@ -167,5 +167,10 @@ export const Error: Story = {
 };
 
 export const InputOnly: Story = {
-    args: {}
+    play: async ({ canvas }) => {
+        await expect(canvas.getByRole('textbox')).toHaveAttribute('aria-label', 'Labelless input');
+    },
+    args: {
+        'aria-label': 'Labelless input'
+    }
 };

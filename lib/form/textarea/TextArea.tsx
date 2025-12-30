@@ -5,7 +5,7 @@ import { isNotBlank } from '../../utils/string-utils';
 
 const theme = {
     base: 'flex-1 focus:outline-0 px-md py-sm',
-    counter: 'absolute -bottom-[20px] right-[0px] text-sm text-secondary-light text-right',
+    counter: 'absolute -bottom-[20px] right-[0px] text-sm text-secondary text-right',
     wrapper: 'w-full flex flex-col relative'
 } as const;
 
@@ -43,9 +43,23 @@ export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onCha
     }, [value]);
 
     return (
-        <ElementWrapper label={label} error={error} required={props.required} disabled={props.disabled} elementId={inputId}>
+        <ElementWrapper
+            label={label}
+            error={error}
+            required={props.required}
+            disabled={props.disabled}
+            elementId={inputId}
+        >
             <div className={theme.wrapper}>
-                <textarea id={inputId} className={theme.base} rows={4} {...props} value={value} onChange={handleOnChange} ref={ref} />
+                <textarea
+                    id={inputId}
+                    className={theme.base}
+                    rows={4}
+                    {...props}
+                    value={value}
+                    onChange={handleOnChange}
+                    ref={ref}
+                />
                 {hasMaxLenght && !hasError && (
                     <span className={theme.counter}>
                         {count}/{props.maxLength}

@@ -27,24 +27,24 @@
 
     --font-body: 'Source Sans Pro', sans-serif;
 
-    --color-primary: #337cf2;
-    --color-primary-dark: #1e60c9;
+    --color-primary: #0852BA;
+    --color-primary-dark: #083C82;
     --color-primary-light: #82b0fa;
 
-    --color-secondary: #797c82;
-    --color-secondary-dark: #595c63;
+    --color-secondary: #57585C;
+    --color-secondary-dark: #444446;
     --color-secondary-light: #b1b6bd;
 
-    --color-success: oklch(79.2% 0.209 151.711);
-    --color-success-dark: oklch(79.2% 0.209 151.711);
-    --color-success-light: oklch(79.2% 0.209 151.711);
+    --color-success: #006600;
+    --color-success-dark: #004700;
+    --color-success-light: #b3e1b1;
 
     --color-warning: oklch(85.2% 0.199 91.936);
     --color-warning-dark: oklch(85.2% 0.199 91.936);
     --color-warning-light: oklch(85.2% 0.199 91.936);
 
-    --color-danger: #e3493b;
-    --color-danger-dark: #a63228;
+    --color-danger: #A72416;
+    --color-danger-dark: #7C1A0E;
     --color-danger-light: #ed9891;
 
     --color-transparent: transparent;

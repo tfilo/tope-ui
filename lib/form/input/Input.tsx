@@ -86,9 +86,9 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
                 </div>
             )}
             <input
-                id={inputId}
                 className={theme.input}
                 {...props}
+                id={inputId}
                 ref={ref}
             />
             {endActionsArray.length > 0 && (

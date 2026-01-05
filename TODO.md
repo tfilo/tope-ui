@@ -12,11 +12,12 @@ List of components to develop
         - [x] ActionEnd: one or more elements (e.g., Button, Dropdown)
     - [x] Textarea
         - [x] Optional max-length and visual counter at bottom right
-    - [ ] Select
-        - [ ] Options (possible subcategories)
-        - [ ] Single / Multi-select
+    - [x] Select
+        - [x] Options (possible subcategories)
+        - [x] Single / Multi-select
     - [ ] Autocomplete
-        - [ ] Single / Multi-select
+        - [x] Single
+        - [ ] Multi-select
     - [ ] File
         - [ ] Single / Multi-select
         - [ ] onChange?: if defined, calls with file list after files are selected
@@ -32,10 +33,10 @@ List of components to develop
 - [ ] OTHER
     - [ ] Dropdown
         - [ ] Options (possible icons)
-    - [ ] Tag
-        - [ ] Colors: Primary, Secondary, Danger, Outline
-        - [ ] onClose?: shows "x" and calls onClose on click
-        - [ ] onClick?: reacts on hover and calls onClick on click
+    - [x] Tag
+        - [x] Colors: Primary, Secondary, Danger, Outline
+        - [x] onRemove?: shows "x" and calls onClose on click
+        - [x] onClick?: reacts on hover and calls onClick on click
     - [ ] Modal
         - [ ] Props: Title (string), Body (ReactNode)
         - [ ] Footer: onConfirm (required), onCancel? (optional)
@@ -76,5 +77,7 @@ List of components to develop
         - [ ] Has optional description showed on bottom of card as transparent overly
         - [ ] Has optional onClick, handle clic on Card anywhere except action in top right corner
         - [ ] Has optional onAction, handle click on action icon in top right corner (configurable icon)
+- [ ] LOCALIZATION
+    - [ ] Add localization option to all components that uses some hardcoded internal texts
 - [ ] PUBLISH
     - [ ] Create github action to publish to NPM

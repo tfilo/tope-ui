@@ -27,13 +27,14 @@
 
     --font-body: 'Source Sans Pro', sans-serif;
 
-    --color-primary: #0852BA;
-    --color-primary-dark: #083C82;
+    --color-primary: #0852ba;
+    --color-primary-dark: #083c82;
     --color-primary-light: #82b0fa;
 
-    --color-secondary: #57585C;
+    --color-secondary: #57585c;
     --color-secondary-dark: #444446;
     --color-secondary-light: #b1b6bd;
+    --color-secondary-extra-light: #ebebed;
 
     --color-success: #006600;
     --color-success-dark: #004700;
@@ -43,8 +44,8 @@
     --color-warning-dark: oklch(85.2% 0.199 91.936);
     --color-warning-light: oklch(85.2% 0.199 91.936);
 
-    --color-danger: #A72416;
-    --color-danger-dark: #7C1A0E;
+    --color-danger: #a72416;
+    --color-danger-dark: #7c1a0e;
     --color-danger-light: #ed9891;
 
     --color-transparent: transparent;

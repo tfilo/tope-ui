@@ -16,7 +16,7 @@ const theme = {
 export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onChange, value, ...props }) => {
     const _id = useId();
     const [count, setCount] = useState(0);
-    const inputId = id || `textarea-${_id}`;
+    const textareaId = id || `textarea-${_id}`;
     const hasMaxLenght = props.maxLength !== undefined;
     const hasError = isNotBlank(error);
 
@@ -48,14 +48,14 @@ export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onCha
             error={error}
             required={props.required}
             disabled={props.disabled}
-            elementId={inputId}
+            elementId={textareaId}
         >
             <div className={theme.wrapper}>
                 <textarea
-                    id={inputId}
                     className={theme.base}
                     rows={4}
                     {...props}
+                    id={textareaId}
                     value={value}
                     onChange={handleOnChange}
                     ref={ref}

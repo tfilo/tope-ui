@@ -43,6 +43,18 @@ export const Basic: Story = {
     }
 };
 
+export const Disabled: Story = {
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
+        await expect(args.onChange).not.toHaveBeenCalled();
+    },
+    args: {
+        label: 'Some disabled input',
+        disabled: true,
+        onChange: fn()
+    }
+};
+
 export const Required: Story = {
     play: async ({ canvas }) => {
         await expect(

@@ -1,9 +1,9 @@
 import type { InputHTMLAttributes, RefObject } from 'react';
-import type { IconType } from '../../common/IconType';
+import type { Icon } from '../../common/Icon';
 
 export interface InputActionProps {
     /** Icon element */
-    icon: IconType;
+    icon: Icon;
     /** Optional method to handle click on icon */
     onClick?: () => void | Promise<void>;
     /** Title for better accesibility */

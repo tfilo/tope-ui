@@ -5,6 +5,7 @@ import { isBlank, isNotBlank } from '../../utils/string-utils';
 import type { Option } from '../../common/Option';
 import { Button } from '../button/Button';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
+import { Tag } from '../../visual';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px]',
@@ -25,7 +26,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
     const [options, setOptions] = useState<Option[]>([]);
 
     const [selectedOption, setSelectedOption] = useState<Option | null>(null);
-    const [displayValue, setDisplayValue] = useState<string>(selectedOption?.label ?? '');
+    const [displayValue, setDisplayValue] = useState<string>('');
 
     // Handle input value changes by user
     const handleDisplayValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,19 +35,39 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
         setDisplayValue(e.currentTarget.value);
     };
 
+    const handleRemoveOption = (o: Option) => {
+        console.log('handleRemoveOption', o);
+        setSelectedOption(null);
+        setDisplayValue('');
+        setOptions([]);
+        onChange(null);
+    };
+
+    const handleOptionsClose = () => {
+        setIsOpen(false);
+        setOptions([]);
+    };
+
+    const handleOptionsOpen = async () => {
+        if (isOpen === false) {
+            setIsOpen(true);
+            await handleSearch(displayValue, true);
+        }
+        // Focus first option if exists
+        if (optionsRef.current) {
+            const firstOption = optionsRef.current.querySelector('li');
+            if (firstOption) {
+                (firstOption as HTMLElement).focus();
+            }
+        }
+    };
+
     // Handle key down events for navigation
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         console.log('handleKeyDown', e.key);
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setIsOpen(true);
-            // Focus first option if exists
-            if (optionsRef.current) {
-                const firstOption = optionsRef.current.querySelector('li');
-                if (firstOption) {
-                    (firstOption as HTMLElement).focus();
-                }
-            }
+            await handleOptionsOpen();
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (options.length > 0 && isNotBlank(displayValue)) {
@@ -56,7 +77,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
             }
         } else if (e.key === 'Escape') {
             e.preventDefault();
-            setIsOpen(false);
+            handleOptionsClose();
         }
     };
 
@@ -80,13 +101,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                 if (inputElement) {
                     inputElement.focus();
                 }
+                handleOptionsClose();
             }
         } else if (e.key === 'Enter') {
             e.preventDefault();
             handleSelect(option);
         } else if (e.key === 'Escape') {
             e.preventDefault();
-            setIsOpen(false);
+            handleOptionsClose();
             // Focus input
             const inputElement = document.getElementById(autocompleteId);
             if (inputElement) {
@@ -103,32 +125,30 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
             console.log('handleBlur - inside options');
             return;
         }
-        setIsOpen(false);
-        setDisplayValue(selectedOption?.label ?? '');
+        handleOptionsClose();
+        setDisplayValue('');
     };
 
     // Handle option selection from dropdown
     const handleSelect = (option: Option | null) => {
         console.log('handleSelect', option);
-        setIsOpen(false);
+        handleOptionsClose();
         if (option?.value === selectedOption?.value) {
             return;
         }
         setSelectedOption(option);
+        setDisplayValue('');
+        setOptions([]);
         if (option === null) {
-            setDisplayValue('');
-            setOptions([]);
             onChange(null);
         } else {
-            setDisplayValue(option.label);
-            setOptions([option]);
             onChange(option.value);
         }
     };
 
-    const handleSearch = useEffectEvent(async (query: string) => {
+    const handleSearch = async (query: string, force: boolean = false) => {
         console.log('handleSearch', isOpen, query);
-        if (isOpen === false) {
+        if (force === false && isOpen === false) {
             // Value is already selected or dropdown is closed, no need to search
             return;
         }
@@ -148,7 +168,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                 setIsSearching(false);
             }
         }
-    });
+    };
+
+    const handleSearchEffectEvent = useEffectEvent(handleSearch);
 
     const onValueChange = useEffectEvent(async (newValue: string | null) => {
         console.log('onValueChange', newValue);
@@ -157,15 +179,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                 setIsFetching(true);
                 const option = await onFetch(newValue.trim());
                 setSelectedOption(option);
-                setDisplayValue(option?.label ?? '');
-                setOptions(option ? [option] : []);
             } finally {
                 setIsFetching(false);
             }
         } else if (isBlank(newValue)) {
             setSelectedOption(null);
-            setDisplayValue('');
         }
+        setOptions([]);
+        setDisplayValue('');
     });
 
     /** Handle external value changes */
@@ -175,7 +196,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     /** Trigger search when display value changes */
     useEffect(() => {
-        handleSearch(displayValue);
+        handleSearchEffectEvent(displayValue);
     }, [displayValue]);
 
     const hasOptions = options.length > 0;
@@ -190,6 +211,12 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
         >
             <div className={theme.wrapper}>
                 <div className={theme.inputWrapper}>
+                    {selectedOption && (
+                        <Tag
+                            label={selectedOption.label}
+                            onRemove={() => handleRemoveOption(selectedOption)}
+                        />
+                    )}
                     <input
                         className={theme.input}
                         {...props}
@@ -205,7 +232,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                         variant='transparent'
                         showChildren={false}
                         icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
-                        onClick={() => setIsOpen(!isOpen)}
+                        onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
                         disabled={props.disabled || isFetching}
                         additionalClassName={theme.button}
                     >

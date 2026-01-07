@@ -8,39 +8,48 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import { Tag } from '../../visual';
 
 const theme = {
-    input: 'flex-1 focus:outline-none px-md min-h-[30px]',
-    inputWrapper: 'flex-1 flex',
-    button: 'min-w-[30px] min-h-[30px]',
+    input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
+    inputWrapper: 'flex-1 flex flex-wrap',
+    button: 'min-w-[30px] min-h-[30px] rounded-sm',
     wrapper: 'w-full flex flex-col relative'
 };
 
-export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, value, onChange, onSearch, onFetch, ...props }) => {
-    console.log('Autocomplete render', value);
+export const Autocomplete: React.FC<AutocompleteProps> = ({
+    id,
+    label,
+    error,
+    value,
+    onChange,
+    onSearch,
+    onFetch,
+    multiple = false,
+    disabled = false,
+    ...props
+}) => {
     const _id = useId();
     const globalAbortController = useRef<AbortController | null>(null);
+    const popoverRef = useRef<HTMLDivElement>(null);
     const optionsRef = useRef<HTMLUListElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
     const [isSearching, setIsSearching] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<Option[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
 
-    const [selectedOption, setSelectedOption] = useState<Option | null>(null);
+    const [selectedOption, setSelectedOption] = useState<Option[]>([]);
     const [displayValue, setDisplayValue] = useState<string>('');
 
     // Handle input value changes by user
     const handleDisplayValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('handleDisplayValueChange', e.currentTarget.value);
         setIsOpen(true);
         setDisplayValue(e.currentTarget.value);
     };
 
-    const handleRemoveOption = (o: Option) => {
-        console.log('handleRemoveOption', o);
-        setSelectedOption(null);
+    const handleRemoveOption = (option: Option) => {
+        setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
         setDisplayValue('');
         setOptions([]);
-        onChange(null);
     };
 
     const handleOptionsClose = () => {
@@ -64,7 +73,6 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     // Handle key down events for navigation
     const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-        console.log('handleKeyDown', e.key);
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             await handleOptionsOpen();
@@ -83,7 +91,6 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     // Handle key down on options for navigation
     const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, option: Option) => {
-        console.log('handleOptionKeyDown', e.key);
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             const nextSibling = (e.currentTarget.nextSibling as HTMLElement) || null;
@@ -119,10 +126,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     // Handle blur event to close dropdown
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        console.log('handleBlur', e.relatedTarget);
         // If target is inside optionsRef, do not close
         if (optionsRef.current && optionsRef.current.contains(e.relatedTarget as Node)) {
-            console.log('handleBlur - inside options');
             return;
         }
         handleOptionsClose();
@@ -131,23 +136,25 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     // Handle option selection from dropdown
     const handleSelect = (option: Option | null) => {
-        console.log('handleSelect', option);
         handleOptionsClose();
-        if (option?.value === selectedOption?.value) {
-            return;
+        if (multiple) {
+            if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
+                // unselect option
+                setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
+            } else if (option) {
+                setSelectedOption([...selectedOption, option]);
+            }
+        } else {
+            if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
+                return;
+            }
+            setSelectedOption(option ? [option] : []);
         }
-        setSelectedOption(option);
         setDisplayValue('');
         setOptions([]);
-        if (option === null) {
-            onChange(null);
-        } else {
-            onChange(option.value);
-        }
     };
 
     const handleSearch = async (query: string, force: boolean = false) => {
-        console.log('handleSearch', isOpen, query);
         if (force === false && isOpen === false) {
             // Value is already selected or dropdown is closed, no need to search
             return;
@@ -172,32 +179,94 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
 
     const handleSearchEffectEvent = useEffectEvent(handleSearch);
 
-    const onValueChange = useEffectEvent(async (newValue: string | null) => {
-        console.log('onValueChange', newValue);
-        if (isNotBlank(newValue) && newValue !== selectedOption?.value) {
+    const onValueChange = useEffectEvent(async (newValues: string[]) => {
+        if (newValues.length === 0) {
+            if (selectedOption.length > 0) {
+                setSelectedOption([]);
+            }
+        } else {
             try {
                 setIsFetching(true);
-                const option = await onFetch(newValue.trim());
-                setSelectedOption(option);
+                // Check if all newValues are already selected
+                const allSelected =
+                    newValues.every((v) => selectedOption.findIndex((o) => o.value === v) !== -1) &&
+                    newValues.length === selectedOption.length;
+                if (!allSelected) {
+                    const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v)));
+                    setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+                }
             } finally {
                 setIsFetching(false);
             }
-        } else if (isBlank(newValue)) {
-            setSelectedOption(null);
         }
+
         setOptions([]);
         setDisplayValue('');
+        setIsInitialized(true);
+    });
+
+    const handleChange = useEffectEvent((selectedOption: Option[], multiple: boolean) => {
+        if (isInitialized === true) {
+            if (multiple === false) {
+                if (selectedOption.length === 0) {
+                    if (value !== null) {
+                        console.log('Calling onChange with null');
+                        (onChange as (value: string | null) => void)(null);
+                    }
+                } else {
+                    if (value !== selectedOption[0].value) {
+                        console.log('Calling onChange with ', selectedOption[0].value);
+                        (onChange as (value: string | null) => void)(selectedOption[0].value);
+                    }
+                }
+            } else {
+                const allSelected =
+                    Array.isArray(value) &&
+                    value.every((v) => selectedOption.findIndex((o) => o.value === v) !== -1) &&
+                    value.length === selectedOption.length;
+
+                if (!allSelected) {
+                    (onChange as (value: string[]) => void)(selectedOption.map((o) => o.value));
+                }
+            }
+        }
     });
 
     /** Handle external value changes */
     useEffect(() => {
-        onValueChange(value);
+        if (value === null || value === undefined || (typeof value === 'string' && isBlank(value))) {
+            onValueChange([]);
+        } else if (Array.isArray(value)) {
+            onValueChange(value.filter((v) => isNotBlank(v)).map((v) => v.trim()));
+        } else {
+            onValueChange([value.trim()]);
+        }
     }, [value]);
 
     /** Trigger search when display value changes */
     useEffect(() => {
         handleSearchEffectEvent(displayValue);
     }, [displayValue]);
+
+    /** Trigger onChange when selectedOption changes */
+    useEffect(() => {
+        handleChange(selectedOption, multiple);
+    }, [selectedOption, multiple]);
+
+    /** Toggle popover open/close  */
+    useEffect(() => {
+        if (isOpen) {
+            popoverRef.current?.showPopover();
+        } else {
+            popoverRef.current?.hidePopover();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (disabled) {
+            handleOptionsClose();
+        }
+    }, [disabled]);
 
     const hasOptions = options.length > 0;
 
@@ -206,49 +275,67 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
             label={label}
             error={error}
             required={props.required}
-            disabled={props.disabled}
+            disabled={disabled}
             elementId={autocompleteId}
         >
             <div className={theme.wrapper}>
-                <div className={theme.inputWrapper}>
-                    {selectedOption && (
+                <div
+                    className={theme.inputWrapper}
+                    style={{ anchorName: `--autocomplete_${_id}` }}
+                >
+                    {selectedOption.map((option) => (
                         <Tag
-                            label={selectedOption.label}
-                            onRemove={() => handleRemoveOption(selectedOption)}
+                            key={option.value}
+                            label={option.label}
+                            disabled={disabled}
+                            onRemove={() => handleRemoveOption(option)}
                         />
-                    )}
-                    <input
-                        className={theme.input}
-                        {...props}
-                        value={displayValue}
-                        disabled={props.disabled || isFetching}
-                        onChange={handleDisplayValueChange}
-                        onKeyDown={handleKeyDown}
-                        onBlur={handleBlur}
-                        id={autocompleteId}
-                    />
-                    <Button
-                        key={props.title}
-                        variant='transparent'
-                        showChildren={false}
-                        icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
-                        onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
-                        disabled={props.disabled || isFetching}
-                        additionalClassName={theme.button}
-                    >
-                        {props.title}
-                    </Button>
+                    ))}
+                    <div className='flex flex-1'>
+                        <input
+                            className={theme.input}
+                            {...props}
+                            value={displayValue}
+                            disabled={disabled || isFetching}
+                            onChange={handleDisplayValueChange}
+                            onKeyDown={handleKeyDown}
+                            onBlur={handleBlur}
+                            id={autocompleteId}
+                        />
+                        <Button
+                            key={props.title}
+                            variant='transparent'
+                            showChildren={false}
+                            icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
+                            onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
+                            disabled={disabled || isFetching}
+                            additionalClassName={theme.button}
+                        >
+                            {props.title}
+                        </Button>
+                    </div>
                 </div>
-                {isOpen && (
+                <div
+                    popover='manual'
+                    ref={popoverRef}
+                    className='absolute border rounded-sm p-sm'
+                    style={{
+                        positionAnchor: `--autocomplete_${_id}`,
+                        top: 'calc(anchor(bottom) + 4px)',
+                        left: 'calc(anchor(left) - 2px)',
+                        right: 'calc(anchor(right) - 2px)',
+                        width: 'auto'
+                    }}
+                >
                     <ul
                         ref={optionsRef}
                         id={`${autocompleteId}-options`}
-                        className='absolute top-[36px] -left-xs border rounded-sm flex flex-col w-[calc(100%+4px)]'
+                        className='flex flex-col'
                     >
                         {isSearching && (
                             <li
                                 key='___loading___'
-                                className={`text-disabled p-md ${hasOptions ? 'border-b border-light' : ''}`}
+                                className={`text-disabled py-md px-sm ${hasOptions ? 'border-b border-light' : ''}`}
                             >
                                 Loading...
                             </li>
@@ -256,7 +343,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                         {!isSearching && !hasOptions && (
                             <li
                                 key='___no_options___'
-                                className='text-disabled p-md'
+                                className='text-disabled py-md px-sm'
                             >
                                 No options
                             </li>
@@ -266,14 +353,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({ id, label, error, va
                                 key={o.value}
                                 onClick={() => handleSelect(o)}
                                 onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                className='hover:bg-secondary-extra-light cursor-pointer rounded-sm p-md'
+                                className='hover:bg-secondary-extra-light cursor-pointer rounded-sm py-md px-sm wrap-anywhere'
                                 tabIndex={0}
                             >
                                 {o.label}
                             </li>
                         ))}
                     </ul>
-                )}
+                </div>
             </div>
         </ElementWrapper>
     );

@@ -17,7 +17,7 @@ List of components to develop
         - [x] Single / Multi-select
     - [ ] Autocomplete
         - [x] Single
-        - [ ] Multi-select
+        - [x] Multi-select
     - [ ] File
         - [ ] Single / Multi-select
         - [ ] onChange?: if defined, calls with file list after files are selected

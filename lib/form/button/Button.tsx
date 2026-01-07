@@ -10,9 +10,9 @@ const theme = {
         primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark disabled:bg-primary-light text-white fill-white',
         secondary: 'bg-secondary border-transparent rounded-sm  hover:bg-secondary-dark disabled:bg-secondary-light text-white fill-white',
         danger: 'bg-danger border-transparent rounded-sm  hover:bg-danger-dark disabled:bg-danger-light text-white fill-white',
-        outline: 'bg-transparent rounded-sm hover:border-dark disabled:border-light disabled:text-disabled',
+        outline: 'bg-transparent rounded-sm hover:border-dark disabled:border-light disabled:text-disabled disabled:fill-disabled',
         transparent:
-            'bg-transparent focus:outline-none focus:bg-primary-light border-transparent disabled:text-disabled hover:text-primary-dark'
+            'bg-transparent focus:outline-none focus:bg-primary-light border-transparent disabled:text-disabled disabled:fill-disabled hover:text-primary-dark'
     },
     textDecoration: {
         underline: 'underline underline-offset-2',

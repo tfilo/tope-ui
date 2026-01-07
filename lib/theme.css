@@ -58,6 +58,7 @@
 
     --text-color-default: #222;
     --text-color-disabled: #999;
+    --fill-disabled: #999;
 
     --border-color-default: #d1d5db;
     --border-color-dark: #9ca3af;

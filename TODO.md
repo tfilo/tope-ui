@@ -15,7 +15,7 @@ List of components to develop
     - [x] Select
         - [x] Options (possible subcategories)
         - [x] Single / Multi-select
-    - [ ] Autocomplete
+    - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
     - [ ] File

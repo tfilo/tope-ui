@@ -55,6 +55,24 @@ export const Disabled: Story = {
     }
 };
 
+export const Readonly: Story = {
+    play: async ({ args, canvas, userEvent }) => {
+        await expect(canvas.getByRole('textbox')).toBeVisible();
+        await expect(canvas.getByLabelText('Some readonly input')).toBeVisible();
+        await expect(canvas.getByLabelText('Some readonly input').tagName).toBe('INPUT');
+        await userEvent.type(canvas.getByRole('textbox'), 'aaaaaa');
+        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(canvas.getByLabelText('Some readonly input')).toHaveValue('This is some text');
+    },
+    args: {
+        label: 'Some readonly input',
+        value: 'This is some text',
+        name: 'basic',
+        readOnly: true,
+        onChange: fn()
+    }
+};
+
 export const Required: Story = {
     play: async ({ canvas }) => {
         await expect(

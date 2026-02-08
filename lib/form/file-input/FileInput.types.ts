@@ -4,7 +4,7 @@ interface SingleFileInput {
     /** value */
     value: File | null;
     /** onChange callback to handle value changes */
-    onChange: (files: File | null) => void;
+    onChange: (file: File | null) => void;
 }
 
 interface MultiFileInput {
@@ -25,14 +25,12 @@ interface BaseFileInputProps {
     id?: string;
     /** Name attribute for the underlying input element */
     name?: string;
-    /** Value attribute for the underlying input element */
-    value: File | null;
     /** Disabled state of the input */
     disabled?: boolean;
     /** Required state of the input */
     required?: boolean;
-    /** onChange event handler */
-    onChange?: (files: File) => void;
+    /** Readonly state of the input */
+    readOnly?: boolean;
     /** accept attribute for the underlying input element */
     accept?: string;
 }

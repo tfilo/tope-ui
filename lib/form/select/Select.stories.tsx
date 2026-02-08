@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { expect, fn, type Mock } from 'storybook/test';
@@ -17,6 +18,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
+    render: (args) => {
+        const [value, setValue] = useState<string>('');
+        return (
+            <Select
+                {...args}
+                value={value}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+                    setValue(e.target.value);
+                    if (args.onChange) {
+                        args.onChange(e);
+                    }
+                }}
+            />
+        );
+    },
     play: async ({ args, canvas, userEvent }) => {
         await expect(canvas.getByRole('combobox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic select')).toBeVisible();

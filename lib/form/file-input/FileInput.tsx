@@ -2,7 +2,8 @@ import React, { useCallback, useId, useMemo } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
 import { Button } from '../button/Button';
-import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/16/solid';
+import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
+import { Tag } from '../../main';
 
 const theme = {
     action: {
@@ -12,14 +13,27 @@ const theme = {
         icon: 'w-xl',
         rightWrapper: 'flex flex-row border-l'
     },
-    input: 'flex-1 focus:outline-none px-md min-h-[30px]'
+    input: 'flex-1 focus:outline-none min-h-[30px]'
 } as const;
 
 /**
- * FileInput component that renders as HTMLFileElement element wrapped by parent div
- * containing optional label and error message.
+ * FileInput component that renders as HTMLDivElement element wrapped by parent div
+ * containing optional label and error message. Internally uses hidden file input to handle file selection and displays selected files as tags.
+ * Supports both single and multiple file selection.
  */
-export const FileInput: React.FC<FileInputProps> = ({ id, label, error, name, value, accept, multiple, disabled, required, onChange }) => {
+export const FileInput: React.FC<FileInputProps> = ({
+    id,
+    label,
+    error,
+    name,
+    value,
+    accept,
+    multiple,
+    disabled,
+    required,
+    readOnly,
+    onChange
+}) => {
     const _id = useId();
     const hiddenFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const inputId = id || `input-${_id}`;
@@ -27,18 +41,6 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, name, va
     const handleSelect = useCallback(() => {
         hiddenFileInputRef.current?.click();
     }, []);
-
-    const handleClear = useCallback(() => {
-        if (onChange && hiddenFileInputRef.current) {
-            hiddenFileInputRef.current.value = '';
-            hiddenFileInputRef.current.files = null;
-            if (multiple) {
-                onChange([]);
-            } else {
-                onChange(null);
-            }
-        }
-    }, [multiple, onChange]);
 
     const handleChange = useCallback(
         (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,22 +58,27 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, name, va
     );
 
     const inputValue = useMemo(() => {
-        if (multiple && Array.isArray(value)) {
-            return value.map((file) => file.name).join(', ');
-        } else if (!multiple && value instanceof File) {
-            return value.name;
+        if (Array.isArray(value)) {
+            return value;
+        } else if (value instanceof File) {
+            return [value];
         }
-        return '';
-    }, [value, multiple]);
+        return [];
+    }, [value]);
 
-    const hasFile = useMemo(() => {
-        if (multiple && Array.isArray(value)) {
-            return value.length > 0;
-        } else if (!multiple && value instanceof File) {
-            return true;
-        }
-        return false;
-    }, [value, multiple]);
+    const handleRemoveFile = useCallback(
+        (fileToRemove: File) => {
+            if (onChange) {
+                if (multiple && Array.isArray(value)) {
+                    const newValue = value.filter((file) => file !== fileToRemove);
+                    onChange(newValue);
+                } else if (!multiple && value instanceof File && value === fileToRemove) {
+                    onChange(null);
+                }
+            }
+        },
+        [onChange, value, multiple]
+    );
 
     return (
         <ElementWrapper
@@ -81,12 +88,21 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, name, va
             disabled={disabled}
             elementId={inputId}
         >
-            <input
+            <div
                 className={theme.input}
                 id={inputId}
-                type='text'
-                value={inputValue}
-            />
+                role='textbox'
+                aria-label={label}
+            >
+                {inputValue.map((option) => (
+                    <Tag
+                        key={option.name}
+                        label={option.name}
+                        disabled={disabled}
+                        onRemove={readOnly ? undefined : () => handleRemoveFile(option)}
+                    />
+                ))}
+            </div>
             <input
                 type='file'
                 name={name}
@@ -98,22 +114,12 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, name, va
                 disabled={disabled}
             />
             <div className={theme.action.rightWrapper}>
-                {hasFile && !disabled && (
-                    <Button
-                        variant='danger'
-                        icon={XMarkIcon}
-                        onClick={handleClear}
-                        disabled={disabled}
-                        additionalClassName={theme.action.clearButton}
-                    >
-                        Clear{/* TODO localize */}
-                    </Button>
-                )}
                 <Button
                     variant='transparent'
+                    showChildren={false}
                     icon={ArrowUpTrayIcon}
                     onClick={handleSelect}
-                    disabled={disabled}
+                    disabled={disabled || readOnly}
                     additionalClassName={theme.action.button}
                 >
                     Select file{/* TODO localize */}

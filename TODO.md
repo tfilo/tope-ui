@@ -18,9 +18,9 @@ List of components to develop
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
-    - [ ] File
-        - [ ] Single / Multi-select
-        - [ ] onChange?: if defined, calls with file list after files are selected
+    - [x] File
+        - [x] Single / Multi-select
+        - [x] onChange?: if defined, calls with file list after files are selected
     - [ ] Date
         - [ ] Support for picker: date, date + time
         - [ ] Option to enter value manually

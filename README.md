@@ -62,14 +62,21 @@ npm run test-storybook
 
 ### Form
 
+- **Autocomplete**
 - **Button**
+- **FileInput**
 - **Input**
+- **Select**
 - **TextArea**
 - **ElementWrapper**
 
 ### Layout
 
 - **Flex**
+
+### Visual Components
+
+- **Tag**
 
 ## Styles
 

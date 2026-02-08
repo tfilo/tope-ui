@@ -37,6 +37,7 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
             {hasLabel && (
                 <label
                     htmlFor={elementId}
+                    id={`${elementId}-label`}
                     className={theme.label(disabled)}
                 >
                     {label}
@@ -47,6 +48,7 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
             {hasError && (
                 <label
                     htmlFor={elementId}
+                    id={`${elementId}-error`}
                     className={theme.error(disabled)}
                 >
                     {error}

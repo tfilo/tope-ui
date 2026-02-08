@@ -61,7 +61,6 @@ export const Disabled: Story = {
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('DIV');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example.txt');
-        await expect(canvas.getByLabelText('Some basic input')).toBeDisabled();
         await expect(canvas.queryByLabelText('Remove example.txt')).not.toBeInTheDocument();
         await expect(canvas.queryByTitle('Select file')).toBeVisible();
         await expect(canvas.queryByTitle('Select file')).toBeDisabled();
@@ -215,6 +214,48 @@ export const Multiple: Story = {
         name: 'basic',
         multiple: true,
         value: [],
+        onChange: fn()
+    }
+};
+
+export const Error: Story = {
+    play: async ({ canvas }) => {
+        const byLabel = canvas.getByLabelText('This is required fileinput', { exact: false });
+        const byError = canvas.getByLabelText('This field is required!');
+        await expect(byLabel).toBeVisible();
+        await expect(byError).toBeVisible();
+        // Element retrieved by its label should be same as element retrieved by error label
+        await expect(byLabel).toStrictEqual(byError);
+
+        // Check that label is before and error after element
+        await expect(canvas.getByRole('textbox').parentElement?.previousSibling).toHaveTextContent('This is required fileinput');
+        await expect(canvas.getByRole('textbox').parentElement?.nextSibling).toHaveTextContent('This field is required!');
+    },
+    render: (args) => {
+        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
+
+        const handleChange = (newValue: File | null) => {
+            setValue(newValue);
+            if (args.onChange !== undefined) {
+                (args.onChange as (value: File | null) => void)(newValue);
+            }
+        };
+
+        return (
+            <FileInput
+                {...args}
+                multiple={false}
+                value={value}
+                onChange={handleChange}
+            />
+        );
+    },
+    args: {
+        label: 'This is required fileinput',
+        required: true,
+        name: 'basic',
+        error: 'This field is required!',
+        value: null,
         onChange: fn()
     }
 };

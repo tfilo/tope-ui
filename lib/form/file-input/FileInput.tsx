@@ -1,9 +1,10 @@
-import React, { useCallback, useId, useMemo } from 'react';
+import React, { useCallback, useEffect, useId, useMemo } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
 import { Button } from '../button/Button';
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
 import { Tag } from '../../main';
+import { isNotBlank } from '../../utils/string-utils';
 
 const theme = {
     action: {
@@ -37,6 +38,8 @@ export const FileInput: React.FC<FileInputProps> = ({
     const _id = useId();
     const hiddenFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const inputId = id || `input-${_id}`;
+    const hasLabel = isNotBlank(label);
+    const hasError = isNotBlank(error);
 
     const handleSelect = useCallback(() => {
         hiddenFileInputRef.current?.click();
@@ -80,6 +83,32 @@ export const FileInput: React.FC<FileInputProps> = ({
         [onChange, value, multiple]
     );
 
+    useEffect(() => {
+        // Simulate accesibility behavior of native file input where clicking on label or error message focuses the input element. This is needed as we are using div as main element instead of native input.
+        const handleClick = () => {
+            document.getElementById(inputId)?.focus();
+        };
+        document.getElementById(`${inputId}-label`)?.addEventListener('click', handleClick);
+        if (hasError) {
+            document.getElementById(`${inputId}-error`)?.addEventListener('click', handleClick);
+        }
+        return () => {
+            document.getElementById(`${inputId}-label`)?.removeEventListener('click', handleClick);
+            document.getElementById(`${inputId}-error`)?.removeEventListener('click', handleClick);
+        };
+    }, [inputId, hasError]);
+
+    const labeledBy = useMemo(() => {
+        const labeledBy = [];
+        if (hasLabel) {
+            labeledBy.push(`${inputId}-label`);
+        }
+        if (hasError) {
+            labeledBy.push(`${inputId}-error`);
+        }
+        return labeledBy.length > 0 ? labeledBy.join(' ') : undefined;
+    }, [hasError, hasLabel, inputId]);
+
     return (
         <ElementWrapper
             label={label}
@@ -92,7 +121,8 @@ export const FileInput: React.FC<FileInputProps> = ({
                 className={theme.input}
                 id={inputId}
                 role='textbox'
-                aria-label={label}
+                aria-labelledby={labeledBy}
+                tabIndex={0}
             >
                 {inputValue.map((option) => (
                     <Tag

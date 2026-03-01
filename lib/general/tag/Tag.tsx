@@ -1,4 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/16/solid';
+
 import type { TagProps } from './Tag.types';
 
 const theme = {

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, fn } from 'storybook/test';
 
 import { Tag } from './Tag';
-import { expect, fn } from 'storybook/test';
 
 const meta = {
     title: 'Visual/Tag',

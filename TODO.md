@@ -3,51 +3,50 @@
 List of components to develop
 
 - [ ] FORM (compatible with Tanstack form)
-    - [x] Button
-        - [x] Support elements: `<button>`, `<a>`, `<Link>`
-        - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
-        - [x] Variants: Text, Icon + Text, Icon
-    - [x] Input
-        - [x] ActionStart: one or more elements (e.g., Button with icon)
-        - [x] ActionEnd: one or more elements (e.g., Button, Dropdown)
-    - [x] Textarea
-        - [x] Optional max-length and visual counter at bottom right
-    - [x] Select
-        - [x] Options (possible subcategories)
-        - [x] Single / Multi-select
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
-    - [x] File
-        - [x] Single / Multi-select
-        - [x] onChange?: if defined, calls with file list after files are selected
     - [ ] Date
         - [ ] Support for picker: date, date + time
         - [ ] Option to enter value manually
         - [ ] Format via props
         - [ ] Returns format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
         - [ ] Returns "UNKNOWN" on invalid input
+    - [x] File
+        - [x] Single / Multi-select
+        - [x] onChange?: if defined, calls with file list after files are selected
+    - [x] Input
+        - [x] ActionStart: one or more elements (e.g., Button with icon)
+        - [x] ActionEnd: one or more elements (e.g., Button, Dropdown)
+    - [x] Select
+        - [x] Options (possible subcategories)
+        - [x] Single / Multi-select
     - [ ] Switch
-        - [ ] Like a toggle: hidden checkbox underneath and send value via ref (for form library)
-
-- [ ] OTHER
+        - [ ] Like a toggle for boolean values, allow on / off state
+    - [x] Textarea
+        - [x] Optional max-length and visual counter at bottom right
+- [ ] GENERAL (Different interactive elements not directly linked to navigation/form/etc)
+    - [x] Button
+        - [x] Support elements: `<button>`, `<a>`, `<Link>`
+        - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
+        - [x] Variants: Text, Icon + Text, Icon
     - [ ] Dropdown
         - [ ] Options (possible icons)
     - [x] Tag
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
         - [x] onClick?: reacts on hover and calls onClick on click
-    - [ ] Modal
-        - [ ] Props: Title (string), Body (ReactNode)
-        - [ ] Footer: onConfirm (required), onCancel? (optional)
-        - [ ] Size: Normal / Wide
     - [ ] Table (Tanstack)
         - [ ] Support with/without pagination
         - [ ] With/without header
         - [ ] Sorting for each column
     - [ ] List
         - [ ] Renders a bulleted list
-
+- [ ] OVERLAYS
+    - [ ] Modal
+        - [ ] Props: Title (string), Body (ReactNode)
+        - [ ] Footer: onConfirm (required), onCancel? (optional)
+        - [ ] Size: Normal / Wide
 - [ ] LAYOUT
     - [ ] Header
         - [ ] Right: profile button (optional) and logout

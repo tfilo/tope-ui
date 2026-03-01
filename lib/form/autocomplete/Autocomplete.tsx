@@ -1,11 +1,10 @@
 import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
-import { ElementWrapper } from '../wrapper/ElementWrapper';
-import type { AutocompleteProps } from './Autocomplete.types';
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
 import { isBlank, isNotBlank } from '../../utils/string-utils';
 import type { Option } from '../../common/Option';
-import { Button } from '../button/Button';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
-import { Tag } from '../../visual';
+import { Button, Tag } from '../../general';
+import { ElementWrapper } from '../wrapper/ElementWrapper';
+import type { AutocompleteProps } from './Autocomplete.types';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',

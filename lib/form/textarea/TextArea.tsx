@@ -1,7 +1,7 @@
 import React, { useEffect, useEffectEvent, useId, useState, type ChangeEvent } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
-import type { TextAreaProps } from './TextArea.types';
 import { isNotBlank } from '../../utils/string-utils';
+import type { TextAreaProps } from './TextArea.types';
 
 const theme = {
     base: 'flex-1 focus:outline-0 px-md py-sm',

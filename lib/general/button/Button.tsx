@@ -1,4 +1,5 @@
 import { useMemo, type ElementType } from 'react';
+
 import type { ButtonProps } from './Button.types';
 
 const theme = {

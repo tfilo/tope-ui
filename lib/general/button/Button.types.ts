@@ -1,4 +1,5 @@
 import type { ElementType, ReactNode, RefObject } from 'react';
+
 import type { Icon } from '../../common/Icon';
 
 interface ButtonBaseProps {

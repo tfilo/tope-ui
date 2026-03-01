@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
 import { expect, fn, waitFor } from 'storybook/test';
+import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/16/solid';
 
 import { Input } from './Input';
-import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/16/solid';
 import type { InputActionProps } from './Input.types';
 
 const meta = {

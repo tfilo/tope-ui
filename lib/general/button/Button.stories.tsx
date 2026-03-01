@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
 import { expect, fn } from 'storybook/test';
-
-import { Button } from './Button';
 import { UserIcon, PlayIcon, TrashIcon } from '@heroicons/react/16/solid';
 
+import { Button } from './Button';
+
 const meta = {
-    title: 'Form/Button',
+    title: 'General/Button',
     component: Button,
     tags: ['autodocs'],
     argTypes: {

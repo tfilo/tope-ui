@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useId, useMemo } from 'react';
+import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
+import { isNotBlank } from '../../utils/string-utils';
+import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
-import { Button } from '../button/Button';
-import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
-import { Tag } from '../../main';
-import { isNotBlank } from '../../utils/string-utils';
 
 const theme = {
     action: {

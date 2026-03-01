@@ -1,9 +1,8 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
 import { expect, fn } from 'storybook/test';
 
 import { Autocomplete } from './Autocomplete';
-import { useState } from 'react';
 
 const meta = {
     title: 'Form/Autocomplete',

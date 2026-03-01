@@ -1,5 +1,6 @@
 import './main.css';
 
 export * from './form';
+export * from './general';
 export * from './layout';
-export * from './visual';
+export * from './utils';

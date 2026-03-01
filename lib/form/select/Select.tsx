@@ -1,6 +1,6 @@
 import { useId } from 'react';
-import type { SelectProps } from './Select.types';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
+import type { SelectProps } from './Select.types';
 
 const theme = {
     base: 'flex-1 focus:outline-none px-md min-h-[30px]',

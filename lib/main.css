@@ -1,2 +1,47 @@
 @import 'tailwindcss';
 @import './theme.css';
+
+.tope-ui-dropdown {
+    width: fit-content;
+
+    margin-right: 16px;
+    top: calc(anchor(bottom) + 4px);
+    left: calc(anchor(left) - 2px);
+
+    position-try: --dropdown-bottom-left-align, --dropdown-top-right-align, --dropdown-top-left-align;
+}
+
+@position-try --dropdown-bottom-left-align {
+    right: calc(anchor(right) - 2px);
+    left: auto;
+    margin-left: 16px;
+    margin-right: auto;
+}
+
+@position-try --dropdown-top-right-align {
+    bottom: calc(anchor(top) + 4px);
+    top: auto;
+}
+
+@position-try --dropdown-top-left-align {
+    bottom: calc(anchor(top) + 4px);
+    right: calc(anchor(right) - 2px);
+    top: auto;
+    left: auto;
+    margin-left: 16px;
+    margin-right: auto;
+}
+
+.tope-ui-autocomplete {
+    top: calc(anchor(bottom) + 4px);
+    left: calc(anchor(left) - 2px);
+    right: calc(anchor(right) - 2px);
+    width: auto;
+
+    position-try: --autocomplete-top-align;
+}
+
+@position-try --autocomplete-top-align {
+    bottom: calc(anchor(top) + 4px);
+    top: auto;
+}

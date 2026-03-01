@@ -110,6 +110,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 handleOptionsClose();
             }
         } else if (e.key === 'Enter') {
+            if (option.disabled) {
+                return;
+            }
             e.preventDefault();
             handleSelect(option);
         } else if (e.key === 'Escape') {
@@ -135,6 +138,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Handle option selection from dropdown
     const handleSelect = (option: Option | null) => {
+        if (option?.disabled) {
+            return;
+        }
         handleOptionsClose();
         if (multiple) {
             if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
@@ -317,13 +323,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 <div
                     popover='manual'
                     ref={popoverRef}
-                    className='absolute border rounded-sm p-sm'
+                    className='absolute border rounded-sm p-sm tope-ui-autocomplete'
                     style={{
-                        positionAnchor: `--autocomplete_${_id}`,
-                        top: 'calc(anchor(bottom) + 4px)',
-                        left: 'calc(anchor(left) - 2px)',
-                        right: 'calc(anchor(right) - 2px)',
-                        width: 'auto'
+                        positionAnchor: `--autocomplete_${_id}`
                     }}
                 >
                     <ul
@@ -352,7 +354,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 key={o.value}
                                 onClick={() => handleSelect(o)}
                                 onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                className='hover:bg-secondary-extra-light cursor-pointer rounded-sm py-md px-sm wrap-anywhere'
+                                className={`${o.disabled ? 'text-disabled' : 'hover:bg-secondary-extra-light cursor-pointer'} rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
                                 tabIndex={0}
                             >
                                 {o.label}

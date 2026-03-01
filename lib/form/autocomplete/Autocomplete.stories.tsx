@@ -22,7 +22,7 @@ const options = [
     { label: 'Apricot', value: 'apricot' },
     { label: 'Avocado', value: 'avocado' },
     { label: 'Banana', value: 'banana' },
-    { label: 'Blackberry', value: 'blackberry' },
+    { label: 'Blackberry', value: 'blackberry', disabled: true },
     { label: 'Blueberry', value: 'blueberry' },
     { label: 'Cantaloupe', value: 'cantaloupe' },
     { label: 'Cherry', value: 'cherry' },

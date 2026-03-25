@@ -232,12 +232,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             if (multiple === false) {
                 if (selectedOption.length === 0) {
                     if (value !== null) {
-                        console.log('Calling onChange with null');
                         (onChange as (value: string | null) => void)(null);
                     }
                 } else {
                     if (value !== selectedOption[0].value) {
-                        console.log('Calling onChange with ', selectedOption[0].value);
                         (onChange as (value: string | null) => void)(selectedOption[0].value);
                     }
                 }

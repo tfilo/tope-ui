@@ -63,7 +63,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         // Focus first option if exists
         if (optionsRef.current) {
-            const firstOption = optionsRef.current.querySelector('li');
+            const firstOption = optionsRef.current.querySelector('button:not(:disabled)');
             if (firstOption) {
                 (firstOption as HTMLElement).focus();
             }
@@ -89,16 +89,33 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     };
 
     // Handle key down on options for navigation
-    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, option: Option) => {
+    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, option: Option) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            const nextSibling = (e.currentTarget.nextSibling as HTMLElement) || null;
-            if (nextSibling) {
-                nextSibling.focus();
-            }
+            let nextSibling: HTMLElement = e.currentTarget;
+            do {
+                const next = (nextSibling.parentElement?.nextElementSibling as HTMLElement | null | undefined) ?? null;
+                if (next) {
+                    nextSibling = next.firstElementChild as HTMLElement;
+                } else {
+                    break;
+                }
+            } while (nextSibling?.hasAttribute('disabled'));
+
+            nextSibling.focus();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            const previousSibling = (e.currentTarget.previousSibling as HTMLElement) || null;
+            let previousSibling: HTMLElement | null = e.currentTarget;
+            do {
+                const prev = (previousSibling.parentElement?.previousElementSibling as HTMLElement | null | undefined) ?? null;
+                if (prev) {
+                    previousSibling = prev.firstElementChild as HTMLElement;
+                } else {
+                    previousSibling = null;
+                    break;
+                }
+            } while (previousSibling?.hasAttribute('disabled'));
+
             if (previousSibling) {
                 previousSibling.focus();
             } else {
@@ -352,12 +369,16 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         {options.map((o) => (
                             <li
                                 key={o.value}
-                                onClick={() => handleSelect(o)}
-                                onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                className={`${o.disabled ? 'text-disabled' : 'hover:bg-secondary-extra-light cursor-pointer'} rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
-                                tabIndex={0}
+                                className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
                             >
-                                {o.label}
+                                <button
+                                    onClick={() => handleSelect(o)}
+                                    onKeyDown={(e) => handleOptionKeyDown(e, o)}
+                                    className='focus:outline-none cursor-pointer disabled:cursor-default'
+                                    disabled={o.disabled}
+                                >
+                                    {o.label}
+                                </button>
                             </li>
                         ))}
                     </ul>

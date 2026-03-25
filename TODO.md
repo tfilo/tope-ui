@@ -30,8 +30,8 @@ List of components to develop
         - [x] Support elements: `<button>`, `<a>`, `<Link>`
         - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
         - [x] Variants: Text, Icon + Text, Icon
-    - [ ] Dropdown
-        - [ ] Options (possible icons)
+    - [x] Dropdown
+        - [x] Options (possible icons)
     - [x] Tag
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
@@ -40,8 +40,8 @@ List of components to develop
         - [ ] Support with/without pagination
         - [ ] With/without header
         - [ ] Sorting for each column
-    - [ ] List
-        - [ ] Renders a bulleted list
+    - [x] List
+        - [x] Renders a bulleted list
 - [ ] OVERLAYS
     - [ ] Modal
         - [ ] Props: Title (string), Body (ReactNode)

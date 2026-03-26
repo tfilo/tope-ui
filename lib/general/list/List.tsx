@@ -1,5 +1,8 @@
 import type { ListProps } from './List.types';
 
+/**
+ * Renders list component, based on props it can be unordered list with bullets or ordered list with numbers
+ */
 export const List: React.FC<ListProps> = ({ listType = 'unordered', items = [] }) => {
     const List = listType === 'unordered' ? 'ul' : 'ol';
 

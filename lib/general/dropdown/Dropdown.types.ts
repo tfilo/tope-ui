@@ -1,10 +1,11 @@
 import type { ButtonProps } from '../button/Button.types';
-import type { Option } from '../../common/Option';
 import type { Icon } from '../../common/Icon';
 
-type OptionWithIconAndAction = Option & {
+type OptionWithIconAndAction = {
+    label: string;
+    disabled?: boolean;
     icon?: Icon;
-    action: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
+    onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
 };
 
 export type DropdownProps = React.PropsWithChildren<{

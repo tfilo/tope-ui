@@ -13,6 +13,9 @@ const theme = {
     wrapper: 'w-full flex flex-col relative'
 };
 
+/**
+ * Autocomplete component with ability to search and fetch items
+ */
 export const Autocomplete: React.FC<AutocompleteProps> = ({
     id,
     label,

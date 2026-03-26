@@ -24,60 +24,55 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const DirectionRow: Story = {
-    render: (args) => (
-        <Flex {...args}>
-            <Button variant='primary'>Button 1</Button>
-            <Button variant='secondary'>Button 2</Button>
-            <Button variant='outline'>Button 3</Button>
-        </Flex>
-    ),
     args: {
         direction: 'row',
         gap: 'md',
-        justify: 'end'
+        justify: 'end',
+        children: [
+            <Button
+                key='b1'
+                variant='primary'
+            >
+                Button 1
+            </Button>,
+            <Button
+                key='b2'
+                variant='secondary'
+            >
+                Button 2
+            </Button>,
+            <Button
+                key='b3'
+                variant='outline'
+            >
+                Button 3
+            </Button>
+        ]
     }
 };
 
 export const DirectionRowCenter: Story = {
-    render: (args) => (
-        <Flex {...args}>
-            <Button variant='primary'>Button 1</Button>
-            <Button variant='secondary'>Button 2</Button>
-            <Button variant='outline'>Button 3</Button>
-        </Flex>
-    ),
     args: {
         direction: 'row',
         gap: 'md',
-        justify: 'center'
+        justify: 'center',
+        children: DirectionRow.args?.children
     }
 };
 
 export const DirectionRowBetween: Story = {
-    render: (args) => (
-        <Flex {...args}>
-            <Button variant='primary'>Button 1</Button>
-            <Button variant='secondary'>Button 2</Button>
-            <Button variant='outline'>Button 3</Button>
-        </Flex>
-    ),
     args: {
         direction: 'row',
         gap: 'md',
-        justify: 'between'
+        justify: 'between',
+        children: DirectionRow.args?.children
     }
 };
 
 export const DirectionColumn: Story = {
-    render: (args) => (
-        <Flex {...args}>
-            <Button variant='primary'>Button 1</Button>
-            <Button variant='secondary'>Button 2</Button>
-            <Button variant='outline'>Button 3</Button>
-        </Flex>
-    ),
     args: {
         direction: 'column',
-        gap: 'md'
+        gap: 'md',
+        children: DirectionRow.args?.children
     }
 };

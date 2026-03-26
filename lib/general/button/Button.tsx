@@ -4,7 +4,7 @@ import type { ButtonProps } from './Button.types';
 
 const theme = {
     base: (showChildren: boolean, additionalClassName: string) => {
-        const mobile = showChildren ? 'mobile:w-fit w-full px-md' : 'w-fit';
+        const mobile = showChildren ? 'mobile:w-fit w-full px-md min-w-fit' : 'w-fit';
         return `${mobile} border flex flex-row justify-center items-center gap-md cursor-pointer disabled:cursor-default font-medium ${additionalClassName}`.trim();
     },
     variant: {
@@ -37,7 +37,7 @@ export const Button = <T extends ElementType = 'button'>({
     ref,
     ...props
 }: ButtonProps<T>) => {
-    const Component = (as ?? 'button') as ElementType;
+    const Component: ElementType = as ?? 'button';
     const Icon = icon ?? null;
     const hasIcon = Icon !== null;
     const isButton = as === undefined || as === 'button';

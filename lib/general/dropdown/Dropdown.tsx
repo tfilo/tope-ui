@@ -3,6 +3,9 @@ import { Button } from '../button';
 import type { DropdownProps } from './Dropdown.types';
 import { ChevronDownIcon } from '@heroicons/react/16/solid';
 
+/**
+ * Dropdown component that renders as button which open list of options when clicked. Using native popover feature.
+ */
 export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonProps }) => {
     const baseId = useId();
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -12,10 +15,11 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
         <div className='relative'>
             <Button
                 {...buttonProps}
+                showChildren={true}
                 popoverTarget={popoverId}
                 style={{ anchorName: `--dropdown_${baseId}` }}
             >
-                {children} <ChevronDownIcon className='w-xl fill-inherit' />
+                {buttonProps?.showChildren !== false && children} <ChevronDownIcon className='w-xl fill-inherit' />
             </Button>
             <div
                 id={popoverId}
@@ -26,18 +30,18 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                     positionAnchor: `--dropdown_${baseId}`
                 }}
             >
-                <ul className='flex flex-col'>
+                <ul className='flex flex-col max-h-[min(200px,50vh)] w-full'>
                     {options.map((o) => {
                         const Icon = o.icon ?? null;
                         return (
                             <li
-                                key={o.value}
+                                key={o.label}
                                 className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
                             >
                                 <button
                                     onClick={(e) => {
                                         popoverRef.current?.hidePopover();
-                                        o.action(e);
+                                        o.onClick(e);
                                     }}
                                     className='flex flex-row gap-sm focus:outline-none cursor-pointer disabled:cursor-default'
                                     disabled={o.disabled}

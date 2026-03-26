@@ -5,7 +5,7 @@ import type { TextAreaProps } from './TextArea.types';
 
 const theme = {
     base: 'flex-1 focus:outline-0 px-md py-sm',
-    counter: 'absolute -bottom-[20px] right-[0px] text-sm text-secondary text-right',
+    counter: 'absolute -bottom-[16px] right-[0px] text-sm text-secondary text-right',
     wrapper: 'w-full flex flex-col relative'
 } as const;
 

@@ -28,7 +28,7 @@ export const Primary: Story = {
             .find((item) => item.textContent === 'Option 1')
             ?.click();
 
-        await expect(args.options[0].action).toHaveBeenCalled();
+        await expect(args.options[0].onClick).toHaveBeenCalled();
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryAllByRole('button').length).toBe(1);
 
@@ -39,7 +39,7 @@ export const Primary: Story = {
             .find((item) => item.textContent === 'Option 2')
             ?.click();
 
-        await expect(args.options[1].action).toHaveBeenCalled();
+        await expect(args.options[1].onClick).toHaveBeenCalled();
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryAllByRole('button').length).toBe(1);
 
@@ -50,7 +50,7 @@ export const Primary: Story = {
             .find((item) => item.textContent === 'Option 3')
             ?.click();
 
-        await expect(args.options[2].action).not.toHaveBeenCalled();
+        await expect(args.options[2].onClick).not.toHaveBeenCalled();
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryAllByRole('button').length).toBe(4);
     },
@@ -58,22 +58,19 @@ export const Primary: Story = {
         children: 'Button',
         options: [
             {
-                value: 'option1',
                 label: 'Option 1',
                 icon: UserIcon,
-                action: fn()
+                onClick: fn()
             },
             {
-                value: 'option2',
                 label: 'Option 2',
                 icon: MapIcon,
-                action: fn()
+                onClick: fn()
             },
             {
-                value: 'option3',
                 label: 'Option 3',
                 disabled: true,
-                action: fn()
+                onClick: fn()
             }
         ],
         buttonProps: {
@@ -93,22 +90,19 @@ export const Disabled: Story = {
         children: 'Button',
         options: [
             {
-                value: 'option1',
                 label: 'Option 1',
                 icon: UserIcon,
-                action: fn()
+                onClick: fn()
             },
             {
-                value: 'option2',
                 label: 'Option 2',
                 icon: MapIcon,
-                action: fn()
+                onClick: fn()
             },
             {
-                value: 'option3',
                 label: 'Option 3',
                 disabled: true,
-                action: fn()
+                onClick: fn()
             }
         ],
         buttonProps: {

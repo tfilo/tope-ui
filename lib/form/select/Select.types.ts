@@ -1,8 +1,8 @@
-import type { InputHTMLAttributes, RefObject } from 'react';
+import type { SelectHTMLAttributes, RefObject } from 'react';
 import type { Option } from '../../common/Option';
 import type { OptionGroup } from '../../common/OptionGroup';
 
-export interface SelectProps extends InputHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     /** Optional label for select component */
     label?: string;
     /** Optional error message for select component, if not blank, all input is in danger color */

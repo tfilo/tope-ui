@@ -36,7 +36,7 @@ List of components to develop
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
         - [x] onClick?: reacts on hover and calls onClick on click
-    - [ ] Table (Tanstack)
+    - [x] Table (Tanstack)
         - [ ] Support with/without pagination
         - [ ] With/without header
         - [ ] Sorting for each column

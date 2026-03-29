@@ -11,6 +11,11 @@ export const localization = {
     logout: 'Logout'
 };
 
+/**
+ * Merges the provided localization object with the existing one, allowing for partial updates to the localization settings.
+ *
+ * @param newLocalization
+ */
 export const setLocalization = (newLocalization: Partial<typeof localization>) => {
     Object.assign(localization, newLocalization);
 };

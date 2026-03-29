@@ -78,5 +78,5 @@ List of components to develop
         - [x] Has optional onAction, handle click on action icon in top right corner (configurable icon)
 - [x] LOCALIZATION
     - [-] Add localization option to all components that uses some hardcoded internal texts
-- [ ] PUBLISH
-    - [ ] Create github action to publish to NPM
+- [x] PUBLISH
+    - [x] Create github action to publish to NPM

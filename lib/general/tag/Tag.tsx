@@ -1,6 +1,7 @@
 import { XMarkIcon } from '@heroicons/react/16/solid';
 
 import type { TagProps } from './Tag.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'inline-flex items-center wrap-anywhere gap-sm border text-md font-medium cursor-default px-sm m-xs focus-within:outline-2 outline-offset-2 outline-primary disabled:cursor-not-allowed min-h-[26px]',
@@ -45,7 +46,7 @@ export const Tag: React.FC<TagProps> = ({
                     type='button'
                     className={theme.removeButton(variant)}
                     onClick={onRemove}
-                    aria-label={`Remove ${label}`}
+                    aria-label={localization.remove(label)}
                 >
                     <XMarkIcon className={theme.removeIcon(variant)} />
                 </button>

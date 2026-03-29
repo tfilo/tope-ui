@@ -1,3 +1,4 @@
+import { localization } from '../../utils/constants';
 import { isNotBlank } from '../../utils/string-utils';
 import type { ElementWrapperProps } from './ElementWrapper.types';
 
@@ -41,7 +42,14 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
                     className={theme.label(disabled)}
                 >
                     {label}
-                    {required && <span className={theme.star(disabled)}>*</span>}
+                    {required && (
+                        <span
+                            className={theme.star(disabled)}
+                            aria-description={localization.requiredField}
+                        >
+                            *
+                        </span>
+                    )}
                 </label>
             )}
             <div className={`${theme.component} ${theme.state[state](disabled)} ${theme.base}`}>{children}</div>

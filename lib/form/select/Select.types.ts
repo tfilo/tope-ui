@@ -13,6 +13,4 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
     options: (Option | OptionGroup)[];
     /** Allow select empty option */
     allowEmptyOption?: boolean;
-    /** Empty option label */
-    emptyOptionLabel?: string;
 }

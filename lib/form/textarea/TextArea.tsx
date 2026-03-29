@@ -2,6 +2,7 @@ import React, { useEffect, useEffectEvent, useId, useState, type ChangeEvent } f
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import { isNotBlank } from '../../utils/string-utils';
 import type { TextAreaProps } from './TextArea.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'flex-1 focus:outline-0 px-md py-sm',
@@ -61,7 +62,10 @@ export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onCha
                     ref={ref}
                 />
                 {hasMaxLenght && !hasError && (
-                    <span className={theme.counter}>
+                    <span
+                        className={theme.counter}
+                        aria-description={localization.textareaCounter}
+                    >
                         {count}/{props.maxLength}
                     </span>
                 )}

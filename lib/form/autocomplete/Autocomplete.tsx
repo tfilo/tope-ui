@@ -5,6 +5,7 @@ import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { AutocompleteProps } from './Autocomplete.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
@@ -356,7 +357,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 key='___loading___'
                                 className={`text-disabled py-md px-sm ${hasOptions ? 'border-b border-light' : ''}`}
                             >
-                                Loading...
+                                {localization.loading}
                             </li>
                         )}
                         {!isSearching && !hasOptions && (
@@ -364,7 +365,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 key='___no_options___'
                                 className='text-disabled py-md px-sm'
                             >
-                                No options
+                                {localization.noOptions}
                             </li>
                         )}
                         {options.map((o) => (

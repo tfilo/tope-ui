@@ -63,20 +63,33 @@ npm run test-storybook
 ### Form
 
 - **Autocomplete**
-- **Button**
 - **FileInput**
 - **Input**
 - **Select**
 - **TextArea**
 - **ElementWrapper**
 
-### Layout
+### General
 
-- **Flex**
+- **Button**
+- **Dropdown**
+- **List**
 
-### Visual Components
+### Visual
 
 - **Tag**
+
+### Layout
+
+- **Card**
+- **Column**
+- **Content**
+- **Flex**
+- **Grid**
+- **Header**
+- **Page**
+- **Section**
+
 
 ## Styles
 

@@ -4,6 +4,7 @@ import { isNotBlank } from '../../utils';
 import placeholder from '../../assets/placeholder.png';
 import { PencilSquareIcon } from '@heroicons/react/16/solid';
 import { Button } from '../../general';
+import { localization } from '../../utils/constants';
 
 export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imageUrl = placeholder }) => {
     const hasOnClick = onClick !== undefined;
@@ -40,7 +41,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                     showChildren={false}
                     onClick={handleAction}
                 >
-                    Edit
+                    {localization.edit}
                 </Button>
             )}
             <BaseElement

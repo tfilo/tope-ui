@@ -76,7 +76,7 @@ List of components to develop
         - [x] Has optional description showed on bottom of card as transparent overly
         - [x] Has optional onClick, handle clic on Card anywhere except action in top right corner
         - [x] Has optional onAction, handle click on action icon in top right corner (configurable icon)
-- [ ] LOCALIZATION
-    - [ ] Add localization option to all components that uses some hardcoded internal texts
+- [x] LOCALIZATION
+    - [-] Add localization option to all components that uses some hardcoded internal texts
 - [ ] PUBLISH
     - [ ] Create github action to publish to NPM

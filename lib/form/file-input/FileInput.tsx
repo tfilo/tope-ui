@@ -4,6 +4,7 @@ import { isNotBlank } from '../../utils/string-utils';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     action: {
@@ -151,7 +152,7 @@ export const FileInput: React.FC<FileInputProps> = ({
                     disabled={disabled || readOnly}
                     additionalClassName={theme.action.button}
                 >
-                    Select file{/* TODO localize */}
+                    {localization.selectFile}
                 </Button>
             </div>
         </ElementWrapper>

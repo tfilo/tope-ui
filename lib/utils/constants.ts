@@ -8,7 +8,12 @@ export const localization = {
     remove: (name: string) => `Remove ${name}`,
     edit: 'Edit',
     profile: 'Profile',
-    logout: 'Logout'
+    logout: 'Logout',
+    page: 'Page',
+    of: 'of',
+    sortAsc: 'Sorted ascending',
+    sortDsc: 'Sorted descending',
+    sortNotSet: 'Not sorted'
 };
 
 /**

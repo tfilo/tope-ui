@@ -1,2 +1,2 @@
-export { setLocalization } from './constants';
+export { setLocalization, setConfig } from './constants';
 export * from './string-utils';

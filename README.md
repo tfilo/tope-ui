@@ -74,6 +74,7 @@ npm run test-storybook
 - **Button**
 - **Dropdown**
 - **List**
+- **Table**
 
 ### Visual
 

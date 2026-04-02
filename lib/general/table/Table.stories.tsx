@@ -3,7 +3,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Table } from './Table';
 import { Button } from '../button';
 import { PencilIcon } from '@heroicons/react/16/solid';
-import type { TableProps } from './Table.types';
+import { type SortObject } from './Table.types';
+import { createColumns } from './table-utils';
+import { expect } from 'storybook/test';
 
 const meta = {
     title: 'General/Table',
@@ -14,14 +16,21 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const columns: TableProps['columns'] = [
+type DataObject = {
+    name: string;
+    age: number;
+    city: string;
+    description: string;
+};
+
+const columns = createColumns<DataObject>([
     { header: 'Name', accessor: 'name', additionalClassName: 'min-w-[150px]', sortable: true, defaultSortDirection: 'asc' },
     {
         header: 'Age',
         accessor: 'age',
         additionalClassName: 'min-w-[100px]',
         sortable: true,
-        compare: (a: unknown, b: unknown) => {
+        compare: (a, b) => {
             const valueA = +(a ?? 0);
             const valueB = +(b ?? 0);
 
@@ -45,9 +54,9 @@ const columns: TableProps['columns'] = [
             </Button>
         )
     }
-];
+]);
 
-const data: Exclude<TableProps['data'], undefined> = [
+const data: DataObject[] = [
     { name: 'Bob', age: 25, city: 'Los Angeles', description: 'Designer' },
     {
         name: 'Alice',
@@ -131,14 +140,7 @@ const data: Exclude<TableProps['data'], undefined> = [
     { name: 'Yara', age: 30, city: 'San Jose', description: 'Hardware Engineer working on the next generation of IoT devices.' }
 ] as const;
 
-const fetchMethod = async (
-    page: number,
-    pageSize: number,
-    sort: {
-        accessor: string;
-        direction: 'asc' | 'desc';
-    }[]
-) => {
+const fetchMethod = async (page: number, pageSize: number, sort: SortObject<DataObject>[]) => {
     const sortedData =
         sort.length === 0
             ? data
@@ -153,11 +155,11 @@ const fetchMethod = async (
                           const valueB = `${rowB[s.accessor]}`;
 
                           if (s.direction === 'asc') {
-                              sortResult = valueA.localeCompare(valueB, undefined, {
+                              sortResult = valueA.localeCompare(valueB, 'sk-SK', {
                                   sensitivity: 'base'
                               });
                           } else {
-                              sortResult = valueB.localeCompare(valueA, undefined, {
+                              sortResult = valueB.localeCompare(valueA, 'sk-SK', {
                                   sensitivity: 'base'
                               });
                           }
@@ -177,14 +179,124 @@ const fetchMethod = async (
 };
 
 export const StaticData: Story = {
+    play: async ({ canvas, userEvent }) => {
+        const sortByNameBtn = canvas.getByTitle('Name', {
+            exact: false
+        });
+        const sortByAgeBtn = canvas.getByTitle('Age', {
+            exact: false
+        });
+        const sortByCityBtn = canvas.getByTitle('City', {
+            exact: false
+        });
+
+        const table = canvas.getByRole('table');
+
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Alice');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Yara');
+
+        await expect(sortByNameBtn.tagName).toBe('BUTTON');
+        await expect(sortByAgeBtn.tagName).toBe('BUTTON');
+        await expect(sortByCityBtn.tagName).toBe('BUTTON');
+
+        await expect(sortByNameBtn.title).toContain('Sorted ascending');
+        await expect(sortByAgeBtn.title).toContain('Not sorted');
+        await expect(sortByCityBtn.title).toContain('Not sorted');
+
+        await userEvent.click(sortByNameBtn);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        await expect(sortByNameBtn.title).toContain('Sorted descending');
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Yara');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Alice');
+
+        await userEvent.click(sortByNameBtn);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        await expect(sortByNameBtn.title).toContain('Not sorted');
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Bob');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Yara');
+
+        await userEvent.click(sortByAgeBtn);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        await expect(sortByAgeBtn.title).toContain('Sorted ascending');
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Fiona');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Kevin');
+        await expect(table.lastElementChild?.childNodes.item(6)?.childNodes.item(2)?.textContent).toBe('Los Angeles');
+        await expect(table.lastElementChild?.childNodes.item(7)?.childNodes.item(2)?.textContent).toBe('Salt Lake City');
+
+        await userEvent.click(sortByCityBtn);
+        await userEvent.click(sortByCityBtn);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        await expect(sortByCityBtn.title).toContain('Sorted descending');
+
+        await expect(sortByAgeBtn.previousElementSibling?.innerHTML).toContain('1');
+        await expect(sortByCityBtn.previousElementSibling?.innerHTML).toContain('2');
+
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Fiona');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Kevin');
+        await expect(table.lastElementChild?.childNodes.item(6)?.childNodes.item(2)?.textContent).toBe('Salt Lake City');
+        await expect(table.lastElementChild?.childNodes.item(7)?.childNodes.item(2)?.textContent).toBe('Los Angeles');
+    },
     args: {
+        // @ts-expect-error incorrect infering happens only in storybook args
         columns,
         data
     }
 };
 
 export const FetchedData: Story = {
+    play: async ({ canvas, userEvent }) => {
+        const table = canvas.getByRole('table');
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await expect(table.lastElementChild?.childElementCount).toBe(5);
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Alice');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Fiona');
+
+        const prevBtn = canvas.getByTitle('Previous page');
+        const nextBtn = canvas.getByTitle('Next page');
+        const pageSelect = canvas.getByLabelText('Current page');
+
+        await expect(prevBtn).toBeDisabled();
+        await expect(nextBtn).toBeEnabled();
+        await expect(pageSelect).toHaveValue('0');
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await userEvent.click(nextBtn);
+        await userEvent.click(nextBtn);
+        await userEvent.click(nextBtn);
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await expect(pageSelect).toHaveValue('3');
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Paula');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Thomas');
+        await expect(prevBtn).toBeEnabled();
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await userEvent.click(nextBtn);
+        await expect(nextBtn).toBeDisabled();
+        await expect(pageSelect).toHaveValue('4');
+        await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Ursula');
+        await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Yara');
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await userEvent.click(prevBtn);
+        await userEvent.click(prevBtn);
+        await userEvent.click(prevBtn);
+        await userEvent.click(prevBtn);
+
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        await expect(prevBtn).toBeDisabled();
+        await expect(nextBtn).toBeEnabled();
+        await expect(pageSelect).toHaveValue('0');
+    },
     args: {
+        // @ts-expect-error incorrect infering happens only in storybook args
         columns,
         onFetch: fetchMethod,
         pageSize: 5

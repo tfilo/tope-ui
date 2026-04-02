@@ -13,7 +13,16 @@ export const localization = {
     of: 'of',
     sortAsc: 'Sorted ascending',
     sortDsc: 'Sorted descending',
-    sortNotSet: 'Not sorted'
+    sortNotSet: 'Not sorted',
+    nextPage: 'Next page',
+    prevPage: 'Previous page',
+    currentPage: 'Current page'
+};
+
+export const config: {
+    locale: Intl.LocalesArgument;
+} = {
+    locale: 'sk-SK'
 };
 
 /**
@@ -23,4 +32,13 @@ export const localization = {
  */
 export const setLocalization = (newLocalization: Partial<typeof localization>) => {
     Object.assign(localization, newLocalization);
+};
+
+/**
+ * Merges the provided config object with the existing one, allowing for partial updates to the config settings.
+ *
+ * @param newConfig
+ */
+export const setConfig = (newConfig: Partial<typeof config>) => {
+    Object.assign(config, newConfig);
 };

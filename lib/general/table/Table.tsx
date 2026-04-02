@@ -1,51 +1,41 @@
-import { ArrowDownIcon, ArrowLeftIcon, ArrowRightIcon, ArrowsUpDownIcon, ArrowUpIcon } from '@heroicons/react/16/solid';
-import { Button } from '../button';
-import type { CellProps, TableProps } from './Table.types';
-import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
-import { localization } from '../../utils/constants';
-import { Select } from '../../form';
+import type { RowObject, SortObject, TableProps } from './Table.types';
+import { useCallback, useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+import { TableCell } from './TableCell';
+import { TablePagination } from './TablePagination';
+import { TableHeaderCell } from './TableHeaderCell';
+import { config } from '../../utils/constants';
 
-type DataType = Exclude<TableProps['data'], undefined>;
-type SortDirection = 'asc' | 'desc' | null;
-
-const Cell: React.FC<CellProps> = ({ row, metadata }) => {
-    if (metadata.cell) {
-        return <>{metadata.cell(row, row[metadata.accessor], metadata.accessor)}</>;
-    }
-
-    if (metadata.formatter) {
-        return <>{metadata.formatter(row[metadata.accessor])}</>;
-    }
-
-    return <>{String(row[metadata.accessor])}</>;
-};
-
-const getSortIcon = (sortDirection: SortDirection) => {
-    if (sortDirection === null) {
-        return ArrowsUpDownIcon;
-    }
-
-    return sortDirection === 'asc' ? ArrowUpIcon : ArrowDownIcon;
-};
-
-const getSortIconLabel = (sortDirection: SortDirection): string => {
-    if (sortDirection === null) {
-        return localization.sortNotSet;
-    }
-
-    return sortDirection === 'asc' ? localization.sortNotSet : localization.sortDsc;
-};
-
+/**
+ * Base compare method, compares all values as strings except number or bigint that are compared as numbers
+ *
+ * @param a first value
+ * @param b second value
+ * @returns number
+ */
 const baseCompareFn = (a: unknown, b: unknown): number => {
-    const valueA = `${a ?? ''}`.toLocaleLowerCase();
-    const valueB = `${b ?? ''}`.toLocaleLowerCase();
-    return valueA.localeCompare(valueB, undefined, {
+    if (typeof a === 'bigint' || typeof b === 'bigint' || typeof a === 'number' || typeof b === 'number') {
+        const valueA = +(a ?? 0);
+        const valueB = +(b ?? 0);
+
+        return valueA - valueB;
+    }
+
+    const valueA = `${a ?? ''}`.toLocaleLowerCase(config.locale);
+    const valueB = `${b ?? ''}`.toLocaleLowerCase(config.locale);
+    return valueA.localeCompare(valueB, config.locale, {
         sensitivity: 'base'
     });
 };
 
-export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10, data: _data, onFetch }) => {
-    console.log('Table rendered');
+/**
+ * Table component that renders as Table with pagination if onFetch used or without if data provided. In case of data provided it handles sort internally, in case of onFetch it pass sort order together with pagination to onFetch method
+ */
+export const Table = <TData extends RowObject>({
+    columns,
+    pageSize: _pageSize = 10,
+    data: _data,
+    onFetch
+}: TableProps<TData>): ReactElement => {
     const [pageSize, setPageSize] = useState(_pageSize);
 
     if (_pageSize < 1) {
@@ -63,8 +53,8 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
 
     const [page, setPage] = useState(0);
     const [totalRecords, setTotalRecords] = useState(0);
-    const [data, setData] = useState<DataType>([]);
-    const [sort, setSort] = useState<{ accessor: string; direction: 'asc' | 'desc' }[]>(() => {
+    const [data, setData] = useState<Readonly<TData[]>>([]);
+    const [sort, setSort] = useState<SortObject<TData>[]>(() => {
         return columns
             .filter((col) => col.defaultSortDirection !== undefined)
             .map((col) => ({
@@ -76,13 +66,6 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
     const hasStaticData = _data !== undefined;
     const hasFetch = onFetch !== undefined;
     const totalPages = Math.ceil(totalRecords / pageSize);
-
-    const paginationOptions = useMemo(() => {
-        return [...new Array(totalPages).keys()].map((i) => ({
-            label: `${i + 1}`,
-            value: `${i}`
-        }));
-    }, [totalPages]);
 
     const onPrevPage = useCallback(() => {
         setPage((prev) => {
@@ -100,7 +83,7 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
         setPage(+e.currentTarget.value);
     }, []);
 
-    const onSortChange = useCallback((accessor: string) => {
+    const onSortChange = useCallback((accessor: keyof TData) => {
         setSort((prev) => {
             let result = [...prev];
             const idx = result.findIndex((s) => s.accessor === accessor);
@@ -120,7 +103,7 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
         setPage(0);
     }, []);
 
-    const onSetData = useEffectEvent((data: DataType, page?: number, pageSize?: number, totalRecords?: number) => {
+    const onSetData = useEffectEvent((data: Readonly<TData[]>, page?: number, pageSize?: number, totalRecords?: number) => {
         setData(data);
         if (page !== undefined) {
             setPage(page);
@@ -146,12 +129,7 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
             const sorted = [..._data].sort((rowA, rowB) => {
                 const _sort = [...sort];
                 let sortResult = 0;
-                let s:
-                    | {
-                          accessor: string;
-                          direction: 'asc' | 'desc';
-                      }
-                    | undefined = undefined;
+                let s: SortObject<TData> | undefined = undefined;
                 do {
                     s = _sort.shift();
                     if (s !== undefined) {
@@ -174,12 +152,6 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
     }, [_data, columns, hasStaticData, sort]);
 
     useEffect(() => {
-        if (hasStaticData) {
-            onSetData(_data);
-        }
-    }, [hasStaticData, _data, _pageSize]);
-
-    useEffect(() => {
         setPageSize(_pageSize);
     }, [_pageSize]);
 
@@ -191,33 +163,17 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
                         <tr>
                             {columns.map((col) => (
                                 <th
-                                    key={`${col.accessor}_${col.header}`}
+                                    key={`${col.accessor.toString()}_${col.header}`}
                                     className={
                                         'border-b border-default p-md text-left font-bold text-default' +
                                         (col.additionalClassName ? ` ${col.additionalClassName}` : '')
                                     }
                                 >
-                                    <div className='flex gap-md'>
-                                        <div className='flex-1'>{col.header}</div>
-                                        {col.sortable && (
-                                            <div className='-my-md items-center flex gap-xs'>
-                                                {sort.length > 1 ? (
-                                                    <span className='bg-primary-extra-light rounded-full px-md aspect-square flex items-center'>
-                                                        {sort.findIndex((s) => s.accessor === col.accessor) + 1}
-                                                    </span>
-                                                ) : null}
-                                                <Button
-                                                    onClick={() => onSortChange(col.accessor)}
-                                                    icon={getSortIcon(sort.find((s) => s.accessor === col.accessor)?.direction ?? null)}
-                                                    showChildren={false}
-                                                    variant='transparent'
-                                                    additionalClassName='min-w-[32px] min-h-[32px] rounded-md'
-                                                >
-                                                    {getSortIconLabel(sort.find((s) => s.accessor === col.accessor)?.direction ?? null)}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <TableHeaderCell
+                                        col={col}
+                                        sort={sort}
+                                        onSortChange={onSortChange}
+                                    />
                                 </th>
                             ))}
                         </tr>
@@ -227,13 +183,13 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
                             <tr key={Object.values(row).join('_')}>
                                 {columns.map((col) => (
                                     <td
-                                        key={`${col.accessor}_${col.header}`}
+                                        key={`${col.accessor.toString()}_${col.header}`}
                                         className={
                                             'border-b border-default p-md text-left text-default' +
                                             (col.additionalClassName ? ` ${col.additionalClassName}` : '')
                                         }
                                     >
-                                        <Cell
+                                        <TableCell
                                             row={row}
                                             metadata={col}
                                         />
@@ -245,31 +201,13 @@ export const Table: React.FC<TableProps> = ({ columns, pageSize: _pageSize = 10,
                 </table>
             </div>
             {!hasStaticData && (
-                <div className='w-full flex gap-md items-center py-sm justify-between'>
-                    <Button
-                        icon={ArrowLeftIcon}
-                        showChildren={false}
-                        variant='outline'
-                        onClick={onPrevPage}
-                        disabled={page === 0}
-                    />
-                    <div className='text-sm flex gap-md items-center'>
-                        {localization.page}
-                        <Select
-                            options={paginationOptions}
-                            value={page.toString()}
-                            onChange={onPageChange}
-                        />
-                        {localization.of} {totalPages}
-                    </div>
-                    <Button
-                        icon={ArrowRightIcon}
-                        showChildren={false}
-                        variant='outline'
-                        onClick={onNextPage}
-                        disabled={page === totalPages - 1}
-                    />
-                </div>
+                <TablePagination
+                    onPrevPage={onPrevPage}
+                    onNextPage={onNextPage}
+                    onPageChange={onPageChange}
+                    page={page}
+                    totalPages={totalPages}
+                />
             )}
         </div>
     );

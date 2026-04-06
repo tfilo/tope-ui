@@ -120,12 +120,14 @@ const generateTimeSlots = (interval: number): Slot[] => {
  * formatToISO("2026-03-26", false, isoDateFormat);
  */
 const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormatPattern: string): string | null => {
-    if (!dateTime) return null;
+    console.log('FORMAT_TO_ISO, DATE_TIME:', dateTime);
+    if (!dateTime?.trim()) return null;
     const parsedDate = parse(dateTime, inputFormatPattern, new Date()); // convert string into Date object according formatPattern
     // Validation: Check if the date is valid AND the year is realistic (e.g., not 0225)
     if (!isValid(parsedDate) || getYear(parsedDate) < minYear || getYear(parsedDate) > maxYear) {
         console.error('Invalid format or unrealistic year');
-        return null;
+        // return null;
+        return 'UNKNOWN';
     } else {
         return hasTime ? format(parsedDate, isoDateTimeFormat) : format(parsedDate, isoDateFormat);
     }
@@ -590,6 +592,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
      */
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const rawValue = e.target.value;
+        console.log('RAWVALUE', rawValue);
         setInputValue(rawValue);
 
         // 1. Reset all states if the input is cleared by the user
@@ -607,6 +610,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
          * (e.g., if the pattern only has time, it takes today's date).
          */
         const parsedDate = parse(rawValue, inputFormatPattern, new Date());
+        console.log('PARSED_DATE', parsedDate);
 
         /**
          * 3. Validate the parsed result.
@@ -634,6 +638,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
              * we keep the 'inputValue' updated but don't force-sync
              * the calendar state until a valid date is formed.
              */
+            console.log('NEPLATNY_DATUM');
         }
     };
 
@@ -651,6 +656,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const formatToIsoDate = useCallback(() => {
         // Attempt to convert the text input to a valid ISO Date object
         const isoDate = formatToISO(inputValue, hasTime, inputFormatPattern);
+        console.log('FORMAT TO ISO DATE', isoDate);
         if (isoDate === null) {
             // STRICT RESET: Clear all values if the input doesn't match a valid date
             setInputValue('');
@@ -678,7 +684,9 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     }, [hasTime, inputFormatPattern, inputValue]);
 
     useEffect(() => {
-        onChange(formatToISO(inputValue, hasTime, inputFormatPattern));
+        const res = formatToISO(inputValue, hasTime, inputFormatPattern);
+        console.log('RES', res);
+        onChange(res);
     }, [hasTime, inputFormatPattern, inputValue, onChange]);
 
     /**

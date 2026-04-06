@@ -3,7 +3,7 @@
 
 .tope-ui-dropdown {
     width: fit-content;
-
+    min-width: calc(anchor-size(width) + 2px);
     margin-right: 16px;
     top: calc(anchor(bottom) + 4px);
     left: calc(anchor(left) - 2px);

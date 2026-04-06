@@ -30,53 +30,52 @@ List of components to develop
         - [x] Support elements: `<button>`, `<a>`, `<Link>`
         - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
         - [x] Variants: Text, Icon + Text, Icon
-    - [ ] Dropdown
-        - [ ] Options (possible icons)
+    - [x] Dropdown
+        - [x] Options (possible icons)
     - [x] Tag
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
         - [x] onClick?: reacts on hover and calls onClick on click
-    - [ ] Table (Tanstack)
-        - [ ] Support with/without pagination
-        - [ ] With/without header
-        - [ ] Sorting for each column
-    - [ ] List
-        - [ ] Renders a bulleted list
+    - [x] Table
+        - [x] Support with/without pagination
+        - [x] Sorting for each column
+    - [x] List
+        - [x] Renders a bulleted list
 - [ ] OVERLAYS
     - [ ] Modal
         - [ ] Props: Title (string), Body (ReactNode)
         - [ ] Footer: onConfirm (required), onCancel? (optional)
         - [ ] Size: Normal / Wide
 - [ ] LAYOUT
-    - [ ] Header
-        - [ ] Right: profile button (optional) and logout
-        - [ ] Left: navigation buttons / dropdowns with icon (on mobile/tablet icons only)
-    - [ ] Content
-        - [ ] Centered app content, max-width 1200px
-    - [ ] Page
-        - [ ] Contains title in form of h1 (optionally as h2 - h6) and children (ReactNode)
-    - [ ] Section
-        - [ ] Contains title in form of h2 (optionally as h3 - h6) and children (ReactNode)
-        - [ ] Optional border
-    - [ ] Grid
-        - [ ] 4 columns on desktop, 2 on tablet, 1 on mobile
-        - [ ] 2 columns on desktop, 2 on tablet, 1 on mobile
-        - [ ] 1 columns on desktop, 1 on tablet, 1 on mobile
-        - [ ] Usable as direct child of Page or Section
-    - [ ] Col
-        - [ ] Will fill single column of grid
-        - [ ] Optionaly span to 2,3,4 columns on desktop or 2 columns on tablet
-        - [ ] Will be designed to contain Input, Select, Autocomplete, TextArea etc. as direct children
+    - [x] Header
+        - [x] Right: profile button (optional) and logout
+        - [x] Left: navigation buttons / dropdowns with icon (on mobile/tablet icons only)
+    - [x] Content
+        - [x] Centered app content, max-width 1280px
+    - [x] Page
+        - [x] Contains title in form of h1 (optionally as h2 - h6) and children (ReactNode)
+    - [x] Section
+        - [x] Contains title in form of h2 (optionally as h3 - h6) and children (ReactNode)
+        - [x] Optional border
+    - [x] Grid
+        - [x] 4 columns on desktop, 2 on tablet, 1 on mobile
+        - [x] 2 columns on desktop, 2 on tablet, 1 on mobile
+        - [x] 1 columns on desktop, 1 on tablet, 1 on mobile
+        - [x] Usable as direct child of Page or Section
+    - [x] Column
+        - [x] Will fill single column of grid
+        - [x] Optionaly span to 2,3,4 columns on desktop or 2 columns on tablet
+        - [x] Will be designed to contain Input, Select, Autocomplete, TextArea etc. as direct children
     - [x] Flex
         - [x] Will be used to primarily wrap buttons, it will take full width of parent element and will do flex layout with children with specified orientation and gap
         - [x] It will change to column direction on mobile screen automaticaly
-    - [ ] Card
-        - [ ] Will fill single column of grid
-        - [ ] Has image as background over full size of card
-        - [ ] Has optional description showed on bottom of card as transparent overly
-        - [ ] Has optional onClick, handle clic on Card anywhere except action in top right corner
-        - [ ] Has optional onAction, handle click on action icon in top right corner (configurable icon)
-- [ ] LOCALIZATION
-    - [ ] Add localization option to all components that uses some hardcoded internal texts
-- [ ] PUBLISH
-    - [ ] Create github action to publish to NPM
+    - [x] Card
+        - [x] Will fill single column of grid
+        - [x] Has image as background over full size of card
+        - [x] Has optional description showed on bottom of card as transparent overly
+        - [x] Has optional onClick, handle clic on Card anywhere except action in top right corner
+        - [x] Has optional onAction, handle click on action icon in top right corner (configurable icon)
+- [x] LOCALIZATION
+    - [-] Add localization option to all components that uses some hardcoded internal texts
+- [x] PUBLISH
+    - [x] Create github action to publish to NPM

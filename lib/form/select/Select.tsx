@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { SelectProps } from './Select.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'flex-1 focus:outline-none px-md min-h-[30px]',
@@ -11,16 +12,7 @@ const theme = {
  * Select component that renders as HTMLSelectElement element wrapped by parent div
  * containing optional label and error message.
  */
-export const Select: React.FC<SelectProps> = ({
-    id,
-    label,
-    error,
-    ref,
-    options,
-    allowEmptyOption,
-    emptyOptionLabel = '--Please choose an option--',
-    ...props
-}) => {
+export const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, allowEmptyOption, ...props }) => {
     const _id = useId();
     const selectId = id || `select-${_id}`;
 
@@ -38,7 +30,7 @@ export const Select: React.FC<SelectProps> = ({
                 id={selectId}
                 ref={ref}
             >
-                {allowEmptyOption && <option value=''>{emptyOptionLabel}</option>}
+                {allowEmptyOption && <option value=''>{localization.emptyOptionLabel}</option>}
                 {options.map((option) => {
                     if ('options' in option) {
                         return (

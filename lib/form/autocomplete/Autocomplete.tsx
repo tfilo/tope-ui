@@ -5,6 +5,7 @@ import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { AutocompleteProps } from './Autocomplete.types';
+import { localization } from '../../utils/constants';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
@@ -13,6 +14,9 @@ const theme = {
     wrapper: 'w-full flex flex-col relative'
 };
 
+/**
+ * Autocomplete component with ability to search and fetch items
+ */
 export const Autocomplete: React.FC<AutocompleteProps> = ({
     id,
     label,
@@ -63,7 +67,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         // Focus first option if exists
         if (optionsRef.current) {
-            const firstOption = optionsRef.current.querySelector('li');
+            const firstOption = optionsRef.current.querySelector('button:not(:disabled)');
             if (firstOption) {
                 (firstOption as HTMLElement).focus();
             }
@@ -89,16 +93,33 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     };
 
     // Handle key down on options for navigation
-    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLLIElement>, option: Option) => {
+    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, option: Option) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            const nextSibling = (e.currentTarget.nextSibling as HTMLElement) || null;
-            if (nextSibling) {
-                nextSibling.focus();
-            }
+            let nextSibling: HTMLElement = e.currentTarget;
+            do {
+                const next = (nextSibling.parentElement?.nextElementSibling as HTMLElement | null | undefined) ?? null;
+                if (next) {
+                    nextSibling = next.firstElementChild as HTMLElement;
+                } else {
+                    break;
+                }
+            } while (nextSibling?.hasAttribute('disabled'));
+
+            nextSibling.focus();
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            const previousSibling = (e.currentTarget.previousSibling as HTMLElement) || null;
+            let previousSibling: HTMLElement | null = e.currentTarget;
+            do {
+                const prev = (previousSibling.parentElement?.previousElementSibling as HTMLElement | null | undefined) ?? null;
+                if (prev) {
+                    previousSibling = prev.firstElementChild as HTMLElement;
+                } else {
+                    previousSibling = null;
+                    break;
+                }
+            } while (previousSibling?.hasAttribute('disabled'));
+
             if (previousSibling) {
                 previousSibling.focus();
             } else {
@@ -215,12 +236,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             if (multiple === false) {
                 if (selectedOption.length === 0) {
                     if (value !== null) {
-                        console.log('Calling onChange with null');
                         (onChange as (value: string | null) => void)(null);
                     }
                 } else {
                     if (value !== selectedOption[0].value) {
-                        console.log('Calling onChange with ', selectedOption[0].value);
                         (onChange as (value: string | null) => void)(selectedOption[0].value);
                     }
                 }
@@ -338,7 +357,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 key='___loading___'
                                 className={`text-disabled py-md px-sm ${hasOptions ? 'border-b border-light' : ''}`}
                             >
-                                Loading...
+                                {localization.loading}
                             </li>
                         )}
                         {!isSearching && !hasOptions && (
@@ -346,18 +365,22 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 key='___no_options___'
                                 className='text-disabled py-md px-sm'
                             >
-                                No options
+                                {localization.noOptions}
                             </li>
                         )}
                         {options.map((o) => (
                             <li
                                 key={o.value}
-                                onClick={() => handleSelect(o)}
-                                onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                className={`${o.disabled ? 'text-disabled' : 'hover:bg-secondary-extra-light cursor-pointer'} rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
-                                tabIndex={0}
+                                className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
                             >
-                                {o.label}
+                                <button
+                                    onClick={() => handleSelect(o)}
+                                    onKeyDown={(e) => handleOptionKeyDown(e, o)}
+                                    className='focus:outline-none cursor-pointer disabled:cursor-default'
+                                    disabled={o.disabled}
+                                >
+                                    {o.label}
+                                </button>
                             </li>
                         ))}
                     </ul>

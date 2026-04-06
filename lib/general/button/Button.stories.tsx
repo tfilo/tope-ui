@@ -25,6 +25,13 @@ const meta = {
         disabled: { control: 'boolean' },
         as: { control: 'select', options: [undefined, 'button', 'a'] }
     },
+    decorators: [
+        (Story) => (
+            <div className='p-xl bg-white'>
+                <Story />
+            </div>
+        )
+    ],
     args: { onClick: fn() }
 } satisfies Meta<typeof Button>;
 

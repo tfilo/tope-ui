@@ -63,20 +63,33 @@ npm run test-storybook
 ### Form
 
 - **Autocomplete**
-- **Button**
 - **FileInput**
 - **Input**
 - **Select**
 - **TextArea**
 - **ElementWrapper**
 
-### Layout
+### General
 
-- **Flex**
+- **Button**
+- **Dropdown**
+- **List**
+- **Table**
 
-### Visual Components
+### Visual
 
 - **Tag**
+
+### Layout
+
+- **Card**
+- **Column**
+- **Content**
+- **Flex**
+- **Grid**
+- **Header**
+- **Page**
+- **Section**
 
 ## Styles
 
@@ -84,3 +97,7 @@ The library builds a bundled stylesheet. Consumers can import:
 
 - `tope-ui/style.css`
 - Tailwind-based theme styles are defined in `lib/main.css` and `lib/theme.css`.
+
+## Localization
+
+Library provides default localization for "hardcoded" values. You can provide your own by calling setLocalization methods that will update original object holding locales.

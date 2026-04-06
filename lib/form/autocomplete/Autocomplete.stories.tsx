@@ -61,7 +61,7 @@ export const Basic: Story = {
         // wait for fetch to finish
         await new Promise((resolve) => setTimeout(resolve, 1700));
         canvas
-            .queryAllByRole('listitem')
+            .queryAllByRole('button')
             .find((item) => item.textContent === 'Apple')
             ?.click();
         // wait for 800ms here to allow useEffects to settle
@@ -141,7 +141,7 @@ export const Multiple: Story = {
         // wait for fetch to finish
         await new Promise((resolve) => setTimeout(resolve, 1700));
         canvas
-            .queryAllByRole('listitem')
+            .queryAllByRole('button')
             .find((item) => item.textContent === 'Apple')
             ?.click();
         // wait for 800ms here to allow useEffects to settle

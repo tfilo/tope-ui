@@ -1,11 +1,14 @@
 {
-    "name": "tope-ui",
+    "name": "@tfilo/tope-ui",
     "author": {
         "name": "Tomáš Filo",
         "email": "tfilosk@gmail.com",
         "url": "https://github.com/tfilo/tope-ui"
     },
-    "private": true,
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tfilo/tope-ui.git"
+    },
     "version": "0.0.1",
     "type": "module",
     "files": [
@@ -22,10 +25,10 @@
     },
     "scripts": {
         "build": "tsc -b && vite build",
-        "lint": "eslint './**/*.{js,jsx,ts,tsx}'",
-        "lint:fix": "eslint './**/*.{js,jsx,ts,tsx}' --fix",
-        "prettier": "prettier './**/*.{js,jsx,ts,tsx,json,md}' --check",
-        "prettier:fix": "prettier './**/*.{js,jsx,ts,tsx,json,md}' --write",
+        "lint": "eslint './lib/**/*.{js,jsx,ts,tsx}'",
+        "lint:fix": "eslint './lib/**/*.{js,jsx,ts,tsx}' --fix",
+        "prettier": "prettier './lib/**/*.{js,jsx,ts,tsx,json,md}' --check",
+        "prettier:fix": "prettier './lib/**/*.{js,jsx,ts,tsx,json,md}' --write",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
         "test-storybook": "vitest --project=storybook",

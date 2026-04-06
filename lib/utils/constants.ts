@@ -16,7 +16,18 @@ export const localization = {
     sortNotSet: 'Not sorted',
     nextPage: 'Next page',
     prevPage: 'Previous page',
-    currentPage: 'Current page'
+    currentPage: 'Current page',
+    dateTimeInput: {
+        previous: 'Predchádzajúci mesiac',
+        next: 'Nasledujúci mesiac',
+        dayAbbreviations: ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'], // 0 for sunday
+        months: ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'],
+        monthAbbreviations: ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+        defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
+        defaultDateInputPattern: 'dd.MM.yyyy',
+        defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
+        defaultDateInputPlaceholder: 'DD.MM.YYYY'
+    }
 };
 
 export const config: {

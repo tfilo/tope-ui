@@ -18,17 +18,17 @@ export const localization = {
     prevPage: 'Previous page',
     currentPage: 'Current page',
     dateTimeInput: {
-        previous: 'Predchádzajúci mesiac',
-        next: 'Nasledujúci mesiac',
-        dayAbbreviations: ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'], // 0 for sunday
-        months: ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'],
-        monthAbbreviations: ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+        previous: 'Previous month',
+        next: 'Next month',
+        dayAbbreviations: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], // 0 for sunday
+        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        monthAbbreviations: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
         defaultDateInputPattern: 'dd.MM.yyyy',
         defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
         defaultDateInputPlaceholder: 'DD.MM.YYYY',
-        openCalendar: 'Otvoriť kalendár',
-        closeCalendar: 'Zatvoriť kalendár'
+        openCalendar: 'Open calendar',
+        closeCalendar: 'Close calendar'
     }
 };
 

@@ -26,7 +26,9 @@ export const localization = {
         defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
         defaultDateInputPattern: 'dd.MM.yyyy',
         defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
-        defaultDateInputPlaceholder: 'DD.MM.YYYY'
+        defaultDateInputPlaceholder: 'DD.MM.YYYY',
+        openCalendar: 'Otvoriť kalendár',
+        closeCalendar: 'Zatvoriť kalendár'
     }
 };
 

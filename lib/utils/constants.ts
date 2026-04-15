@@ -16,7 +16,20 @@ export const localization = {
     sortNotSet: 'Not sorted',
     nextPage: 'Next page',
     prevPage: 'Previous page',
-    currentPage: 'Current page'
+    currentPage: 'Current page',
+    dateTimeInput: {
+        previous: 'Previous month',
+        next: 'Next month',
+        dayAbbreviations: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], // 0 for sunday
+        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        monthAbbreviations: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
+        defaultDateInputPattern: 'dd.MM.yyyy',
+        defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
+        defaultDateInputPlaceholder: 'DD.MM.YYYY',
+        openCalendar: 'Open calendar',
+        closeCalendar: 'Close calendar'
+    }
 };
 
 export const config: {

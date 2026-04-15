@@ -39,8 +39,8 @@
         "react-dom": "^19.2.0"
     },
     "devDependencies": {
-        "@heroicons/react": "^2.2.0",
         "@eslint/js": "^9.39.1",
+        "@heroicons/react": "^2.2.0",
         "@storybook/addon-a11y": "^10.1.11",
         "@storybook/addon-docs": "^10.1.11",
         "@storybook/addon-vitest": "^10.1.11",
@@ -52,6 +52,7 @@
         "@vitejs/plugin-react": "^5.1.1",
         "@vitest/browser-playwright": "^4.0.16",
         "@vitest/coverage-v8": "^4.0.16",
+        "date-fns": "^4.1.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-react-hooks": "^7.0.1",
         "eslint-plugin-react-refresh": "^0.4.24",

@@ -29,7 +29,8 @@ export const localization = {
         defaultDateInputPlaceholder: 'DD.MM.YYYY',
         openCalendar: 'Open calendar',
         closeCalendar: 'Close calendar'
-    }
+    },
+    switch: 'switch'
 };
 
 export const config: {

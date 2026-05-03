@@ -89,3 +89,13 @@ export const isBlank = (str: string | null | undefined): boolean => {
 export const isNotBlank = (str: string | null | undefined): str is string => {
     return !isBlank(str);
 };
+
+/**
+ * Stringify boolean
+ *
+ * @param val
+ * @returns 'true' or 'false'
+ */
+export const sb = (val: boolean): 'true' | 'false' => {
+    return `${val}`;
+};

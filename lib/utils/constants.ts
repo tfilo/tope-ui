@@ -30,7 +30,11 @@ export const localization = {
         openCalendar: 'Open calendar',
         closeCalendar: 'Close calendar'
     },
-    switch: 'switch'
+    switch: 'switch',
+    modal: {
+        cancelLabel: 'Cancel',
+        confirmLabel: 'Confirm'
+    }
 };
 
 export const config: {

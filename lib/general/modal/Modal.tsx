@@ -23,6 +23,7 @@ const theme = {
 
 /** Modal component that renders as HTMLDialogElement */
 const Modal: React.FC<ModalProps> = ({
+    closedby = 'any', // should close dialog after backdrop click or esc press
     title,
     body,
     size = 'normal',
@@ -55,8 +56,8 @@ const Modal: React.FC<ModalProps> = ({
         }
     }, [openModal]);
 
-    // This handler catches the ESC press and backdrop click
-    const handleEscPressAndBackdropClick = async (event: React.SyntheticEvent) => {
+    /** This handler catches the ESC press and backdrop click */
+    const handleOnCancel = async (event: React.SyntheticEvent) => {
         event.preventDefault(); // Prevent the native close to control it via React
         if (onClose) {
             try {
@@ -81,8 +82,8 @@ const Modal: React.FC<ModalProps> = ({
         <dialog
             {...props}
             ref={dialogRef}
-            onCancel={handleEscPressAndBackdropClick}
-            closedby='any' // should close dialog after backdrop click or esc press
+            onCancel={handleOnCancel}
+            closedby={closedby}
             className={theme.dialog(size)}
         >
             <div className={theme.wrapper}>

@@ -20,7 +20,7 @@ const icons = {
 const onClose = fn();
 
 const meta = {
-    title: 'Common/Modal',
+    title: 'General/Modal',
     component: Modal,
     tags: ['autodocs'],
     argTypes: {
@@ -68,6 +68,26 @@ const meta = {
             control: 'select',
             mapping: icons,
             options: Object.keys(icons)
+        },
+        closedby: {
+            description:
+                'Determines how the user is allowed to close the dialog:\n' +
+                '- **`none`** Blocks all automatic closing (ignores both ESC press and backdrop clicks).\n' +
+                '- **`any`** Allows closing by any standard method (either ESC press or clicking the backdrop).\n' +
+                '- **`closerequest`** Closes only via system requests (ESC press only, backdrop clicks are ignored).',
+            table: {
+                type: { summary: "'none' | 'any' | 'closerequest'" },
+                defaultValue: { summary: 'any' }
+            },
+            control: {
+                type: 'radio',
+                labels: {
+                    none: 'none',
+                    any: 'any',
+                    closerequest: 'closerequest'
+                }
+            },
+            options: ['none', 'any', 'closerequest']
         }
     },
     render: ({ cancelMode, cancelLabel, openModal, onClose, ...args }, context) => {
@@ -202,6 +222,24 @@ export const WithoutConfirm: Story = {
     args: {
         cancelLabel: null,
         cancelMode: 'none' // The cancelMode attribute is set as a helper attribute for stories only.
+    }
+};
+
+export const BlocksAutomaticClosing: Story = {
+    args: {
+        closedby: 'none'
+    }
+};
+
+export const AllowsAutomaticClosing: Story = {
+    args: {
+        closedby: 'any'
+    }
+};
+
+export const EscPressOnlyClosing: Story = {
+    args: {
+        closedby: 'closerequest'
     }
 };
 

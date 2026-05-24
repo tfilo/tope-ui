@@ -63,9 +63,11 @@ npm run test-storybook
 ### Form
 
 - **Autocomplete**
+- **DateTimeInput**
 - **FileInput**
 - **Input**
 - **Select**
+- **Switch**
 - **TextArea**
 - **ElementWrapper**
 
@@ -74,10 +76,8 @@ npm run test-storybook
 - **Button**
 - **Dropdown**
 - **List**
+- **Modal**
 - **Table**
-
-### Visual
-
 - **Tag**
 
 ### Layout
@@ -90,6 +90,15 @@ npm run test-storybook
 - **Header**
 - **Page**
 - **Section**
+
+### Utils
+
+#### String utils
+- **isEmpty**
+- **isNotEmpty**
+- **isBlank**
+- **isNotBlank**
+- **sb** - convert boolean to string 'true' | 'false'
 
 ## Styles
 

@@ -30,15 +30,10 @@ const baseCompareFn = (a: unknown, b: unknown): number => {
 /**
  * Table component that renders as Table with pagination if onFetch used or without if data provided. In case of data provided it handles sort internally, in case of onFetch it pass sort order together with pagination to onFetch method
  */
-export const Table = <TData extends RowObject>({
-    columns,
-    pageSize: _pageSize = 10,
-    data: _data,
-    onFetch
-}: TableProps<TData>): ReactElement => {
-    const [pageSize, setPageSize] = useState(_pageSize);
+export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _data, onFetch }: TableProps<TData>): ReactElement => {
+    //const [pageSize, setPageSize] = useState(_pageSize);
 
-    if (_pageSize < 1) {
+    if (pageSize < 1) {
         throw new Error('PageSize must be at least 1!');
     }
     if (columns.length < 1) {
@@ -103,13 +98,13 @@ export const Table = <TData extends RowObject>({
         setPage(0);
     }, []);
 
-    const onSetData = useEffectEvent((data: Readonly<TData[]>, page?: number, pageSize?: number, totalRecords?: number) => {
+    const onSetData = useEffectEvent((data: Readonly<TData[]>, page?: number, _pageSize?: number, totalRecords?: number) => {
+        if (_pageSize !== undefined && _pageSize !== pageSize) {
+            throw new Error('PageSize can not be changed from response');
+        }
         setData(data);
         if (page !== undefined) {
             setPage(page);
-        }
-        if (pageSize !== undefined) {
-            setPageSize(pageSize);
         }
         if (totalRecords !== undefined) {
             setTotalRecords(totalRecords);
@@ -125,35 +120,40 @@ export const Table = <TData extends RowObject>({
     }, [onFetch, hasFetch, page, pageSize, sort]);
 
     useEffect(() => {
-        if (hasStaticData) {
-            const sorted = [..._data].sort((rowA, rowB) => {
-                const _sort = [...sort];
-                let sortResult = 0;
-                let s: SortObject<TData> | undefined = undefined;
-                do {
-                    s = _sort.shift();
-                    if (s !== undefined) {
-                        const accessor = s.accessor;
-                        const valueA = rowA[accessor];
-                        const valueB = rowB[accessor];
-                        const comparatorFn = columns.find((col) => col.accessor === accessor)?.compare ?? baseCompareFn;
+        const abortController = new AbortController();
+        (async () => {
+            if (hasStaticData) {
+                const sorted = [..._data].sort((rowA, rowB) => {
+                    const _sort = [...sort];
+                    let sortResult = 0;
+                    let s: SortObject<TData> | undefined = undefined;
+                    do {
+                        s = _sort.shift();
+                        if (s !== undefined) {
+                            const accessor = s.accessor;
+                            const valueA = rowA[accessor];
+                            const valueB = rowB[accessor];
+                            const comparatorFn = columns.find((col) => col.accessor === accessor)?.compare ?? baseCompareFn;
 
-                        if (s.direction === 'asc') {
-                            sortResult = comparatorFn(valueA, valueB);
-                        } else {
-                            sortResult = comparatorFn(valueB, valueA);
+                            if (s.direction === 'asc') {
+                                sortResult = comparatorFn(valueA, valueB);
+                            } else {
+                                sortResult = comparatorFn(valueB, valueA);
+                            }
                         }
-                    }
-                } while (sortResult === 0 && s !== undefined);
-                return sortResult;
-            });
-            onSetData(sorted);
-        }
-    }, [_data, columns, hasStaticData, sort]);
+                    } while (sortResult === 0 && s !== undefined);
+                    return sortResult;
+                });
+                if (!abortController.signal.aborted) {
+                    onSetData(sorted);
+                }
+            }
+        })();
 
-    useEffect(() => {
-        setPageSize(_pageSize);
-    }, [_pageSize]);
+        return () => {
+            abortController.abort();
+        };
+    }, [_data, columns, hasStaticData, sort]);
 
     return (
         <div className='w-full'>

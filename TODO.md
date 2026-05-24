@@ -6,12 +6,12 @@ List of components to develop
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
-    - [ ] Date
-        - [ ] Support for picker: date, date + time
-        - [ ] Option to enter value manually
-        - [ ] Format via props
-        - [ ] Returns format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
-        - [ ] Returns "UNKNOWN" on invalid input
+    - [x] Date
+        - [x] Support for picker: date, date + time
+        - [x] Option to enter value manually
+        - [x] Format via props
+        - [x] Returns format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+        - [x] Returns "UNKNOWN" on invalid input
     - [x] File
         - [x] Single / Multi-select
         - [x] onChange?: if defined, calls with file list after files are selected
@@ -21,8 +21,8 @@ List of components to develop
     - [x] Select
         - [x] Options (possible subcategories)
         - [x] Single / Multi-select
-    - [ ] Switch
-        - [ ] Like a toggle for boolean values, allow on / off state
+    - [x] Switch
+        - [x] Like a toggle for boolean values, allow on / off state
     - [x] Textarea
         - [x] Optional max-length and visual counter at bottom right
 - [ ] GENERAL (Different interactive elements not directly linked to navigation/form/etc)

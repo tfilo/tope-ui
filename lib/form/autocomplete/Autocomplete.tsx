@@ -258,13 +258,24 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     /** Handle external value changes */
     useEffect(() => {
-        if (value === null || value === undefined || (typeof value === 'string' && isBlank(value))) {
-            onValueChange([]);
-        } else if (Array.isArray(value)) {
-            onValueChange(value.filter((v) => isNotBlank(v)).map((v) => v.trim()));
-        } else {
-            onValueChange([value.trim()]);
-        }
+        const abortController = new AbortController();
+        (async () => {
+            const newValue: string[] = [];
+            if (value === null || value === undefined || (typeof value === 'string' && isBlank(value))) {
+                // keep newValue empty
+            } else if (Array.isArray(value)) {
+                newValue.push(...value.filter((v) => isNotBlank(v)).map((v) => v.trim()));
+            } else {
+                newValue.push(value.trim());
+            }
+            if (!abortController.signal.aborted) {
+                onValueChange(newValue);
+            }
+        })();
+
+        return () => {
+            abortController.abort();
+        };
     }, [value]);
 
     /** Trigger search when display value changes */
@@ -287,9 +298,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     }, [isOpen]);
 
     useEffect(() => {
-        if (disabled) {
-            handleOptionsClose();
-        }
+        (async () => {
+            if (disabled) {
+                handleOptionsClose();
+            }
+        })();
     }, [disabled]);
 
     const hasOptions = options.length > 0;

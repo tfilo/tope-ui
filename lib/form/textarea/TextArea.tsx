@@ -1,4 +1,4 @@
-import React, { useEffect, useEffectEvent, useId, useState, type ChangeEvent } from 'react';
+import React, { useId, type ChangeEvent } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import { isNotBlank } from '../../utils/string-utils';
 import type { TextAreaProps } from './TextArea.types';
@@ -16,32 +16,17 @@ const theme = {
  */
 export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onChange, value, ...props }) => {
     const _id = useId();
-    const [count, setCount] = useState(0);
     const textareaId = id || `textarea-${_id}`;
     const hasMaxLenght = props.maxLength !== undefined;
     const hasError = isNotBlank(error);
+
+    const count = value ? String(value).length : 0;
 
     const handleOnChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         if (onChange !== undefined && typeof onChange === 'function') {
             onChange(e);
         }
-        setCount(e.currentTarget.value.length);
     };
-
-    const onUpdateCount = useEffectEvent((length: number) => {
-        setCount(length);
-    });
-
-    useEffect(() => {
-        if (value !== undefined || value !== null) {
-            if (typeof value === 'number') {
-                onUpdateCount(String(value).length);
-            }
-            if (typeof value === 'string') {
-                onUpdateCount(value.length);
-            }
-        }
-    }, [value]);
 
     return (
         <ElementWrapper

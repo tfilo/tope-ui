@@ -50,23 +50,13 @@ const Modal: React.FC<ModalProps> = ({
         if (!dialog) return;
 
         if (openModal) {
+            if (dialog.open) return; // Prevent opening if already open
             dialog.showModal();
         } else {
+            if (!dialog.open) return; // Prevent closing if already closed
             dialog.close();
         }
     }, [openModal]);
-
-    /** This handler catches the ESC press and backdrop click */
-    const handleOnCancel = async (event: React.SyntheticEvent) => {
-        event.preventDefault(); // Prevent the native close to control it via React
-        if (onClose) {
-            try {
-                await onClose(false);
-            } catch (e) {
-                console.error(e);
-            }
-        }
-    };
 
     const onCloseHandler = async (confirm: boolean) => {
         if (onClose) {
@@ -76,6 +66,12 @@ const Modal: React.FC<ModalProps> = ({
                 console.error(e);
             }
         }
+    };
+
+    /** This handler catches the ESC press and backdrop click */
+    const handleOnCancel = async (event: React.SyntheticEvent) => {
+        event.preventDefault(); // Prevent the native close to control it via React
+        await onCloseHandler(false);
     };
 
     return (

@@ -45,3 +45,9 @@
     bottom: calc(anchor(top) + 4px);
     top: auto;
 }
+
+dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}

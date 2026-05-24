@@ -42,10 +42,10 @@ List of components to develop
     - [x] List
         - [x] Renders a bulleted list
 - [ ] OVERLAYS
-    - [ ] Modal
-        - [ ] Props: Title (string), Body (ReactNode)
-        - [ ] Footer: onConfirm (required), onCancel? (optional)
-        - [ ] Size: Normal / Wide
+    - [x] Modal
+        - [x] Props: Title (string), Body (ReactNode)
+        - [x] Footer: onConfirm (required), onCancel? (optional)
+        - [x] Size: Normal / Wide
 - [ ] LAYOUT
     - [x] Header
         - [x] Right: profile button (optional) and logout

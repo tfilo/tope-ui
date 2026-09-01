@@ -149,7 +149,7 @@ const fetchMethod = async (page: number, pageSize: number, sort: SortObject<Data
                   let sortResult = 0;
                   let s: SortObject<DataObject> | undefined;
                   do {
-                      s = _sort.shift();
+                      const s = _sort.shift();
                       if (s) {
                           const valueA = `${rowA[s.accessor]}`;
                           const valueB = `${rowB[s.accessor]}`;

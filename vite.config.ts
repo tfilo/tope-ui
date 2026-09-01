@@ -6,6 +6,10 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pkg from './package.json' with { type: 'json' };
+
+// Extract dependency names from package.json
+const externalDependencies = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})];
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,7 +27,7 @@ export default defineConfig({
         rollupOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library
-            external: ['react'],
+            external: externalDependencies.map((dep) => new RegExp(`^${dep}(/.*)?$`)),
             output: {
                 // Provide global variables to use in the UMD build
                 // for externalized deps

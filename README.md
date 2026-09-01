@@ -63,9 +63,11 @@ npm run test-storybook
 ### Form
 
 - **Autocomplete**
+- **DateTimeInput**
 - **FileInput**
 - **Input**
 - **Select**
+- **Switch**
 - **TextArea**
 - **ElementWrapper**
 
@@ -74,10 +76,8 @@ npm run test-storybook
 - **Button**
 - **Dropdown**
 - **List**
+- **Modal**
 - **Table**
-
-### Visual
-
 - **Tag**
 
 ### Layout
@@ -91,6 +91,15 @@ npm run test-storybook
 - **Page**
 - **Section**
 
+### Utils
+
+#### String utils
+- **isEmpty**
+- **isNotEmpty**
+- **isBlank**
+- **isNotBlank**
+- **sb** - convert boolean to string 'true' | 'false'
+
 ## Styles
 
 The library builds a bundled stylesheet. Consumers can import:
@@ -100,4 +109,4 @@ The library builds a bundled stylesheet. Consumers can import:
 
 ## Localization
 
-Library provides default localization for "hardcoded" values. You can provide your own by calling setLocalization methods that will update original object holding locales.
+Library provides default localization with hardcoded values. You can provide your own by calling setLocalization methods that will update original object holding locales.

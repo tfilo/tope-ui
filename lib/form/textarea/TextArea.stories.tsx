@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn } from 'storybook/test';
 
 import { TextArea } from './TextArea';
+import React from 'react';
 
 const meta = {
     title: 'Form/TextArea',
@@ -35,6 +36,16 @@ export const WithMaxLength: Story = {
         await expect(canvas.getByRole('textbox').nextSibling).toHaveTextContent('0/160');
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
         await expect(canvas.getByRole('textbox').nextSibling).toHaveTextContent('17/160');
+    },
+    render: (args) => {
+        const [value, setValue] = React.useState('');
+        return (
+            <TextArea
+                {...args}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+            />
+        );
     },
     args: {
         label: 'Some basic textarea',

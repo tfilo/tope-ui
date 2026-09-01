@@ -126,8 +126,9 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                 const sorted = [..._data].sort((rowA, rowB) => {
                     const _sort = [...sort];
                     let sortResult = 0;
+                    let s: SortObject<TData> | undefined;
                     do {
-                        const s: SortObject<TData> | undefined = _sort.shift();
+                        s = _sort.shift();
                         if (s !== undefined) {
                             const accessor = s.accessor;
                             const valueA = rowA[accessor];

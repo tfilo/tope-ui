@@ -20,7 +20,7 @@ import {
     subMonths
 } from 'date-fns';
 import { localization } from '../../utils/constants';
-import type { WeekDay } from './WeekDay';
+import { WeekDay } from './WeekDay';
 
 const isoDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
 const isoDateFormat = 'yyyy-MM-dd';

@@ -109,4 +109,4 @@ The library builds a bundled stylesheet. Consumers can import:
 
 ## Localization
 
-Library provides default localization for "hardcoded" values. You can provide your own by calling setLocalization methods that will update original object holding locales.
+Library provides default localization with hardcoded values. You can provide your own by calling setLocalization methods that will update original object holding locales.

@@ -18,8 +18,7 @@ type ColumnCell<TData extends RowObject, TAccessor extends keyof TData> = {
 };
 
 type ColumnCellOrFormater<TData extends RowObject, TAccessor extends keyof TData> =
-    | ColumnCell<TData, TAccessor>
-    | ColumnFormatter<TData, TAccessor>;
+    ColumnCell<TData, TAccessor> | ColumnFormatter<TData, TAccessor>;
 
 type TableData<TData extends RowObject> = {
     /** Data is an array of objects where keys are strings and values can be of any type */

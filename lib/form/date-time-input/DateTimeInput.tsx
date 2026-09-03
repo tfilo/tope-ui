@@ -20,21 +20,12 @@ import {
     subMonths
 } from 'date-fns';
 import { localization } from '../../utils/constants';
+import { WeekDay } from './WeekDay';
 
 const isoDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
 const isoDateFormat = 'yyyy-MM-dd';
 const minYear = 1900;
 const maxYear = 2100;
-
-export const WeekDay = {
-    Sunday: 0,
-    Monday: 1,
-    Tuesday: 2,
-    Wednesday: 3,
-    Thursday: 4,
-    Friday: 5,
-    Saturday: 6
-} as const;
 
 export type WeekDayType = (typeof WeekDay)[keyof typeof WeekDay];
 

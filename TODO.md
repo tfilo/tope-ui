@@ -2,80 +2,112 @@
 
 List of components to develop
 
-- [ ] FORM (compatible with Tanstack form)
+- [ ] FORM
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
+        - [ ] Review
     - [x] Date
         - [x] Support for picker: date, date + time
         - [x] Option to enter value manually
         - [x] Format via props
         - [x] Returns format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
         - [x] Returns "UNKNOWN" on invalid input
+        - [ ] Review
     - [x] File
         - [x] Single / Multi-select
         - [x] onChange?: if defined, calls with file list after files are selected
+        - [ ] Review
     - [x] Input
         - [x] ActionStart: one or more elements (e.g., Button with icon)
         - [x] ActionEnd: one or more elements (e.g., Button, Dropdown)
+        - [ ] Review
     - [x] Select
         - [x] Options (possible subcategories)
         - [x] Single / Multi-select
+        - [ ] Refactor to same style as Autocomplete
+        - [ ] Review
     - [x] Switch
         - [x] Like a toggle for boolean values, allow on / off state
+        - [ ] Review
     - [x] Textarea
         - [x] Optional max-length and visual counter at bottom right
+        - [ ] Review
 - [ ] GENERAL (Different interactive elements not directly linked to navigation/form/etc)
     - [x] Button
         - [x] Support elements: `<button>`, `<a>`, `<Link>`
         - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
         - [x] Variants: Text, Icon + Text, Icon
+        - [ ] Review
     - [x] Dropdown
         - [x] Options (possible icons)
+        - [ ] Review
     - [x] Tag
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
         - [x] onClick?: reacts on hover and calls onClick on click
+        - [ ] Review
     - [x] Table
         - [x] Support with/without pagination
         - [x] Sorting for each column
+        - [ ] Review
     - [x] List
         - [x] Renders a bulleted list
+        - [ ] Review
 - [ ] OVERLAYS
     - [x] Modal
         - [x] Props: Title (string), Body (ReactNode)
         - [x] Footer: onConfirm (required), onCancel? (optional)
         - [x] Size: Normal / Wide
+        - [ ] Review
 - [ ] LAYOUT
     - [x] Header
         - [x] Right: profile button (optional) and logout
         - [x] Left: navigation buttons / dropdowns with icon (on mobile/tablet icons only)
+        - [ ] Review
     - [x] Content
         - [x] Centered app content, max-width 1280px
+        - [ ] Review
     - [x] Page
         - [x] Contains title in form of h1 (optionally as h2 - h6) and children (ReactNode)
+        - [ ] Review
     - [x] Section
         - [x] Contains title in form of h2 (optionally as h3 - h6) and children (ReactNode)
         - [x] Optional border
+        - [ ] Review
     - [x] Grid
         - [x] 4 columns on desktop, 2 on tablet, 1 on mobile
         - [x] 2 columns on desktop, 2 on tablet, 1 on mobile
         - [x] 1 columns on desktop, 1 on tablet, 1 on mobile
         - [x] Usable as direct child of Page or Section
+        - [ ] Review
     - [x] Column
         - [x] Will fill single column of grid
         - [x] Optionaly span to 2,3,4 columns on desktop or 2 columns on tablet
         - [x] Will be designed to contain Input, Select, Autocomplete, TextArea etc. as direct children
+        - [ ] Review
     - [x] Flex
         - [x] Will be used to primarily wrap buttons, it will take full width of parent element and will do flex layout with children with specified orientation and gap
         - [x] It will change to column direction on mobile screen automaticaly
+        - [ ] Review
     - [x] Card
         - [x] Will fill single column of grid
         - [x] Has image as background over full size of card
         - [x] Has optional description showed on bottom of card as transparent overly
         - [x] Has optional onClick, handle clic on Card anywhere except action in top right corner
         - [x] Has optional onAction, handle click on action icon in top right corner (configurable icon)
+        - [ ] Review
 - [x] LOCALIZATION
-    - [-] Add localization option to all components that uses some hardcoded internal texts
+    - [x] Add localization option to all components that uses some hardcoded internal texts
+    - [ ] Review if all text are available for localization
+- [ ] INTEGRATION TO TANSTACK
+    - [ ] Read documentation how to integrate components with tanstack form
+    - [ ] Integrate Autocomplete
+    - [ ] Integrate Date
+    - [ ] Integrate File
+    - [ ] Integrate Input
+    - [ ] Integrate Select
+    - [ ] Integrate Switch
+    - [ ] Integrate Textarea
 - [x] PUBLISH
     - [x] Create github action to publish to NPM

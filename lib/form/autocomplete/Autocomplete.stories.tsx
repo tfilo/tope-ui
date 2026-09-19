@@ -107,7 +107,7 @@ export const Basic: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -203,7 +203,7 @@ export const Multiple: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -276,7 +276,7 @@ export const Disabled: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -322,7 +322,7 @@ export const Required: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -370,7 +370,7 @@ export const Error: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -401,7 +401,7 @@ export const AutocompleteOnly: Story = {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 5));
+                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay

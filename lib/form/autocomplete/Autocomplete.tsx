@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/16/solid';
+import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
 import { isBlank, isNotBlank } from '../../utils/string-utils';
 import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
@@ -172,9 +172,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             }
         } else {
             if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
-                return;
+                // unselect option
+                setSelectedOption([]);
+            } else if (option) {
+                setSelectedOption(option ? [option] : []);
             }
-            setSelectedOption(option ? [option] : []);
         }
         setDisplayValue('');
         setOptions([]);
@@ -389,10 +391,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 <button
                                     onClick={() => handleSelect(o)}
                                     onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                    className='focus:outline-none cursor-pointer disabled:cursor-default'
+                                    className='focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between'
                                     disabled={o.disabled}
                                 >
                                     {o.label}
+                                    {selectedOption.some((so) => so.value === o.value) && <CheckIcon className='w-xl fill-primary' />}
                                 </button>
                             </li>
                         ))}

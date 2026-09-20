@@ -103,11 +103,16 @@ export const Basic: Story = {
         name: 'basic',
         onChange: fn(),
         value: null,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -199,11 +204,16 @@ export const Multiple: Story = {
         name: 'basic',
         onChange: fn(),
         value: null,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -272,11 +282,16 @@ export const Disabled: Story = {
         onChange: fn(),
         value: null,
         disabled: true,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -318,11 +333,16 @@ export const Required: Story = {
         required: true,
         onChange: fn(),
         value: null,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -366,11 +386,16 @@ export const Error: Story = {
         error: 'This field is required!',
         onChange: fn(),
         value: null,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay
@@ -397,11 +422,16 @@ export const AutocompleteOnly: Story = {
         'aria-label': 'Labelless autocomplete',
         onChange: fn(),
         value: null,
-        onSearch: async (query: string) => {
+        onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
                     () => {
-                        resolve(options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase())).slice(0, 10));
+                        const filteredOptions = options.filter((option) => option.label.toLowerCase().includes(query.toLowerCase()));
+                        resolve({
+                            options: filteredOptions.slice(page * pageSize, page * pageSize + pageSize),
+                            hasNextPage: filteredOptions.length > (page + 1) * pageSize,
+                            page: page
+                        });
                     },
                     Math.round(Math.random() * 1000) + 500
                 ); // Simulate network delay

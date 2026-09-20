@@ -4,7 +4,7 @@ import { isBlank, isNotBlank } from '../../utils/string-utils';
 import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
-import type { AutocompleteProps } from './Autocomplete.types';
+import type { AutocompleteProps, OnSearchResult } from './Autocomplete.types';
 import { localization } from '../../utils/constants';
 
 const theme = {
@@ -27,17 +27,20 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     onFetch,
     multiple = false,
     disabled = false,
+    pageSize = 10,
     ...props
 }) => {
     const _id = useId();
-    const globalAbortController = useRef<AbortController | null>(null);
+    const searchAbortController = useRef<AbortController | null>(null);
+    const nextPageAbortController = useRef<AbortController | null>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const optionsRef = useRef<HTMLUListElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
     const [isSearching, setIsSearching] = useState(false);
+    const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
-    const [options, setOptions] = useState<Option[]>([]);
+    const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
     const [isInitialized, setIsInitialized] = useState(false);
 
     const [selectedOption, setSelectedOption] = useState<Option[]>([]);
@@ -52,12 +55,12 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const handleRemoveOption = (option: Option) => {
         setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
         setDisplayValue('');
-        setOptions([]);
+        setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
     const handleOptionsClose = () => {
         setIsOpen(false);
-        setOptions([]);
+        setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
     const handleOptionsOpen = async () => {
@@ -81,8 +84,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             await handleOptionsOpen();
         } else if (e.key === 'Enter') {
             e.preventDefault();
-            if (options.length > 0 && isNotBlank(displayValue)) {
-                handleSelect(options[0]);
+            if (options.options.length > 0 && isNotBlank(displayValue)) {
+                handleSelect(options.options[0]);
             } else {
                 handleSelect(null);
             }
@@ -99,7 +102,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             let nextSibling: HTMLElement = e.currentTarget;
             do {
                 const next = (nextSibling.parentElement?.nextElementSibling as HTMLElement | null | undefined) ?? null;
-                if (next) {
+                if (next && next.firstElementChild?.tagName === 'BUTTON') {
                     nextSibling = next.firstElementChild as HTMLElement;
                 } else {
                     break;
@@ -112,7 +115,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             let previousSibling: HTMLElement | null = e.currentTarget;
             do {
                 const prev = (previousSibling.parentElement?.previousElementSibling as HTMLElement | null | undefined) ?? null;
-                if (prev) {
+                if (prev && prev.firstElementChild?.tagName === 'BUTTON') {
                     previousSibling = prev.firstElementChild as HTMLElement;
                 } else {
                     previousSibling = null;
@@ -179,7 +182,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             }
         }
         setDisplayValue('');
-        setOptions([]);
+        setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
     const handleSearch = async (query: string, force: boolean = false) => {
@@ -188,13 +191,18 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             return;
         }
         const controller = new AbortController();
-        if (globalAbortController.current) {
-            globalAbortController.current.abort();
+        if (searchAbortController.current) {
+            searchAbortController.current.abort();
         }
-        globalAbortController.current = controller;
+        searchAbortController.current = controller;
+        if (nextPageAbortController.current) {
+            nextPageAbortController.current.abort();
+            nextPageAbortController.current = null;
+            setIsLoadingNextPage(false);
+        }
         try {
             setIsSearching(true);
-            const options = await onSearch(query, controller.signal);
+            const options = await onSearch(query, 0, pageSize, controller.signal);
             if (!controller.signal.aborted) {
                 setOptions(options);
             }
@@ -228,7 +236,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             }
         }
 
-        setOptions([]);
+        setOptions({ hasNextPage: false, page: 0, options: [] });
         setDisplayValue('');
         setIsInitialized(true);
     });
@@ -257,6 +265,36 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             }
         }
     });
+
+    const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+        const atBottom = scrollTop + clientHeight >= scrollHeight - 8;
+
+        if (atBottom && !isSearching && !isLoadingNextPage && options.hasNextPage) {
+            setIsLoadingNextPage(true);
+            const controller = new AbortController();
+            if (nextPageAbortController.current) {
+                nextPageAbortController.current.abort();
+            }
+            nextPageAbortController.current = controller;
+            try {
+                const nextOptions = await onSearch(displayValue, options.page + 1, pageSize, controller.signal);
+                if (!controller.signal.aborted) {
+                    setOptions((oldOptions) => {
+                        return {
+                            hasNextPage: nextOptions.hasNextPage,
+                            page: nextOptions.page,
+                            options: [...oldOptions.options, ...nextOptions.options]
+                        };
+                    });
+                }
+            } finally {
+                if (!controller.signal.aborted) {
+                    setIsLoadingNextPage(false);
+                }
+            }
+        }
+    };
 
     /** Handle external value changes */
     useEffect(() => {
@@ -307,7 +345,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         })();
     }, [disabled]);
 
-    const hasOptions = options.length > 0;
+    const hasOptions = options.options.length > 0;
 
     return (
         <ElementWrapper
@@ -328,6 +366,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             label={option.label}
                             disabled={disabled}
                             onRemove={() => handleRemoveOption(option)}
+                            variant='outline'
                         />
                     ))}
                     <div className='flex flex-1'>
@@ -359,22 +398,16 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     ref={popoverRef}
                     className='absolute border rounded-sm p-sm tope-ui-autocomplete'
                     style={{
-                        positionAnchor: `--autocomplete_${_id}`
+                        positionAnchor: `--autocomplete_${_id}`,
+                        maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
                     }}
+                    onScroll={handleScroll}
                 >
                     <ul
                         ref={optionsRef}
                         id={`${autocompleteId}-options`}
                         className='flex flex-col'
                     >
-                        {isSearching && (
-                            <li
-                                key='___loading___'
-                                className={`text-disabled py-md px-sm ${hasOptions ? 'border-b border-light' : ''}`}
-                            >
-                                {localization.loading}
-                            </li>
-                        )}
                         {!isSearching && !hasOptions && (
                             <li
                                 key='___no_options___'
@@ -383,7 +416,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 {localization.noOptions}
                             </li>
                         )}
-                        {options.map((o) => (
+                        {options.options.map((o) => (
                             <li
                                 key={o.value}
                                 className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
@@ -399,6 +432,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 </button>
                             </li>
                         ))}
+                        {(isSearching || isLoadingNextPage) && (
+                            <li
+                                key='___loading___'
+                                className={'text-disabled py-md px-sm'}
+                            >
+                                {localization.loading}
+                            </li>
+                        )}
                     </ul>
                 </div>
             </div>

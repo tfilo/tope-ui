@@ -22,6 +22,7 @@ import {
 import { localization } from '../../utils/constants';
 import { WeekDay } from './WeekDay';
 
+const unknownDate = 'UNKNOWN';
 const isoDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
 const isoDateFormat = 'yyyy-MM-dd';
 const minYear = 1900;
@@ -95,7 +96,7 @@ const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormat
     const parsedDate = parse(dateTime, inputFormatPattern, new Date()); // convert string into Date object according formatPattern
     if (!isValid(parsedDate) || getYear(parsedDate) < minYear || getYear(parsedDate) > maxYear) {
         // 'Invalid format or year out of the range');
-        return 'UNKNOWN';
+        return unknownDate;
     } else {
         return hasTime ? format(parsedDate, isoDateTimeFormat) : format(parsedDate, isoDateFormat);
     }
@@ -116,7 +117,7 @@ const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormat
  * formatFromISO(null, "dd.MM.yyyy");
  */
 const formatFromISO = (dateTime: string | null, inputFormatPattern: string): string => {
-    if (!dateTime || dateTime.trim() === 'UNKNOWN') return '';
+    if (!dateTime || dateTime.trim() === unknownDate) return '';
     try {
         // Convert ISO string to Date object first to ensure compatibility with date-fns format()
         const date = parseISO(dateTime);
@@ -167,43 +168,39 @@ const formatDate = (
     }
 };
 
-// const theme = {
-//     action: {
-//         button: 'min-w-[30px] min-h-[30px]',
-//         icon: 'w-xl',
-//         iconWrapper: 'min-w-[30px] min-h-[30px] flex justify-center',
-//         rightWrapper: 'flex flex-row border-l relative'
-//     },
-//     calendar: {
-//         wrapper: 'flex absolute border rounded-sm p-md tope-ui-calendar',
-//         base: 'flex-1 flex flex-col',
-//         btn: '!w-full !h-[24px]',
-//         btns: 'mb-md flex w-full flex-row gap-xl',
-//         dayBtn: '!w-[40px] !h-[24px]',
-//         headTh: 'w-[40px] h-[24px]',
-//         headTr: 'flex flex-row',
-//         hight: 'h-[24px]',
-//         iconBtn: 'py-md !w-[50px]',
-//         list: 'visible h-[200px] w-[80px] overflow-auto p-sm',
-//         monthYear: 'flex gap-md',
-//         monthYearBtn: 'py-md flex-1',
-//         noBorder: 'border-none',
-//         row: 'flex flex-row text-center',
-//         table: 'h-[200px]'
-//     },
-//     fullWidth: 'w-full',
-//     input: 'flex-1 focus:outline-none px-md min-h-[30px]',
-//     month: 'flex-1 grid grid-row-4 h-[200px] overflow-auto p-sm gap-md',
-//     year: 'flex-1 flex flex-col h-[200px] overflow-auto p-sm gap-md',
-//     paddingSm: 'p-sm',
-//     roundedSm: 'rounded-sm'
-// } as const;
+const theme = {
+    action: {
+        button: 'min-w-[30px] min-h-[30px]',
+        rightWrapper: 'relative flex flex-row border-l'
+    },
+    calendar: {
+        wrapper: 'tope-ui-calendar absolute rounded-sm border',
+        base: 'flex size-full flex-col',
+        btns: 'flex flex-row gap-xl border-b p-md',
+        btnPrev: 'min-w-[50px] min-h-[40px]',
+        btnMiddle: 'min-w-[50px] min-h-[40px] flex-1',
+        btnNext: 'min-w-[50px] min-h-[40px]',
+        years: 'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md',
+        yearBtn: 'w-full min-w-full min-h-[32px]',
+        months: 'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md',
+        monthBtn: 'flex-1',
+        days: 'm-md h-none flex-1 table-fixed border-collapse',
+        daysWrapper: 'flex flex-1 flex-row',
+        daysHeader: 'h-3xl max-h-3xl w-[14.2857%]',
+        daysColumn: 'h-3xl max-h-3xl w-[14.2857%] p-xs',
+        dayBtn: 'p-sm w-full! h-full!',
+        times: 'visible max-h-[184px] w-[80px] overflow-y-scroll border-l p-md',
+        timeBtn: 'border-none'
+    },
+    fullWidth: 'w-full',
+    flex: 'flex',
+    input: 'min-h-[30px] flex-1 px-md focus:outline-none'
+} as const;
 
-// const bgColor = {
-//     none: '',
-//     selected: 'bg-primary-light',
-//     today: 'bg-primary-extra-light'
-// } as const;
+const bgColor = {
+    selected: 'bg-primary-light!',
+    today: 'border border-primary-light!'
+} as const;
 
 /** Date and DateTime input component that renders as HTMLInputElement element wrapped by parent div containing optional label and error message.
  * DateTimeInput - A date and time picker component.
@@ -523,11 +520,11 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 onChange(res);
             } else {
                 // Date is invalid (parsedDate is invalid, or year is out of the range)
-                onChange('UNKNOWN');
+                onChange(unknownDate);
             }
         } else {
             // Date is invalid (user is still typing)
-            onChange('UNKNOWN');
+            onChange(unknownDate);
         }
     };
 
@@ -736,7 +733,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     if (value !== prevValue) {
         setPrevValue(value);
-        if (value !== 'UNKNOWN') {
+        if (value !== unknownDate) {
             setInputValue(formatFromISO(value, inputFormatPattern));
         }
     }
@@ -751,7 +748,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 elementId={inputId}
             >
                 <input
-                    className={'min-h-[30px] flex-1 px-md focus:outline-none'}
+                    className={theme.input}
                     {...props}
                     type='text'
                     id={inputId}
@@ -759,7 +756,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     value={inputValue}
                     onChange={handleInputChange}
                 />
-                <div className={'relative flex flex-row border-l'}>
+                <div className={theme.action.rightWrapper}>
                     <Button
                         variant='transparent'
                         showChildren={false}
@@ -775,7 +772,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                             }
                         }}
                         disabled={props.disabled}
-                        additionalClassName={'min-w-[30px] min-h-[30px]'}
+                        additionalClassName={theme.action.button}
                         style={{ anchorName: `--calendar_${baseId}` }}
                     >
                         {inputIconTitle ?? (isOpen ? localization.dateTimeInput.closeCalendar : localization.dateTimeInput.openCalendar)}
@@ -783,7 +780,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 </div>
             </ElementWrapper>
             <div
-                className={'tope-ui-calendar absolute rounded-sm border'}
+                className={theme.calendar.wrapper}
                 popover='manual'
                 style={{
                     positionAnchor: `--calendar_${baseId}`,
@@ -792,15 +789,15 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 }}
                 ref={calendarRef}
             >
-                <div className={'flex size-full flex-col'}>
+                <div className={theme.calendar.base}>
                     {pickerType === 'day' && (
-                        <div className={'flex flex-row gap-xl border-b p-md'}>
+                        <div className={theme.calendar.btns}>
                             <Button
                                 variant='outline'
                                 showChildren={false}
                                 icon={ChevronLeftIcon}
                                 onClick={() => changeMonthHandler(MonthDirection.PREVIOUS)}
-                                additionalClassName='min-w-[50px] min-h-[40px]'
+                                additionalClassName={theme.calendar.btnPrev}
                             >
                                 {localization.dateTimeInput.previousMonth}
                             </Button>
@@ -818,7 +815,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                         }
                                     })
                                 }
-                                additionalClassName='min-w-[50px] min-h-[40px] flex-1'
+                                additionalClassName={theme.calendar.btnMiddle}
                             >
                                 {selectedMonth === null
                                     ? `${localization.dateTimeInput.months[getMonth(new Date())]} `
@@ -830,20 +827,20 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                 showChildren={false}
                                 icon={ChevronRightIcon}
                                 onClick={() => changeMonthHandler(MonthDirection.NEXT)}
-                                additionalClassName='min-w-[50px] min-h-[40px]'
+                                additionalClassName={theme.calendar.btnNext}
                             >
                                 {localization.dateTimeInput.nextMonth}
                             </Button>
                         </div>
                     )}
                     {pickerType !== 'day' && (
-                        <div className={'flex flex-row gap-xl border-b p-md'}>
+                        <div className={theme.calendar.btns}>
                             <Button
                                 variant='outline'
                                 showChildren={false}
                                 icon={ChevronLeftIcon}
                                 onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) - 1)}
-                                additionalClassName='min-w-[50px] min-h-[40px]'
+                                additionalClassName={theme.calendar.btnPrev}
                             >
                                 {localization.dateTimeInput.previousYear}
                             </Button>
@@ -861,7 +858,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                         }
                                     })
                                 }
-                                additionalClassName='min-w-[50px] min-h-[40px] flex-1'
+                                additionalClassName={theme.calendar.btnMiddle}
                             >
                                 {selectedYear ?? getYear(new Date())}
                             </Button>
@@ -870,27 +867,27 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                 showChildren={false}
                                 icon={ChevronRightIcon}
                                 onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) + 1)}
-                                additionalClassName='min-w-[50px] min-h-[40px]'
+                                additionalClassName={theme.calendar.btnNext}
                             >
                                 {localization.dateTimeInput.nextYear}
                             </Button>
                         </div>
                     )}
                     {pickerType === 'year' && (
-                        <ul className={'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md'}>
+                        <ul className={theme.calendar.years}>
                             {yearsRange.map((year) => {
                                 let yearBgColor = '';
                                 if (year === getYear(new Date())) {
-                                    yearBgColor = 'border border-primary-light!';
+                                    yearBgColor = bgColor.today;
                                 }
                                 if (year === selectedYear) {
-                                    yearBgColor = 'bg-primary-light!';
+                                    yearBgColor = bgColor.selected;
                                 }
 
                                 return (
                                     <li
                                         key={year}
-                                        className={'w-full'}
+                                        className={theme.fullWidth}
                                         ref={
                                             year === selectedYear || (selectedYear === null && year === getYear(new Date()))
                                                 ? activeYearRef
@@ -899,7 +896,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     >
                                         <Button
                                             variant='outline'
-                                            additionalClassName={`w-full min-w-full min-h-[32px] ${yearBgColor}`}
+                                            additionalClassName={theme.calendar.yearBtn + ' ' + yearBgColor}
                                             onClick={() => changeYearHandler(year)}
                                         >
                                             {year}
@@ -911,23 +908,23 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     )}
 
                     {pickerType === 'month' && (
-                        <ul className={'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md'}>
+                        <ul className={theme.calendar.months}>
                             {allMonths.map((month) => {
                                 let monthBgColor = '';
                                 if (month.val === getMonth(new Date()) && (selectedYear === getYear(new Date()) || selectedYear === null)) {
-                                    monthBgColor = 'border border-primary-light!    ';
+                                    monthBgColor = bgColor.today;
                                 }
                                 if (month.val === selectedMonth) {
-                                    monthBgColor = 'bg-primary-light!';
+                                    monthBgColor = bgColor.selected;
                                 }
                                 return (
                                     <li
                                         key={`${month.label}`}
-                                        className='flex'
+                                        className={theme.flex}
                                     >
                                         <Button
                                             variant='outline'
-                                            additionalClassName={`flex-1 ${monthBgColor}`}
+                                            additionalClassName={theme.calendar.monthBtn + ' ' + monthBgColor}
                                             onClick={() => {
                                                 changeMonthAndYearHandler(selectedYear ?? getYear(new Date()), month);
                                             }}
@@ -941,15 +938,15 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     )}
 
                     {pickerType === 'day' && (
-                        <div className='flex flex-1 flex-row'>
-                            <table className='m-md h-none flex-1 table-fixed border-collapse'>
+                        <div className={theme.calendar.daysWrapper}>
+                            <table className={theme.calendar.days}>
                                 <thead>
                                     <tr>
                                         {days.map((d) => {
                                             return (
                                                 <th
                                                     key={d}
-                                                    className='h-3xl max-h-3xl w-[14.2857%]'
+                                                    className={theme.calendar.daysHeader}
                                                     aria-label={d}
                                                 >
                                                     {d.substring(0, 2)}
@@ -969,19 +966,19 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                         ((selectedMonth === getMonth(new Date()) && selectedYear === getYear(new Date())) ||
                                                             (selectedMonth === null && selectedYear === null))
                                                     ) {
-                                                        dayBgColor = 'border border-primary-light!';
+                                                        dayBgColor = bgColor.today;
                                                     }
                                                     if (d.date === selectedDate && d.day !== null) {
-                                                        dayBgColor = 'bg-primary-light!';
+                                                        dayBgColor = bgColor.selected;
                                                     }
                                                     return (
                                                         <td
                                                             key={`day-${d.date}-${d.day}`}
-                                                            className='h-3xl max-h-3xl w-[14.2857%] p-xs'
+                                                            className={theme.calendar.daysColumn}
                                                         >
                                                             <Button
                                                                 variant='outline'
-                                                                additionalClassName={`${dayBgColor} p-sm w-full! h-full!`.trim()}
+                                                                additionalClassName={dayBgColor + ' ' + theme.calendar.dayBtn}
                                                                 onClick={() => changeDayHandler(d)}
                                                                 disabled={d.day === null}
                                                             >
@@ -996,7 +993,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                 </tbody>
                             </table>
                             {hasTime && (
-                                <ul className={'visible max-h-[184px] w-[80px] overflow-y-scroll border-l p-md'}>
+                                <ul className={theme.calendar.times}>
                                     {timeSlots.map((ts) => {
                                         const isSelected = ts.minute === selectedMinutes;
                                         const isNearestSlot = isSelected || ts.minute === getNearestSlot();
@@ -1009,7 +1006,9 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                 <Button
                                                     variant='outline'
                                                     showChildren={true}
-                                                    additionalClassName={`${isSelected ? 'bg-primary-light!' : ''} border-none`}
+                                                    additionalClassName={
+                                                        (isSelected ? 'bg-primary-light!' : '') + ' ' + theme.calendar.timeBtn
+                                                    }
                                                     onClick={() => changeTimeHandler(ts.minute)}
                                                 >
                                                     {ts.label}

@@ -6,14 +6,14 @@ List of components to develop
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
-        - [ ] Review
+        - [x] Review
     - [x] Date
         - [x] Support for picker: date, date + time
         - [x] Option to enter value manually
         - [x] Format via props
         - [x] Returns format YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
         - [x] Returns "UNKNOWN" on invalid input
-        - [ ] Review
+        - [x] Review
     - [x] File
         - [x] Single / Multi-select
         - [x] onChange?: if defined, calls with file list after files are selected

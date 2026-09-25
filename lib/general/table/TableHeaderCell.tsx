@@ -37,9 +37,9 @@ export const TableHeaderCell: TableHeaderCellComponent = ({ col, sort, onSortCha
         <div className='flex gap-md'>
             <div className='flex-1'>{col.header}</div>
             {col.sortable && (
-                <div className='-my-md items-center flex gap-xs'>
+                <div className='-my-md flex items-center gap-xs'>
                     {isMultiSorted && (
-                        <span className='bg-primary-extra-light rounded-full px-md aspect-square flex items-center'>{sortIndex + 1}</span>
+                        <span className='flex aspect-square items-center rounded-full bg-primary-extra-light px-md'>{sortIndex + 1}</span>
                     )}
                     <Button
                         onClick={handleSort}

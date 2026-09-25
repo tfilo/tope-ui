@@ -1,5 +1,7 @@
 import type { InputHTMLAttributes } from 'react';
-import type { WeekDayType } from './DateTimeInput';
+import type { WeekDay } from './WeekDay';
+
+export type WeekDayType = (typeof WeekDay)[keyof typeof WeekDay];
 
 /** Represents a single day cell in the calendar grid. */
 export interface Day {

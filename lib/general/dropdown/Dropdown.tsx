@@ -25,25 +25,25 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                 id={popoverId}
                 ref={popoverRef}
                 popover='auto'
-                className='absolute border rounded-sm p-sm tope-ui-dropdown'
+                className='tope-ui-dropdown absolute rounded-sm border p-sm'
                 style={{
                     positionAnchor: `--dropdown_${baseId}`
                 }}
             >
-                <ul className='flex flex-col max-h-[min(200px,50vh)] w-full'>
+                <ul className='flex max-h-[min(200px,50vh)] w-full flex-col'>
                     {options.map((o) => {
                         const Icon = o.icon ?? null;
                         return (
                             <li
                                 key={o.label}
-                                className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
+                                className={`${o.disabled ? 'text-disabled' : 'has-focus-within:outline-2 has-hover:bg-secondary-extra-light'} rounded-sm px-sm py-md wrap-anywhere outline-primary focus:z-10`}
                             >
                                 <button
                                     onClick={(e) => {
                                         popoverRef.current?.hidePopover();
                                         o.onClick(e);
                                     }}
-                                    className='flex flex-row gap-sm focus:outline-none cursor-pointer disabled:cursor-default'
+                                    className='flex cursor-pointer flex-row gap-sm focus:outline-none disabled:cursor-default'
                                     disabled={o.disabled}
                                 >
                                     {Icon && <Icon className='w-xl fill-inherit' />}

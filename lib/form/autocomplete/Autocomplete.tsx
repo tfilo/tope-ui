@@ -11,7 +11,16 @@ const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
     inputWrapper: 'flex-1 flex flex-wrap',
     button: 'min-w-[30px] min-h-[30px] rounded-sm',
-    wrapper: 'w-full flex flex-col relative'
+    wrapper: 'w-full flex flex-col relative',
+    optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete',
+    options: 'flex flex-col',
+    option: {
+        noninteractive: 'text-disabled py-md px-sm',
+        interactive: (disabled: boolean = false) =>
+            `${disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`,
+        button: 'focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between',
+        buttonIcon: 'w-xl fill-primary'
+    }
 };
 
 /**
@@ -95,6 +104,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     };
 
+    // Handle key down events for open button, allows to navigate by arrows to options
+    const handleKeyDownOnOpenButton = async (e: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            await handleOptionsOpen();
+        }
+    };
+
     // Handle key down on options for navigation
     const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, option: Option) => {
         if (e.key === 'ArrowDown') {
@@ -153,7 +170,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Handle blur event to close dropdown
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         // If target is inside optionsRef, do not close
-        if (optionsRef.current && optionsRef.current.contains(e.relatedTarget as Node)) {
+        if (optionsRef.current?.contains(e.relatedTarget as Node)) {
             return;
         }
         handleOptionsClose();
@@ -167,20 +184,19 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         handleOptionsClose();
         if (multiple) {
-            if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
+            if (option && selectedOption.some((o) => o.value === option.value)) {
                 // unselect option
                 setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
             } else if (option) {
                 setSelectedOption([...selectedOption, option]);
             }
-        } else {
-            if (option && selectedOption.findIndex((o) => o.value === option.value) !== -1) {
-                // unselect option
-                setSelectedOption([]);
-            } else if (option) {
-                setSelectedOption(option ? [option] : []);
-            }
+        } else if (option && selectedOption.some((o) => o.value === option.value)) {
+            // unselect option
+            setSelectedOption([]);
+        } else if (option) {
+            setSelectedOption(option ? [option] : []);
         }
+
         setDisplayValue('');
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
@@ -225,8 +241,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 setIsFetching(true);
                 // Check if all newValues are already selected
                 const allSelected =
-                    newValues.every((v) => selectedOption.findIndex((o) => o.value === v) !== -1) &&
-                    newValues.length === selectedOption.length;
+                    newValues.every((v) => selectedOption.some((o) => o.value === v)) && newValues.length === selectedOption.length;
                 if (!allSelected) {
                     const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v)));
                     setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
@@ -248,15 +263,13 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     if (value !== null) {
                         (onChange as (value: string | null) => void)(null);
                     }
-                } else {
-                    if (value !== selectedOption[0].value) {
-                        (onChange as (value: string | null) => void)(selectedOption[0].value);
-                    }
+                } else if (value !== selectedOption[0].value) {
+                    (onChange as (value: string | null) => void)(selectedOption[0].value);
                 }
             } else {
                 const allSelected =
                     Array.isArray(value) &&
-                    value.every((v) => selectedOption.findIndex((o) => o.value === v) !== -1) &&
+                    value.every((v) => selectedOption.some((o) => o.value === v)) &&
                     value.length === selectedOption.length;
 
                 if (!allSelected) {
@@ -386,6 +399,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             showChildren={false}
                             icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
                             onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
+                            onKeyDown={handleKeyDownOnOpenButton}
                             disabled={disabled || isFetching}
                             additionalClassName={theme.button}
                         >
@@ -396,7 +410,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 <div
                     popover='manual'
                     ref={popoverRef}
-                    className='absolute border rounded-sm p-sm tope-ui-autocomplete'
+                    className={theme.optionsWrapper}
                     style={{
                         positionAnchor: `--autocomplete_${_id}`,
                         maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
@@ -406,12 +420,12 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     <ul
                         ref={optionsRef}
                         id={`${autocompleteId}-options`}
-                        className='flex flex-col'
+                        className={theme.options}
                     >
                         {!isSearching && !hasOptions && (
                             <li
                                 key='___no_options___'
-                                className='text-disabled py-md px-sm'
+                                className={theme.option.noninteractive}
                             >
                                 {localization.noOptions}
                             </li>
@@ -419,23 +433,23 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         {options.options.map((o) => (
                             <li
                                 key={o.value}
-                                className={`${o.disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`}
+                                className={theme.option.interactive(o.disabled)}
                             >
                                 <button
                                     onClick={() => handleSelect(o)}
                                     onKeyDown={(e) => handleOptionKeyDown(e, o)}
-                                    className='focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between'
+                                    className={theme.option.button}
                                     disabled={o.disabled}
                                 >
                                     {o.label}
-                                    {selectedOption.some((so) => so.value === o.value) && <CheckIcon className='w-xl fill-primary' />}
+                                    {selectedOption.some((so) => so.value === o.value) && <CheckIcon className={theme.option.buttonIcon} />}
                                 </button>
                             </li>
                         ))}
                         {(isSearching || isLoadingNextPage) && (
                             <li
                                 key='___loading___'
-                                className={'text-disabled py-md px-sm'}
+                                className={theme.option.noninteractive}
                             >
                                 {localization.loading}
                             </li>

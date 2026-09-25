@@ -4,17 +4,18 @@ import type { TagProps } from './Tag.types';
 import { localization } from '../../utils/constants';
 
 const theme = {
-    base: 'inline-flex items-center wrap-anywhere gap-sm border text-md font-medium cursor-default px-sm m-xs focus-within:outline-2 outline-offset-2 outline-primary disabled:cursor-not-allowed min-h-[26px]',
+    base: (variant: TagProps['variant']) =>
+        `group inline-flex items-center wrap-anywhere gap-sm border text-md font-medium cursor-default px-sm m-xs ${variant === 'outline' ? '' : 'focus-within:outline-2 outline-offset-2 outline-primary '}disabled:cursor-not-allowed min-h-[26px]`,
     variant: {
         primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark has-disabled:bg-primary-light text-white',
         secondary: 'bg-secondary border-transparent rounded-sm hover:bg-secondary-dark has-disabled:bg-secondary-light text-white',
         danger: 'bg-danger border-transparent rounded-sm hover:bg-danger-dark has-disabled:bg-danger-light text-white',
-        outline: 'bg-transparent rounded-sm hover:border-dark'
+        outline:
+            'bg-transparent rounded-sm hover:border-dark focus-within:bg-primary focus-within:hover:bg-primary-dark     focus-within:text-white focus-within:border-primary'
     },
     mainButton: (isClickable: boolean) => `outline-none disabled:cursor-default ${isClickable ? 'cursor-pointer' : ''}`,
-    removeButton: (variant: TagProps['variant']) =>
-        `cursor-pointer outline-none rounded-full focus:ring-2 ${variant !== 'outline' ? 'focus:ring-white' : 'focus:ring-primary'}`,
-    removeIcon: (variant: TagProps['variant']) => `w-xl h-xl ${variant !== 'outline' ? 'fill-white' : ''}`
+    removeButton: 'cursor-pointer outline-none rounded-full focus:ring-2 focus:ring-white',
+    removeIcon: (variant: TagProps['variant']) => `w-xl h-xl ${variant !== 'outline' ? 'fill-white' : 'group-focus-within:fill-white'}`
 } as const;
 
 export const Tag: React.FC<TagProps> = ({
@@ -23,7 +24,7 @@ export const Tag: React.FC<TagProps> = ({
     onClick,
     disabled,
     variant = 'primary',
-    className = [theme.base, theme.variant[variant]].join(' '),
+    className = [theme.base(variant), theme.variant[variant]].join(' '),
     ...props
 }) => {
     const isClickable = onClick !== undefined && typeof onClick === 'function';
@@ -44,7 +45,7 @@ export const Tag: React.FC<TagProps> = ({
             {!disabled && onRemove && (
                 <button
                     type='button'
-                    className={theme.removeButton(variant)}
+                    className={theme.removeButton}
                     onClick={onRemove}
                     aria-label={localization.remove(label)}
                 >

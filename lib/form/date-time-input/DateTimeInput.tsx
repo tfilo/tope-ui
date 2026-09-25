@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { DateTimeInputProps, Day, Month, Slot } from './DateTimeInput.types';
 import { Button } from '../../general';
@@ -26,9 +26,6 @@ const isoDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
 const isoDateFormat = 'yyyy-MM-dd';
 const minYear = 1900;
 const maxYear = 2100;
-
-export type WeekDayType = (typeof WeekDay)[keyof typeof WeekDay];
-
 const MonthDirection = {
     PREVIOUS: 'PREVIOUS',
     NEXT: 'NEXT'
@@ -43,13 +40,8 @@ for (let i = minYear; i <= maxYear; i++) {
 
 const allMonths: Month[] = [];
 for (let i = 0; i < 12; i++) {
-    allMonths.push({ label: localization.dateTimeInput.monthAbbreviations[i], val: i });
+    allMonths.push({ label: localization.dateTimeInput.months[i], val: i });
 }
-const monthRows = [
-    allMonths.slice(0, 4), // Jan - Apr
-    allMonths.slice(4, 8), // May - Aug
-    allMonths.slice(8, 12) // Sep - Dec
-];
 
 /** Generate time slots
  * @param {number} interval number in minutes between slots
@@ -124,7 +116,7 @@ const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormat
  * formatFromISO(null, "dd.MM.yyyy");
  */
 const formatFromISO = (dateTime: string | null, inputFormatPattern: string): string => {
-    if (!dateTime) return '';
+    if (!dateTime || dateTime.trim() === 'UNKNOWN') return '';
     try {
         // Convert ISO string to Date object first to ensure compatibility with date-fns format()
         const date = parseISO(dateTime);
@@ -175,43 +167,43 @@ const formatDate = (
     }
 };
 
-const theme = {
-    action: {
-        button: 'min-w-[30px] min-h-[30px]',
-        icon: 'w-xl',
-        iconWrapper: 'min-w-[30px] min-h-[30px] flex justify-center',
-        rightWrapper: 'flex flex-row border-l relative'
-    },
-    calendar: {
-        base: 'flex w-fit flex-col absolute border rounded-sm p-md tope-ui-dropdown',
-        btn: '!w-full !h-[24px]',
-        btns: 'mb-md flex w-full flex-row gap-xl',
-        dayBtn: '!w-[40px] !h-[24px]',
-        headTh: 'w-[40px] h-[24px]',
-        headTr: 'flex flex-row',
-        hight: 'h-[24px]',
-        iconBtn: 'py-md !w-[50px]',
-        list: 'visible h-[200px] w-[80px] overflow-auto p-sm',
-        monthYear: 'flex gap-md',
-        monthYearBtn: 'py-md flex-1',
-        noBorder: 'border-none',
-        row: 'flex flex-row text-center',
-        table: 'h-[200px]'
-    },
-    fullWidth: 'w-full',
-    input: 'flex-1 focus:outline-none px-md min-h-[30px]',
-    month: {
-        base: 'h-[200px] overflow-auto p-sm'
-    },
-    paddingSm: 'p-sm',
-    roundedSm: 'rounded-sm'
-} as const;
+// const theme = {
+//     action: {
+//         button: 'min-w-[30px] min-h-[30px]',
+//         icon: 'w-xl',
+//         iconWrapper: 'min-w-[30px] min-h-[30px] flex justify-center',
+//         rightWrapper: 'flex flex-row border-l relative'
+//     },
+//     calendar: {
+//         wrapper: 'flex absolute border rounded-sm p-md tope-ui-calendar',
+//         base: 'flex-1 flex flex-col',
+//         btn: '!w-full !h-[24px]',
+//         btns: 'mb-md flex w-full flex-row gap-xl',
+//         dayBtn: '!w-[40px] !h-[24px]',
+//         headTh: 'w-[40px] h-[24px]',
+//         headTr: 'flex flex-row',
+//         hight: 'h-[24px]',
+//         iconBtn: 'py-md !w-[50px]',
+//         list: 'visible h-[200px] w-[80px] overflow-auto p-sm',
+//         monthYear: 'flex gap-md',
+//         monthYearBtn: 'py-md flex-1',
+//         noBorder: 'border-none',
+//         row: 'flex flex-row text-center',
+//         table: 'h-[200px]'
+//     },
+//     fullWidth: 'w-full',
+//     input: 'flex-1 focus:outline-none px-md min-h-[30px]',
+//     month: 'flex-1 grid grid-row-4 h-[200px] overflow-auto p-sm gap-md',
+//     year: 'flex-1 flex flex-col h-[200px] overflow-auto p-sm gap-md',
+//     paddingSm: 'p-sm',
+//     roundedSm: 'rounded-sm'
+// } as const;
 
-const bgColor = {
-    none: '',
-    selected: '!bg-primary-light',
-    today: '!bg-secondary-extra-light'
-};
+// const bgColor = {
+//     none: '',
+//     selected: 'bg-primary-light',
+//     today: 'bg-primary-extra-light'
+// } as const;
 
 /** Date and DateTime input component that renders as HTMLInputElement element wrapped by parent div containing optional label and error message.
  * DateTimeInput - A date and time picker component.
@@ -242,20 +234,56 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     closeDateTimePickerIfSelected = true,
     ...props
 }) => {
-    const hasTime = useMemo(() => {
-        return type === 'dateTime';
-    }, [type]);
+    const hasTime = type === 'dateTime';
 
     const [isOpen, setIsOpen] = useState(false);
-    const [isOpenMonth, setIsOpenMonth] = useState(false);
+    const [pickerType, setPickerType] = useState<'day' | 'month' | 'year'>('day');
 
-    const [selectedDate, setSelectedDate] = useState<number | null>(value ? getDate(parseISO(value)) : null);
-    const [selectedMonth, setSelectedMonth] = useState<number | null>(value ? getMonth(parseISO(value)) : null); // Start from 0
-    const [selectedYear, setSelectedYear] = useState<number | null>(value ? getYear(parseISO(value)) : null);
-    const [selectedMinutes, setSelectedMinutes] = useState<number | null>(
-        value && hasTime ? getHours(value) * 60 + getMinutes(value) : null
-    );
-    const [selectedSeconds, setSelectedSeconds] = useState<number | null>(value && hasTime ? getSeconds(parseISO(value)) : null);
+    const [selectedDate, setSelectedDate] = useState<number | null>(() => {
+        if (value) {
+            const parsed = parseISO(value);
+            if (isValid(parsed)) {
+                return getDate(parsed);
+            }
+        }
+        return null;
+    });
+    const [selectedMonth, setSelectedMonth] = useState<number | null>(() => {
+        if (value) {
+            const parsed = parseISO(value);
+            if (isValid(parsed)) {
+                return getMonth(parsed);
+            }
+        }
+        return null;
+    }); // Start from 0
+    const [selectedYear, setSelectedYear] = useState<number | null>(() => {
+        if (value) {
+            const parsed = parseISO(value);
+            if (isValid(parsed)) {
+                return getYear(parsed);
+            }
+        }
+        return null;
+    });
+    const [selectedMinutes, setSelectedMinutes] = useState<number | null>(() => {
+        if (value && hasTime) {
+            const parsed = parseISO(value);
+            if (isValid(parsed)) {
+                return getHours(parsed) * 60 + getMinutes(parsed);
+            }
+        }
+        return null;
+    });
+    const [selectedSeconds, setSelectedSeconds] = useState<number | null>(() => {
+        if (value && hasTime) {
+            const parsed = parseISO(value);
+            if (isValid(parsed)) {
+                return getSeconds(parsed);
+            }
+        }
+        return null;
+    });
 
     /** Determines the active date-fns format pattern for parsing and formatting.
      * Logic flow:
@@ -280,8 +308,6 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const _id = useId();
     const baseId = id || _id;
     const inputId = `input-${baseId}`;
-    const popoverId = `${baseId}-popover`;
-    const listId = `${baseId}-month-year-list`;
 
     /** Determines the input placeholder string.
      * Logic flow:
@@ -305,7 +331,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
      */
     const days = useMemo(() => {
         // Get day abbreviations (e.g., ["Ne", "Po", "Ut", "St", ...])
-        const allDays = localization.dateTimeInput.dayAbbreviations;
+        const allDays = localization.dateTimeInput.days;
         // Calculate the index of the first day to display.
         // If Saturday is the last day, Sunday (index 0) becomes the first day.
         // Otherwise, the first day is simply the day following the chosen last day.
@@ -430,7 +456,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     /** Automatically scrolls the active time slot into view when the selection changes or the picker for month choosing is opened/closed.
      * @dependency selectedMinutes - Re-runs when the user picks a different time.
-     * @dependency isOpenMonth - Re-runs when the month view is opened/closed.
+     * @dependency pickerType - Re-runs when the month view is opened/closed.
      * @dependency isOpen - Re-runs when the calendar (time) view is opened/closed.
      */
     useEffect(() => {
@@ -440,30 +466,22 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 block: 'center' // Vertically aligns the item to the middle of the list
             });
         }
-    }, [selectedMinutes, isOpenMonth, isOpen]);
+    }, [selectedMinutes, pickerType, isOpen]);
 
     /** Automatically aligns the selected year to the top of the scrollable list.
      * @dependency selectedYear - Re-runs to track the new active year.
-     * @dependency isOpenMonth - Re-runs to ensure alignment when the view is opened.
+     * @dependency pickerType - Re-runs to ensure alignment when the view is opened.
      * @dependency isOpen - Re-runs when the calendar (time) view is opened/closed.
      */
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (activeYearRef.current) {
             // Standard jump to the element
             activeYearRef.current.scrollIntoView({
                 behavior: 'auto', // Immediate jump without animation
-                block: 'start' // Aligns the selected year to the top of the container
+                block: 'center' // Aligns the selected year to the top of the container
             });
-            // Manual Offset Correction: after scrolling to the start, we scroll the parent container UP by 3 pixels to reveal the outline of button. We find the closest scrollable parent to apply this to.
-            const scrollableParent = activeYearRef.current.parentElement;
-            if (scrollableParent) {
-                scrollableParent.scrollBy({
-                    behavior: 'auto',
-                    top: -3 // Move up by 3 px
-                });
-            }
         }
-    }, [selectedYear, isOpenMonth, isOpen]);
+    }, [selectedYear, pickerType, isOpen]);
 
     /** Synchronizes internal date states by parsing the raw input string according to a format pattern.
      * @param {ChangeEvent<HTMLInputElement>} e - The input change event.
@@ -513,6 +531,15 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         }
     };
 
+    const handleCalendarClose = () => {
+        setIsOpen(false);
+        setPickerType('day');
+    };
+
+    const handleCalendarOpen = () => {
+        setIsOpen(true);
+    };
+
     /** Final update when some value from date-tme picker was selected.
      * @param {string} formattedDate - Date-time string formatted according to the inputFormatPattern
      * @param {boolean} [closeDateTimePicker=true] - If date-time picker should be closed after selection
@@ -524,8 +551,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
             onChange(res);
             if (closeDateTimePicker && closeDateTimePickerIfSelected) {
                 // close date-time picker
-                setIsOpen(false);
-                setIsOpenMonth(false);
+                handleCalendarClose();
             }
         },
         [closeDateTimePickerIfSelected, hasTime, inputFormatPattern, onChange]
@@ -540,8 +566,14 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         let newMonth;
         if (direction === MonthDirection.PREVIOUS) {
             newMonth = subMonths(currentlyDisplayedMonth, 1); // Subtract one month using date-fns
+            if (getYear(newMonth) < minYear) {
+                return; // Don't allow to go belove minYear
+            }
         } else if (direction === MonthDirection.NEXT) {
             newMonth = addMonths(currentlyDisplayedMonth, 1); // Add one month using date-fns
+            if (getYear(newMonth) > maxYear) {
+                return; // Don't allow to go above maxYear
+            }
         }
 
         if (newMonth) {
@@ -575,27 +607,31 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         // If a day is already picked, we must sync the text input with the new view
         if (selectedDate) {
             const formattedDate = formatDate(year, month.val, selectedDate, selectedMinutes ?? 0, selectedSeconds ?? 0, inputFormatPattern);
-            handleDateSelection(formattedDate);
+            handleDateSelection(formattedDate, false);
         }
+        setPickerType('day');
     };
 
     /** Handles the selection of a new year from the calendar.
      * @param {number} year - The year value selected by the user.
      */
     const changeYearHandler = (year: number) => {
-        setSelectedYear(year);
+        const _year = Math.max(Math.min(year, maxYear), minYear);
+
+        setSelectedYear(_year);
         // If a day and month is already picked, we must sync the text input with the new year
         if (selectedMonth && selectedDate) {
             const formattedDate = formatDate(
-                year,
+                _year,
                 selectedMonth,
                 selectedDate,
                 selectedMinutes ?? 0,
                 selectedSeconds ?? 0,
                 inputFormatPattern
             );
-            handleDateSelection(formattedDate);
+            handleDateSelection(formattedDate, false);
         }
+        setPickerType('month');
     };
 
     /** Updates the calendar's day.
@@ -670,15 +706,13 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
             // Check if click is inside the calendar or calendar button
             const isInsideContainer = calendarRef.current?.contains(target) || calendarBtnRef.current?.contains(target);
             if (!isInsideContainer) {
-                setIsOpen(false);
-                setIsOpenMonth(false);
+                handleCalendarClose();
             }
         };
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                setIsOpen(false);
-                setIsOpenMonth(false);
+                handleCalendarClose();
             }
         };
 
@@ -692,11 +726,17 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (isOpen) {
+            calendarRef.current?.showPopover();
+        } else {
+            calendarRef.current?.hidePopover();
+        }
+    }, [isOpen]);
+
     if (value !== prevValue) {
         setPrevValue(value);
-        if (value === 'UNKNOWN') {
-            return;
-        } else {
+        if (value !== 'UNKNOWN') {
             setInputValue(formatFromISO(value, inputFormatPattern));
         }
     }
@@ -711,7 +751,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 elementId={inputId}
             >
                 <input
-                    className={theme.input}
+                    className={'min-h-[30px] flex-1 px-md focus:outline-none'}
                     {...props}
                     type='text'
                     id={inputId}
@@ -719,7 +759,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     value={inputValue}
                     onChange={handleInputChange}
                 />
-                <div className={theme.action.rightWrapper}>
+                <div className={'relative flex flex-row border-l'}>
                     <Button
                         variant='transparent'
                         showChildren={false}
@@ -727,198 +767,221 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         ref={calendarBtnRef}
                         onClick={() => {
                             if (!props.readOnly) {
-                                setIsOpen((prev) => {
-                                    if (prev) {
-                                        setIsOpenMonth(false);
-                                    }
-                                    return !prev;
-                                });
+                                if (isOpen) {
+                                    handleCalendarClose();
+                                } else {
+                                    handleCalendarOpen();
+                                }
                             }
                         }}
                         disabled={props.disabled}
-                        additionalClassName={theme.action.button}
-                        popoverTarget={popoverId}
-                        style={{ anchorName: `--dropdown_${baseId}` }}
+                        additionalClassName={'min-w-[30px] min-h-[30px]'}
+                        style={{ anchorName: `--calendar_${baseId}` }}
                     >
                         {inputIconTitle ?? (isOpen ? localization.dateTimeInput.closeCalendar : localization.dateTimeInput.openCalendar)}
                     </Button>
                 </div>
             </ElementWrapper>
-            {isOpen && (
-                <div
-                    className={theme.calendar.base}
-                    id={popoverId}
-                    popover='auto'
-                    style={{
-                        positionAnchor: `--dropdown_${baseId}`
-                    }}
-                    ref={calendarRef}
-                >
-                    <div className={theme.calendar.btns}>
-                        <Button
-                            variant='outline'
-                            showChildren={false}
-                            icon={ChevronLeftIcon}
-                            onClick={() => changeMonthHandler(MonthDirection.PREVIOUS)}
-                            additionalClassName={theme.calendar.iconBtn}
-                        >
-                            {localization.dateTimeInput.previous}
-                        </Button>
-                        <Button
-                            variant='outline'
-                            showChildren={true}
-                            onClick={() => setIsOpenMonth((prev) => !prev)}
-                            additionalClassName={theme.calendar.monthYearBtn}
-                        >
-                            {selectedMonth === null
-                                ? `${localization.dateTimeInput.months[getMonth(new Date())]} `
-                                : `${localization.dateTimeInput.months[selectedMonth]} `}
-                            {selectedYear ?? getYear(new Date())}
-                        </Button>
-                        <Button
-                            variant='outline'
-                            showChildren={false}
-                            icon={ChevronRightIcon}
-                            onClick={() => changeMonthHandler(MonthDirection.NEXT)}
-                            additionalClassName={theme.calendar.iconBtn}
-                        >
-                            {localization.dateTimeInput.next}
-                        </Button>
-                    </div>
-
-                    {isOpenMonth && (
-                        <ul
-                            id={listId}
-                            className={theme.month.base}
-                            style={{ width: hasTime ? '368px' : '280px' }} // width: table -> 7 columns = 7 * 40px = 280px , timeslots -> 80 px, , 'gap-md' -> 8 px
-                        >
+            <div
+                className={'tope-ui-calendar absolute rounded-sm border'}
+                popover='manual'
+                style={{
+                    positionAnchor: `--calendar_${baseId}`,
+                    width: hasTime ? '384px' : '298px', // width: table -> 7 columns = 7 * 40px = 280px , timeslots -> 80 px, , 'gap-md' -> 8 px
+                    height: '243px'
+                }}
+                ref={calendarRef}
+            >
+                <div className={'flex size-full flex-col'}>
+                    {pickerType === 'day' && (
+                        <div className={'flex flex-row gap-xl border-b p-md'}>
+                            <Button
+                                variant='outline'
+                                showChildren={false}
+                                icon={ChevronLeftIcon}
+                                onClick={() => changeMonthHandler(MonthDirection.PREVIOUS)}
+                                additionalClassName='min-w-[50px] min-h-[40px]'
+                            >
+                                {localization.dateTimeInput.previousMonth}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                onClick={() =>
+                                    setPickerType((prev) => {
+                                        switch (prev) {
+                                            case 'day':
+                                                return 'month';
+                                            case 'month':
+                                                return 'year';
+                                            case 'year':
+                                                return 'day';
+                                        }
+                                    })
+                                }
+                                additionalClassName='min-w-[50px] min-h-[40px] flex-1'
+                            >
+                                {selectedMonth === null
+                                    ? `${localization.dateTimeInput.months[getMonth(new Date())]} `
+                                    : `${localization.dateTimeInput.months[selectedMonth]} `}
+                                {selectedYear ?? getYear(new Date())}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                showChildren={false}
+                                icon={ChevronRightIcon}
+                                onClick={() => changeMonthHandler(MonthDirection.NEXT)}
+                                additionalClassName='min-w-[50px] min-h-[40px]'
+                            >
+                                {localization.dateTimeInput.nextMonth}
+                            </Button>
+                        </div>
+                    )}
+                    {pickerType !== 'day' && (
+                        <div className={'flex flex-row gap-xl border-b p-md'}>
+                            <Button
+                                variant='outline'
+                                showChildren={false}
+                                icon={ChevronLeftIcon}
+                                onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) - 1)}
+                                additionalClassName='min-w-[50px] min-h-[40px]'
+                            >
+                                {localization.dateTimeInput.previousYear}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                onClick={() =>
+                                    setPickerType((prev) => {
+                                        switch (prev) {
+                                            case 'day':
+                                                return 'month';
+                                            case 'month':
+                                                return 'year';
+                                            case 'year':
+                                                return 'day';
+                                        }
+                                    })
+                                }
+                                additionalClassName='min-w-[50px] min-h-[40px] flex-1'
+                            >
+                                {selectedYear ?? getYear(new Date())}
+                            </Button>
+                            <Button
+                                variant='outline'
+                                showChildren={false}
+                                icon={ChevronRightIcon}
+                                onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) + 1)}
+                                additionalClassName='min-w-[50px] min-h-[40px]'
+                            >
+                                {localization.dateTimeInput.nextYear}
+                            </Button>
+                        </div>
+                    )}
+                    {pickerType === 'year' && (
+                        <ul className={'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md'}>
                             {yearsRange.map((year) => {
-                                let yearBgColor = bgColor.none;
+                                let yearBgColor = '';
+                                if (year === getYear(new Date())) {
+                                    yearBgColor = 'border border-primary-light!';
+                                }
                                 if (year === selectedYear) {
-                                    yearBgColor = bgColor.selected;
-                                } else if (selectedYear === null && year === getYear(new Date())) {
-                                    yearBgColor = bgColor.today;
+                                    yearBgColor = 'bg-primary-light!';
                                 }
 
-                                const isSelected = selectedYear ? year === selectedYear : year === getYear(new Date());
                                 return (
                                     <li
                                         key={year}
-                                        ref={isSelected ? activeYearRef : null}
-                                        className={theme.fullWidth}
+                                        className={'w-full'}
+                                        ref={
+                                            year === selectedYear || (selectedYear === null && year === getYear(new Date()))
+                                                ? activeYearRef
+                                                : undefined
+                                        }
                                     >
-                                        {isSelected ? (
-                                            <table className={theme.fullWidth}>
-                                                <thead className={`${theme.fullWidth} ${yearBgColor}`}>
-                                                    <tr>
-                                                        <th
-                                                            colSpan={4}
-                                                            className={theme.roundedSm}
-                                                        >
-                                                            <Button
-                                                                variant='outline'
-                                                                showChildren={true}
-                                                                additionalClassName={`${theme.calendar.btn} ${yearBgColor}`}
-                                                                onClick={() => changeYearHandler(year)}
-                                                            >
-                                                                {year}
-                                                            </Button>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {monthRows.map((r) => {
-                                                        return (
-                                                            <tr key={`${r[0].label}-${r[1].label}-${r[2].label}-${r[3].label}`}>
-                                                                {r.map((monthVal) => {
-                                                                    let monthBgColor = bgColor.none;
-                                                                    if (monthVal.val === selectedMonth) {
-                                                                        monthBgColor = bgColor.selected;
-                                                                    } else if (
-                                                                        selectedMonth === null &&
-                                                                        monthVal.val === getMonth(new Date())
-                                                                    ) {
-                                                                        monthBgColor = bgColor.today;
-                                                                    }
-                                                                    return (
-                                                                        <td
-                                                                            key={monthVal.label}
-                                                                            className={theme.paddingSm}
-                                                                        >
-                                                                            <Button
-                                                                                variant='outline'
-                                                                                showChildren={true}
-                                                                                additionalClassName={`${theme.calendar.btn} ${monthBgColor}`}
-                                                                                onClick={() => {
-                                                                                    changeMonthAndYearHandler(year, monthVal);
-                                                                                }}
-                                                                            >
-                                                                                {monthVal.label}
-                                                                            </Button>
-                                                                        </td>
-                                                                    );
-                                                                })}
-                                                            </tr>
-                                                        );
-                                                    })}
-                                                </tbody>
-                                            </table>
-                                        ) : (
-                                            <Button
-                                                variant='outline'
-                                                showChildren={true}
-                                                additionalClassName={`${theme.calendar.btn} ${yearBgColor}`}
-                                                onClick={() => changeYearHandler(year)}
-                                            >
-                                                {year}
-                                            </Button>
-                                        )}
+                                        <Button
+                                            variant='outline'
+                                            additionalClassName={`w-full min-w-full min-h-[32px] ${yearBgColor}`}
+                                            onClick={() => changeYearHandler(year)}
+                                        >
+                                            {year}
+                                        </Button>
                                     </li>
                                 );
                             })}
                         </ul>
                     )}
-                    {!isOpenMonth && (
-                        <div className={theme.calendar.monthYear}>
-                            <table className={theme.calendar.table}>
+
+                    {pickerType === 'month' && (
+                        <ul className={'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md'}>
+                            {allMonths.map((month) => {
+                                let monthBgColor = '';
+                                if (month.val === getMonth(new Date()) && (selectedYear === getYear(new Date()) || selectedYear === null)) {
+                                    monthBgColor = 'border border-primary-light!    ';
+                                }
+                                if (month.val === selectedMonth) {
+                                    monthBgColor = 'bg-primary-light!';
+                                }
+                                return (
+                                    <li
+                                        key={`${month.label}`}
+                                        className='flex'
+                                    >
+                                        <Button
+                                            variant='outline'
+                                            additionalClassName={`flex-1 ${monthBgColor}`}
+                                            onClick={() => {
+                                                changeMonthAndYearHandler(selectedYear ?? getYear(new Date()), month);
+                                            }}
+                                        >
+                                            {month.label.substring(0, 3)}
+                                        </Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+
+                    {pickerType === 'day' && (
+                        <div className='flex flex-1 flex-row'>
+                            <table className='m-md h-none flex-1 table-fixed border-collapse'>
                                 <thead>
-                                    <tr className={theme.calendar.headTr}>
+                                    <tr>
                                         {days.map((d) => {
                                             return (
                                                 <th
                                                     key={d}
-                                                    className={theme.calendar.headTh}
+                                                    className='h-3xl max-h-3xl w-[14.2857%]'
+                                                    aria-label={d}
                                                 >
-                                                    {d}
+                                                    {d.substring(0, 2)}
                                                 </th>
                                             );
                                         })}
                                     </tr>
                                 </thead>
-                                {daysInMonthArray?.map((cd, idx) => {
-                                    return (
-                                        <tbody key={`week-${idx}-${cd[0].date}-${cd[0].day}`}>
-                                            <tr className={theme.calendar.row}>
+                                <tbody>
+                                    {daysInMonthArray?.map((cd, idx) => {
+                                        return (
+                                            <tr key={`week-${idx}-${cd[0].date}-${cd[0].day}`}>
                                                 {cd.map((d) => {
-                                                    let dayBgColor = bgColor.none;
-
-                                                    if (d.date === selectedDate && d.day !== null) {
-                                                        dayBgColor = bgColor.selected;
-                                                    } else if (
-                                                        !selectedDate &&
+                                                    let dayBgColor = 'border-none';
+                                                    if (
                                                         d.date === getDate(new Date()) &&
-                                                        d.day !== null &&
-                                                        (selectedMonth === null || selectedMonth === getMonth(new Date())) &&
-                                                        (selectedYear === null || selectedYear === getYear(new Date()))
+                                                        ((selectedMonth === getMonth(new Date()) && selectedYear === getYear(new Date())) ||
+                                                            (selectedMonth === null && selectedYear === null))
                                                     ) {
-                                                        dayBgColor = bgColor.today;
+                                                        dayBgColor = 'border border-primary-light!';
+                                                    }
+                                                    if (d.date === selectedDate && d.day !== null) {
+                                                        dayBgColor = 'bg-primary-light!';
                                                     }
                                                     return (
-                                                        <td key={`day-${d.date}-${d.day}`}>
+                                                        <td
+                                                            key={`day-${d.date}-${d.day}`}
+                                                            className='h-3xl max-h-3xl w-[14.2857%] p-xs'
+                                                        >
                                                             <Button
                                                                 variant='outline'
-                                                                showChildren={true}
-                                                                additionalClassName={`${dayBgColor} ${theme.calendar.noBorder} ${theme.calendar.dayBtn}`}
+                                                                additionalClassName={`${dayBgColor} p-sm w-full! h-full!`.trim()}
                                                                 onClick={() => changeDayHandler(d)}
                                                                 disabled={d.day === null}
                                                             >
@@ -928,12 +991,12 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                     );
                                                 })}
                                             </tr>
-                                        </tbody>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </tbody>
                             </table>
                             {hasTime && (
-                                <ul className={theme.calendar.list}>
+                                <ul className={'visible max-h-[184px] w-[80px] overflow-y-scroll border-l p-md'}>
                                     {timeSlots.map((ts) => {
                                         const isSelected = ts.minute === selectedMinutes;
                                         const isNearestSlot = isSelected || ts.minute === getNearestSlot();
@@ -941,12 +1004,12 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                             <li
                                                 key={ts.minute}
                                                 ref={isNearestSlot ? activeDayRef : null}
-                                                className={theme.calendar.hight}
+                                                className='h-3xl'
                                             >
                                                 <Button
                                                     variant='outline'
                                                     showChildren={true}
-                                                    additionalClassName={`${isSelected ? bgColor.selected : bgColor.none} ${theme.calendar.noBorder}`}
+                                                    additionalClassName={`${isSelected ? 'bg-primary-light!' : ''} border-none`}
                                                     onClick={() => changeTimeHandler(ts.minute)}
                                                 >
                                                     {ts.label}
@@ -959,7 +1022,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         </div>
                     )}
                 </div>
-            )}
+            </div>
         </>
     );
 };

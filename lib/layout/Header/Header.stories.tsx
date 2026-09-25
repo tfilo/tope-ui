@@ -15,7 +15,7 @@ const meta = {
     },
     decorators: [
         (Story) => (
-            <div className='flex flex-col h-[600px] overflow-hidden'>
+            <div className='flex h-[600px] flex-col overflow-hidden'>
                 <Story />
                 <Content>
                     <Page title='Page content under header'>

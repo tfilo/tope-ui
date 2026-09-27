@@ -18,11 +18,12 @@ export const localization = {
     prevPage: 'Previous page',
     currentPage: 'Current page',
     dateTimeInput: {
-        previous: 'Previous month',
-        next: 'Next month',
-        dayAbbreviations: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'], // 0 for sunday
+        previousMonth: 'Previous month',
+        nextMonth: 'Next month',
+        previousYear: 'Previous year',
+        nextYear: 'Next year',
+        days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // 0 for sunday
         months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-        monthAbbreviations: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
         defaultDateInputPattern: 'dd.MM.yyyy',
         defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',

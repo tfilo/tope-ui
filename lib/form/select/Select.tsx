@@ -55,7 +55,7 @@ export const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, 
                             key={option.value}
                             value={option.value}
                             disabled={option.disabled}
-                            className='p-xs rounded-sm'
+                            className='rounded-sm p-xs'
                         >
                             {option.label}
                         </option>

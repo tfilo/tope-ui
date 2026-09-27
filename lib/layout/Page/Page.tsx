@@ -10,7 +10,7 @@ export const Page: React.FC<PageProps> = ({ children, title, titleType = 'h1' })
     const Title: ElementType = titleType;
 
     return (
-        <div className='p-lg flex-1 flex flex-col gap-lg'>
+        <div className='flex flex-1 flex-col gap-lg p-lg'>
             {hasTitle && <Title className='text-headline-1'>{title}</Title>}
             {children}
         </div>

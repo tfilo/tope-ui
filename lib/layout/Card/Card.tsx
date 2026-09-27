@@ -45,7 +45,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                 </Button>
             )}
             <BaseElement
-                className={`border border-default rounded-sm ${hasOnClick ? 'cursor-pointer' : 'cursor-default'} w-full aspect-square flex flex-col`}
+                className={`rounded-sm border border-default ${hasOnClick ? 'cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`}
                 onClick={handleClick}
                 style={{
                     backgroundImage: `url(${imageUrl})`,
@@ -55,7 +55,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
             >
                 <div className='flex-1'></div>
                 {hasDescription && (
-                    <div className='text-base text-justify p-lg bg-secondary-light/20'>
+                    <div className='bg-secondary-light/20 p-lg text-justify text-base'>
                         <span className='text-default'>{description}</span>
                     </div>
                 )}

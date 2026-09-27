@@ -227,30 +227,64 @@ export const MoreCustomOptions: Story = {
         // calendar
         await expect(canvas.getByRole('button')).toHaveAttribute('title', 'calendar');
         const btn = canvas.getByTitle('calendar');
-        await expect(canvasElement.querySelector('#calendar-popover')).toBeFalsy();
+        await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
         await userEvent.click(btn);
         await waitFor(() => {
-            expect(canvasElement.querySelector('#calendar-popover')).toBeVisible();
+            expect(canvasElement.querySelector('div[popover="manual"]')).toBeVisible();
         });
         // close calendar clicking on the btn
         await userEvent.click(btn);
-        await expect(canvasElement.querySelector('#calendar-popover')).toBeFalsy();
+        await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
         // close calendar clicking outside the calendar
         await userEvent.click(btn);
         await userEvent.click(canvas.getByLabelText('Input name*'));
-        await expect(canvasElement.querySelector('#calendar-popover')).toBeFalsy();
+        await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
+
+        await expect(args.onChange).toHaveBeenCalledTimes(21);
         // month year list
         await userEvent.click(btn);
-        const calendar = canvasElement.querySelector<HTMLElement>('#calendar-popover');
+        const calendar = canvasElement.querySelector<HTMLElement>('div[popover="manual"]');
         if (!calendar) {
             throw new Error('Calendar not found');
         }
         const monthButton = within(calendar).getAllByRole('button')[1];
-        await expect(canvasElement.querySelector('#calendar-month-year-list')).toBeFalsy();
+        await expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
         await userEvent.click(monthButton);
         await waitFor(() => {
-            expect(canvasElement.querySelector('#calendar-month-year-list')).toBeVisible();
+            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeVisible();
         });
+
+        const yearButton = within(calendar).getAllByRole('button')[1];
+        await expect(
+            canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')
+        ).toBeFalsy();
+        await userEvent.click(yearButton);
+        await waitFor(() => {
+            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
+            expect(
+                canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')
+            ).toBeVisible();
+        });
+
+        const year2000Button = within(calendar).getByText('2000');
+        await userEvent.click(year2000Button);
+        await waitFor(() => {
+            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeVisible();
+            expect(canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')).toBeFalsy();
+        });
+
+        const monthJanButton = within(calendar).getByText('Jan');
+        await userEvent.click(monthJanButton);
+        await waitFor(() => {
+            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
+            expect(canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')).toBeFalsy();
+        });
+
+        const day10Button = within(calendar).getByText('10');
+        await userEvent.click(day10Button);
+
+        await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
+        await expect(args.onChange).toHaveBeenCalledTimes(22);
     },
     args: {
         type: 'dateTime',

@@ -5,7 +5,7 @@
     width: fit-content;
     min-width: calc(anchor-size(width) + 2px);
     margin-right: 16px;
-    top: calc(anchor(bottom) + 4px);
+    top: calc(anchor(bottom) + 6px);
     left: calc(anchor(left) - 2px);
 
     position-try: --dropdown-bottom-left-align, --dropdown-top-right-align, --dropdown-top-left-align;
@@ -19,12 +19,12 @@
 }
 
 @position-try --dropdown-top-right-align {
-    bottom: calc(anchor(top) + 4px);
+    bottom: calc(anchor(top) + 6px);
     top: auto;
 }
 
 @position-try --dropdown-top-left-align {
-    bottom: calc(anchor(top) + 4px);
+    bottom: calc(anchor(top) + 6px);
     right: calc(anchor(right) - 2px);
     top: auto;
     left: auto;
@@ -33,7 +33,7 @@
 }
 
 .tope-ui-autocomplete {
-    top: calc(anchor(bottom) + 4px);
+    top: calc(anchor(bottom) + 6px);
     left: calc(anchor(left) - 2px);
     right: calc(anchor(right) - 2px);
     width: auto;
@@ -42,7 +42,21 @@
 }
 
 @position-try --autocomplete-top-align {
-    bottom: calc(anchor(top) + 4px);
+    bottom: calc(anchor(top) + 6px);
+    top: auto;
+}
+
+.tope-ui-calendar {
+    width: fit-content;
+    top: calc(anchor(bottom) + 6px);
+    right: calc(anchor(right) - 2px);
+    left: auto;
+
+    position-try: --calendar-top-align;
+}
+
+@position-try --autocomplete-top-align {
+    bottom: calc(anchor(top) + 6px);
     top: auto;
 }
 

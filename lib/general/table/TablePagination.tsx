@@ -14,7 +14,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
     }, [totalPages]);
 
     return (
-        <div className='w-full flex gap-md items-center py-sm justify-between'>
+        <div className='flex w-full items-center justify-between gap-md py-sm'>
             <Button
                 icon={ArrowLeftIcon}
                 showChildren={false}
@@ -24,7 +24,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
             >
                 {localization.prevPage}
             </Button>
-            <div className='text-sm flex gap-md items-center'>
+            <div className='flex items-center gap-md text-sm'>
                 {localization.page}
                 <Select
                     options={paginationOptions}

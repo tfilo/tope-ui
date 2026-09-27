@@ -108,6 +108,8 @@
     --spacing-md: 0.5rem; /* 8px */
     --spacing-lg: 0.75rem; /* 12px */
     --spacing-xl: 1rem; /* 16px */
+    --spacing-2xl: 1.25rem; /* 20px */
+    --spacing-3xl: 1.5rem; /* 24px */
 
     --breakpoint-mobile: 32rem; /* 512px */
     --breakpoint-tablet: 48rem; /* 768px */

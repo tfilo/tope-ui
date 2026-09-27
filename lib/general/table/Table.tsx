@@ -157,7 +157,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
 
     return (
         <div className='w-full'>
-            <div className='overflow-y-auto w-full'>
+            <div className='w-full overflow-y-auto'>
                 <table className='w-full table-auto border-separate border-spacing-none'>
                     <thead>
                         <tr>

@@ -17,49 +17,48 @@ List of components to develop
     - [x] File
         - [x] Single / Multi-select
         - [x] onChange?: if defined, calls with file list after files are selected
-        - [ ] Review
+        - [x] Review
     - [x] Input
         - [x] ActionStart: one or more elements (e.g., Button with icon)
         - [x] ActionEnd: one or more elements (e.g., Button, Dropdown)
-        - [ ] Review
+        - [x] Review
     - [x] Select
         - [x] Options (possible subcategories)
         - [x] Single / Multi-select
-        - [ ] Refactor to same style as Autocomplete
-        - [ ] Review
+        - [x] Review
     - [x] Switch
         - [x] Like a toggle for boolean values, allow on / off state
-        - [ ] Review
+        - [x] Review
     - [x] Textarea
         - [x] Optional max-length and visual counter at bottom right
-        - [ ] Review
+        - [x] Review
 - [ ] GENERAL (Different interactive elements not directly linked to navigation/form/etc)
     - [x] Button
         - [x] Support elements: `<button>`, `<a>`, `<Link>`
         - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
         - [x] Variants: Text, Icon + Text, Icon
-        - [ ] Review
+        - [x] Review
     - [x] Dropdown
         - [x] Options (possible icons)
-        - [ ] Review
+        - [x] Review
     - [x] Tag
         - [x] Colors: Primary, Secondary, Danger, Outline
         - [x] onRemove?: shows "x" and calls onClose on click
         - [x] onClick?: reacts on hover and calls onClick on click
-        - [ ] Review
+        - [x] Review
     - [x] Table
         - [x] Support with/without pagination
         - [x] Sorting for each column
-        - [ ] Review
+        - [x] Review
     - [x] List
         - [x] Renders a bulleted list
-        - [ ] Review
+        - [x] Review
 - [ ] OVERLAYS
     - [x] Modal
         - [x] Props: Title (string), Body (ReactNode)
         - [x] Footer: onConfirm (required), onCancel? (optional)
         - [x] Size: Normal / Wide
-        - [ ] Review
+        - [x] Review
 - [ ] LAYOUT
     - [x] Header
         - [x] Right: profile button (optional) and logout

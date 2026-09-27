@@ -61,17 +61,20 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         setDisplayValue(e.currentTarget.value);
     };
 
+    // Remove selected option and reset search state
     const handleRemoveOption = (option: Option) => {
         setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
         setDisplayValue('');
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
+    // Close dropdown and clear current option list
     const handleOptionsClose = () => {
         setIsOpen(false);
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
+    // Open dropdown, fetch the initial options if needed, and focus the first available item
     const handleOptionsOpen = async () => {
         if (isOpen === false) {
             setIsOpen(true);
@@ -201,6 +204,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
+    // Handle search for options based on user input
     const handleSearch = async (query: string, force: boolean = false) => {
         if (force === false && isOpen === false) {
             // Value is already selected or dropdown is closed, no need to search
@@ -231,6 +235,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const handleSearchEffectEvent = useEffectEvent(handleSearch);
 
+    // Handle external value changes and fetch corresponding options
     const onValueChange = useEffectEvent(async (newValues: string[]) => {
         if (newValues.length === 0) {
             if (selectedOption.length > 0) {
@@ -256,6 +261,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         setIsInitialized(true);
     });
 
+    // Trigger onChange when selectedOption changes
     const handleChange = useEffectEvent((selectedOption: Option[], multiple: boolean) => {
         if (isInitialized === true) {
             if (multiple === false) {
@@ -279,6 +285,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     });
 
+    // Handle scroll event to load next page of options
     const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
         const atBottom = scrollTop + clientHeight >= scrollHeight - 8;
@@ -309,7 +316,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     };
 
-    /** Handle external value changes */
+    // Handle external value changes
     useEffect(() => {
         const abortController = new AbortController();
         (async () => {
@@ -331,17 +338,17 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         };
     }, [value]);
 
-    /** Trigger search when display value changes */
+    // Trigger search when display value changes
     useEffect(() => {
         handleSearchEffectEvent(displayValue);
     }, [displayValue]);
 
-    /** Trigger onChange when selectedOption changes */
+    // Trigger onChange when selectedOption changes
     useEffect(() => {
         handleChange(selectedOption, multiple);
     }, [selectedOption, multiple]);
 
-    /** Toggle popover open/close  */
+    // Toggle popover open/close
     useEffect(() => {
         if (isOpen) {
             popoverRef.current?.showPopover();
@@ -350,6 +357,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     }, [isOpen]);
 
+    // Closes dropdown when disabled
     useEffect(() => {
         (async () => {
             if (disabled) {

@@ -6,7 +6,7 @@ import { localization } from '../../utils/constants';
 
 const theme = {
     dialog: (size: ModalProps['size']) => {
-        return `${size === 'normal' ? 'max-w-3xl' : 'max-w-7xl'} m-auto rounded-md shadow-2xl`;
+        return `${size === 'normal' ? 'max-w-[min(600px,90%)]' : 'max-w-[min(1200px,90%)]'} m-auto rounded-md shadow-2xl`;
     },
     wrapper: 'p-lg flex flex-row gap-lg',
     title: 'rounded-t-sm font-bold',

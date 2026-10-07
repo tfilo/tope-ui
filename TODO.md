@@ -110,3 +110,5 @@ List of components to develop
     - [ ] Integrate Textarea
 - [x] PUBLISH
     - [x] Create github action to publish to NPM
+- [x] BUILD
+    - [x] Add react compiler

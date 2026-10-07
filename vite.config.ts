@@ -1,6 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
@@ -14,7 +15,16 @@ const externalDependencies = [...Object.keys(pkg.dependencies || {}), ...Object.
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-    plugins: [tailwindcss(), react()],
+    optimizeDeps: {
+        include: ['react/compiler-runtime']
+    },
+    plugins: [
+        tailwindcss(),
+        react(),
+        babel({
+            plugins: ['babel-plugin-react-compiler']
+        })
+    ],
     build: {
         lib: {
             entry: resolve(__dirname, 'lib/main.ts'),
@@ -59,8 +69,7 @@ export default defineConfig({
                                 browser: 'chromium'
                             }
                         ]
-                    },
-                    setupFiles: ['.storybook/vitest.setup.ts']
+                    }
                 }
             }
         ]

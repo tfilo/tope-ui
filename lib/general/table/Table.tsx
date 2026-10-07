@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+import { useEffect, useEffectEvent, useState, type ReactElement } from 'react';
 
 import { config } from '../../utils/constants';
 import type { RowObject, SortObject, TableProps } from './Table.types';
@@ -71,23 +71,23 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     const hasFetch = onFetch !== undefined;
     const totalPages = Math.ceil(totalRecords / pageSize);
 
-    const onPrevPage = useCallback(() => {
+    const onPrevPage = () => {
         setPage((prev) => {
             return Math.max(0, prev - 1);
         });
-    }, []);
+    };
 
-    const onNextPage = useCallback(() => {
+    const onNextPage = () => {
         setPage((prev) => {
             return Math.min(totalPages - 1, prev + 1);
         });
-    }, [totalPages]);
+    };
 
-    const onPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+    const onPageChange = (e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
         setPage(+e.currentTarget.value);
-    }, []);
+    };
 
-    const onSortChange = useCallback((accessor: keyof TData) => {
+    const onSortChange = (accessor: keyof TData) => {
         setSort((prev) => {
             let result = [...prev];
             const idx = result.findIndex((s) => s.accessor === accessor);
@@ -105,7 +105,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
             return result;
         });
         setPage(0);
-    }, []);
+    };
 
     const onSetData = useEffectEvent((data: Readonly<TData[]>, page?: number, _pageSize?: number, totalRecords?: number) => {
         if (_pageSize !== undefined && _pageSize !== pageSize) {

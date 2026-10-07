@@ -1,4 +1,4 @@
-import { useId, useMemo } from 'react';
+import { useId } from 'react';
 
 import type { SwitchProps } from './switch.types';
 import { isNotBlank, sb } from '../../utils/string-utils';
@@ -60,13 +60,8 @@ const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, v
     const hasLabel = isNotBlank(label);
     const hasError = isNotBlank(error);
 
-    const borderColor = useMemo(() => {
-        return theme.borderColor(hasError).disabled[sb(!!disabled)].checked[sb(value)];
-    }, [disabled, hasError, value]);
-
-    const circleColor = useMemo(() => {
-        return theme.circle.color.disabled[sb(!!disabled)].checked[sb(value)];
-    }, [disabled, value]);
+    const borderColor = theme.borderColor(hasError).disabled[sb(!!disabled)].checked[sb(value)];
+    const circleColor = theme.circle.color.disabled[sb(!!disabled)].checked[sb(value)];
 
     return (
         <>

@@ -110,5 +110,6 @@ List of components to develop
     - [ ] Integrate Textarea
 - [x] PUBLISH
     - [x] Create github action to publish to NPM
-- [x] BUILD
+- [ ] BUILD
     - [x] Add react compiler
+    - [x] Remove useMemo and useCallback

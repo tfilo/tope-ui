@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { ArrowLeftStartOnRectangleIcon, UserCircleIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
@@ -17,12 +16,8 @@ const theme = {
  */
 export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null }) => {
     const hasProfileOrLogout = onProfile !== null || onLogout !== null;
-
     const size = useWindowSize();
-
-    const isMobile = useMemo(() => {
-        return size === 'mobile';
-    }, [size]);
+    const isMobile = size === 'mobile';
 
     return (
         <header className={theme.base}>

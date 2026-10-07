@@ -1,4 +1,4 @@
-import React, { useCallback, useId, useState } from 'react';
+import React, { useId, useState } from 'react';
 
 import { Button } from '../../general/button';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
@@ -18,7 +18,7 @@ const theme = {
 const InputAction: React.FC<InputActionProps> = (props) => {
     const [processing, setProcessing] = useState(false);
 
-    const handleClick = useCallback(async () => {
+    const handleClick = async () => {
         if (props.onClick) {
             setProcessing(true);
             try {
@@ -27,7 +27,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
                 setProcessing(false);
             }
         }
-    }, [props]);
+    };
 
     if (!props.onClick) {
         const Icon = props.icon;

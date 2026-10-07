@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { expect, fn, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -42,13 +42,10 @@ const meta = {
     render: ({ value, onChange, ...args }) => {
         const [val, setVal] = useState<string | null>(value);
 
-        const handleChange = useCallback(
-            (val: string | null) => {
-                setVal(val);
-                onChange(val);
-            },
-            [onChange]
-        );
+        const handleChange = (val: string | null) => {
+            setVal(val);
+            onChange(val);
+        };
 
         useEffect(() => {
             setVal(value);

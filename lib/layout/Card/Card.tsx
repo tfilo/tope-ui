@@ -1,4 +1,4 @@
-import { useCallback, type ElementType } from 'react';
+import { type ElementType } from 'react';
 import { PencilSquareIcon } from '@heroicons/react/16/solid';
 
 import placeholder from '../../assets/placeholder.png';
@@ -24,24 +24,18 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
     const BaseElement: ElementType = hasOnClick ? 'button' : 'div';
     const hasDescription = isNotBlank(description);
 
-    const handleClick = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-            if (hasOnClick) {
-                onClick(e as React.MouseEvent<HTMLButtonElement, MouseEvent>);
-            }
-        },
-        [hasOnClick, onClick]
-    );
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (hasOnClick) {
+            onClick(e as React.MouseEvent<HTMLButtonElement, MouseEvent>);
+        }
+    };
 
-    const handleAction = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            e.stopPropagation();
-            if (hasOnAction) {
-                onAction(e);
-            }
-        },
-        [hasOnAction, onAction]
-    );
+    const handleAction = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.stopPropagation();
+        if (hasOnAction) {
+            onAction(e);
+        }
+    };
 
     return (
         <div className={theme.base}>

@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
@@ -12,12 +11,10 @@ const theme = {
 } as const;
 
 export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, onPrevPage, onPageChange, page, totalPages }) => {
-    const paginationOptions = useMemo(() => {
-        return [...new Array(totalPages).keys()].map((i) => ({
-            label: `${i + 1}`,
-            value: `${i}`
-        }));
-    }, [totalPages]);
+    const paginationOptions = [...new Array(totalPages).keys()].map((i) => ({
+        label: `${i + 1}`,
+        value: `${i}`
+    }));
 
     return (
         <div className={theme.wrapper}>

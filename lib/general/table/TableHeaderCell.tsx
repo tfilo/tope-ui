@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { ArrowDownIcon, ArrowsUpDownIcon, ArrowUpIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
@@ -38,9 +37,9 @@ export const TableHeaderCell: TableHeaderCellComponent = ({ col, sort, onSortCha
     const icon = getSortIcon(sortDirection);
     const title = `${col.header} - ${getSortIconLabel(sortDirection)}`;
 
-    const handleSort = useCallback(() => {
+    const handleSort = () => {
         onSortChange(col.accessor);
-    }, [col.accessor, onSortChange]);
+    };
 
     return (
         <div className={theme.wrapper}>

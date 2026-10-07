@@ -1,4 +1,4 @@
-import { useMemo, type ElementType } from 'react';
+import { type ElementType } from 'react';
 
 import type { ButtonProps } from './Button.types';
 
@@ -42,12 +42,7 @@ export const Button = <T extends ElementType = 'button'>({
     const hasIcon = Icon !== null;
     const isButton = as === undefined || as === 'button';
 
-    const title = useMemo(() => {
-        if (showChildren === false && typeof children === 'string') {
-            return children;
-        }
-        return undefined;
-    }, [children, showChildren]);
+    const title = showChildren === false && typeof children === 'string' ? children : undefined;
 
     return (
         <Component

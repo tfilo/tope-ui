@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 import { localization } from '../../utils/constants';
@@ -38,13 +38,7 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
 
-    const Icon = useMemo(() => {
-        if (icon) {
-            return icon;
-        } else if (variant === 'danger') {
-            return ExclamationTriangleIcon;
-        } else return InformationCircleIcon;
-    }, [icon, variant]);
+    const Icon = icon ?? (variant === 'danger' ? ExclamationTriangleIcon : InformationCircleIcon);
 
     useEffect(() => {
         const dialog = dialogRef.current;

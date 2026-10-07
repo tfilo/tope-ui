@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import React, { useEffect, useId, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
 import {
     addMonths,
     format,
@@ -289,13 +289,9 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * 1. If a custom `inputFormat` is provided via props, it takes the highest priority.
      * 2. If no custom format exists, it falls back to a predefined default pattern based on whether the component is in "DateTime" or "Date-only" mode (`hasTime`).
      */
-    const inputFormatPattern = useMemo(() => {
-        if (inputFormat) {
-            return inputFormat;
-        } else {
-            return hasTime ? localization.dateTimeInput.defaultDateTimeInputPattern : localization.dateTimeInput.defaultDateInputPattern;
-        }
-    }, [hasTime, inputFormat]);
+    const inputFormatPattern =
+        inputFormat ??
+        (hasTime ? localization.dateTimeInput.defaultDateTimeInputPattern : localization.dateTimeInput.defaultDateInputPattern);
 
     const [inputValue, setInputValue] = useState<string>(formatFromISO(value, inputFormatPattern));
     const [prevValue, setPrevValue] = useState(value);
@@ -313,22 +309,11 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * 1. If a custom `placeholder` is provided via props, it takes the highest priority.
      * 2. If no custom placeholder exists, it falls back to a predefined default placeholder based on whether the component is in "DateTime" or "Date-only" mode (`hasTime`).
      */
-    const inputPlaceholder = useMemo(() => {
-        if (placeholder) {
-            return placeholder;
-        } else {
-            return hasTime
-                ? localization.dateTimeInput.defaultDateTimeInputPlaceholder
-                : localization.dateTimeInput.defaultDateInputPlaceholder;
-        }
-    }, [hasTime, placeholder]);
+    const inputPlaceholder =
+        placeholder ??
+        (hasTime ? localization.dateTimeInput.defaultDateTimeInputPlaceholder : localization.dateTimeInput.defaultDateInputPlaceholder);
 
-    /** Memoized array of abbreviated day names, based on the `lastDayInWeek` prop. it calculates the starting day and reorders the abbreviations
-     * @example
-     * // If lastDayInWeek is Sunday (0), firstDay is 1 (Monday). Result: [Mon, Tue, ..., Sun]
-     * // If lastDayInWeek is Saturday (6), firstDay is 0 (Sunday). Result: [Sun, Mon, ..., Sat]
-     */
-    const days = useMemo(() => {
+    const calculateDays = () => {
         // Get day abbreviations (e.g., ["Ne", "Po", "Ut", "St", ...])
         const allDays = localization.dateTimeInput.days;
         // Calculate the index of the first day to display.
@@ -339,14 +324,15 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         const daysAfter = allDays.slice(firstDayInweek);
         const daysBefore = allDays.slice(0, firstDayInweek);
         return [...daysAfter, ...daysBefore];
-    }, [lastDayInWeek]);
-
-    /**  Memoized array of days for the currently selected or active month or today's month.
-     * Each day object contains:
-     * - `date`: The numerical day of the month (1-31).
-     * - `day`: The day of the week index (0-6, where 0 is Sunday)
+    };
+    /** Array of abbreviated day names, based on the `lastDayInWeek` prop. it calculates the starting day and reorders the abbreviations
+     * @example
+     * // If lastDayInWeek is Sunday (0), firstDay is 1 (Monday). Result: [Mon, Tue, ..., Sun]
+     * // If lastDayInWeek is Saturday (6), firstDay is 0 (Sunday). Result: [Sun, Mon, ..., Sat]
      */
-    const monthsDays = useMemo(() => {
+    const days = calculateDays();
+
+    const calculateMonthDays = () => {
         // Fallback to today's date if selectedYear/Month are null
         const usedYear = selectedYear ?? getYear(new Date());
         const usedMonth = selectedMonth ?? getMonth(new Date());
@@ -364,14 +350,20 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         }
 
         return daysArray;
-    }, [selectedMonth, selectedYear]);
+    };
+    /**  Array of days for the currently selected or active month or today's month.
+     * Each day object contains:
+     * - `date`: The numerical day of the month (1-31).
+     * - `day`: The day of the week index (0-6, where 0 is Sunday)
+     */
+    const monthsDays = calculateMonthDays();
 
     /** Transforms aflat array of month days into a 2D array representing calendar weeks with last day of week according  `lastDayInWeek` prop.
      * If the first week doesn't start on the first day of the week, it prepends dates from the end of the previous month.
      * If the last week is incomplete, it appends dates from the start of the next month.
      * @returns {Day[][] | undefined} A 2D array where each inner array represents a week (7 days).
      */
-    const getDaysInMonthArray = useCallback(() => {
+    const getDaysInMonthArray = () => {
         const usedYear = selectedYear ?? getYear(new Date());
         const usedMonth = selectedMonth ?? getMonth(new Date());
 
@@ -417,26 +409,22 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
             }
             return calendarArray;
         }
-    }, [lastDayInWeek, monthsDays, selectedMonth, selectedYear]);
+    };
 
-    /** Memoized list of time slots generated based on the defined interval (`slots` prop).
+    /** List of time slots generated based on the defined interval (`slots` prop).
      * @returns {Slot[]} An array of time slot objects.
      */
-    const timeSlots = useMemo(() => {
-        return generateTimeSlots(slots);
-    }, [slots]);
+    const timeSlots = generateTimeSlots(slots);
 
-    /** Memoized 2D array representing the calendar (weeks and days).
+    /** 2D array representing the calendar (weeks and days).
      * @returns {Day[][] | undefined} A 2D array where each sub-array is a week.
      */
-    const daysInMonthArray = useMemo(() => {
-        return getDaysInMonthArray();
-    }, [getDaysInMonthArray]);
+    const daysInMonthArray = getDaysInMonthArray();
 
     /** Calculates the time slot closest to a reference time.
      * @returns {number | null} The total minutes from the start of the day for the nearest slot, or null if no slots are available.
      */
-    const getNearestSlot = useCallback(() => {
+    const getNearestSlot = () => {
         if (!timeSlots || timeSlots.length === 0) {
             return null;
         }
@@ -451,7 +439,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
             return currDiff < prevDiff ? curr : prev;
         }, timeSlots[0]);
         return nearest.minute;
-    }, [selectedMinutes, timeSlots]);
+    };
 
     /** Automatically scrolls the active time slot into view when the selection changes or the picker for month choosing is opened/closed.
      * @dependency selectedMinutes - Re-runs when the user picks a different time.
@@ -543,18 +531,15 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * @param {string} formattedDate - Date-time string formatted according to the inputFormatPattern
      * @param {boolean} [closeDateTimePicker=true] - If date-time picker should be closed after selection
      */
-    const handleDateSelection = useCallback(
-        (formattedDate: string, closeDateTimePicker: boolean = true) => {
-            setInputValue(formattedDate);
-            const res = formatToISO(formattedDate, hasTime, inputFormatPattern);
-            onChange(res);
-            if (closeDateTimePicker && closeDateTimePickerIfSelected) {
-                // close date-time picker
-                handleCalendarClose();
-            }
-        },
-        [closeDateTimePickerIfSelected, hasTime, inputFormatPattern, onChange]
-    );
+    const handleDateSelection = (formattedDate: string, closeDateTimePicker: boolean = true) => {
+        setInputValue(formattedDate);
+        const res = formatToISO(formattedDate, hasTime, inputFormatPattern);
+        onChange(res);
+        if (closeDateTimePicker && closeDateTimePickerIfSelected) {
+            // close date-time picker
+            handleCalendarClose();
+        }
+    };
 
     /** Navigates through months.
      * @param {MonthDirectionType} direction - Indicates whether to move to the PREVIOUS or NEXT month.

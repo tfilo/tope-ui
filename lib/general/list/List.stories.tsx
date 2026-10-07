@@ -1,7 +1,7 @@
+import { expect } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { List } from './List';
-import { expect } from 'storybook/test';
 
 const meta = {
     title: 'General/List',

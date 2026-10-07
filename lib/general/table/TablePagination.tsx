@@ -1,9 +1,15 @@
-import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/16/solid';
-import { Button } from '../button';
-import { Select } from '../../form/select';
-import { localization } from '../../utils/constants';
-import { type TablePaginationProps } from './Table.types';
 import { useMemo } from 'react';
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
+import { Select } from '../../form/select';
+import { Button } from '../button';
+import { type TablePaginationProps } from './Table.types';
+
+const theme = {
+    wrapper: 'flex w-full items-center justify-between gap-md py-sm',
+    pageInfo: 'flex items-center gap-md text-sm'
+} as const;
 
 export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, onPrevPage, onPageChange, page, totalPages }) => {
     const paginationOptions = useMemo(() => {
@@ -14,7 +20,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
     }, [totalPages]);
 
     return (
-        <div className='flex w-full items-center justify-between gap-md py-sm'>
+        <div className={theme.wrapper}>
             <Button
                 icon={ArrowLeftIcon}
                 showChildren={false}
@@ -24,7 +30,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
             >
                 {localization.prevPage}
             </Button>
-            <div className='flex items-center gap-md text-sm'>
+            <div className={theme.pageInfo}>
                 {localization.page}
                 <Select
                     options={paginationOptions}

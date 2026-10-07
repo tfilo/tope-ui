@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-
-import { Page } from './Page';
-import { MapIcon } from '@heroicons/react/16/solid';
 import { expect, fn } from 'storybook/test';
-import { Header } from '../Header';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MapIcon } from '@heroicons/react/16/solid';
+
 import { Content } from '../Content';
+import { Header } from '../Header';
+import { Page } from './Page';
 
 const meta = {
     title: 'Layout/Page',

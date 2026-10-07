@@ -1,9 +1,10 @@
+import { useMemo } from 'react';
 import { ArrowLeftStartOnRectangleIcon, UserCircleIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
+import useWindowSize from '../../hooks/useWindowSize';
 import { Button, Dropdown } from '../../general';
 import type { HeaderProps } from './Header.types';
-import useWindowSize from '../../hooks/useWindowSize';
-import { useMemo } from 'react';
-import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'border-b border-default flex flex-row gap-xl shadow',

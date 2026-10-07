@@ -1,7 +1,7 @@
 import { XMarkIcon } from '@heroicons/react/16/solid';
 
-import type { TagProps } from './Tag.types';
 import { localization } from '../../utils/constants';
+import type { TagProps } from './Tag.types';
 
 const theme = {
     base: (variant: TagProps['variant']) =>

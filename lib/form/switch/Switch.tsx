@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react';
+
 import type { SwitchProps } from './switch.types';
 import { isNotBlank, sb } from '../../utils/string-utils';
 import { localization } from '../../utils/constants';

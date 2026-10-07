@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
-import type { ModalProps } from './Modal.types';
-import { Button } from '..';
 import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+
 import { localization } from '../../utils/constants';
+import { Button } from '../button';
+import type { ModalProps } from './Modal.types';
 
 const theme = {
     dialog: (size: ModalProps['size']) => {

@@ -1,15 +1,17 @@
 import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
+
 import { isBlank, isNotBlank } from '../../utils/string-utils';
+import { localization } from '../../utils/constants';
 import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { AutocompleteProps, OnSearchResult } from './Autocomplete.types';
-import { localization } from '../../utils/constants';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
-    inputWrapper: 'flex-1 flex flex-wrap',
+    inputAndTagWrapper: 'flex-1 flex flex-wrap',
+    inputWrapper: 'flex flex-1',
     button: 'min-w-[30px] min-h-[30px] rounded-sm',
     wrapper: 'w-full flex flex-col relative',
     optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete',
@@ -378,7 +380,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         >
             <div className={theme.wrapper}>
                 <div
-                    className={theme.inputWrapper}
+                    className={theme.inputAndTagWrapper}
                     style={{ anchorName: `--autocomplete_${_id}` }}
                 >
                     {selectedOption.map((option) => (
@@ -390,7 +392,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             variant='outline'
                         />
                     ))}
-                    <div className='flex flex-1'>
+                    <div className={theme.inputWrapper}>
                         <input
                             className={theme.input}
                             {...props}

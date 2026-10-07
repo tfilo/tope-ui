@@ -63,42 +63,42 @@ List of components to develop
     - [x] Header
         - [x] Right: profile button (optional) and logout
         - [x] Left: navigation buttons / dropdowns with icon (on mobile/tablet icons only)
-        - [ ] Review
+        - [x] Review
     - [x] Content
         - [x] Centered app content, max-width 1280px
-        - [ ] Review
+        - [x] Review
     - [x] Page
         - [x] Contains title in form of h1 (optionally as h2 - h6) and children (ReactNode)
-        - [ ] Review
+        - [x] Review
     - [x] Section
         - [x] Contains title in form of h2 (optionally as h3 - h6) and children (ReactNode)
         - [x] Optional border
-        - [ ] Review
+        - [x] Review
     - [x] Grid
         - [x] 4 columns on desktop, 2 on tablet, 1 on mobile
         - [x] 2 columns on desktop, 2 on tablet, 1 on mobile
         - [x] 1 columns on desktop, 1 on tablet, 1 on mobile
         - [x] Usable as direct child of Page or Section
-        - [ ] Review
+        - [x] Review
     - [x] Column
         - [x] Will fill single column of grid
         - [x] Optionaly span to 2,3,4 columns on desktop or 2 columns on tablet
         - [x] Will be designed to contain Input, Select, Autocomplete, TextArea etc. as direct children
-        - [ ] Review
+        - [x] Review
     - [x] Flex
         - [x] Will be used to primarily wrap buttons, it will take full width of parent element and will do flex layout with children with specified orientation and gap
         - [x] It will change to column direction on mobile screen automaticaly
-        - [ ] Review
+        - [x] Review
     - [x] Card
         - [x] Will fill single column of grid
         - [x] Has image as background over full size of card
         - [x] Has optional description showed on bottom of card as transparent overly
         - [x] Has optional onClick, handle clic on Card anywhere except action in top right corner
         - [x] Has optional onAction, handle click on action icon in top right corner (configurable icon)
-        - [ ] Review
+        - [x] Review
 - [x] LOCALIZATION
     - [x] Add localization option to all components that uses some hardcoded internal texts
-    - [ ] Review if all text are available for localization
+    - [x] Review if all text are available for localization
 - [ ] INTEGRATION TO TANSTACK
     - [ ] Read documentation how to integrate components with tanstack form
     - [ ] Integrate Autocomplete

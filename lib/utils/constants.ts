@@ -39,6 +39,7 @@ export const localization = {
 };
 
 export const config: {
+    /** Default locale used for sorting in table */
     locale: Intl.LocalesArgument;
 } = {
     locale: 'sk-SK'

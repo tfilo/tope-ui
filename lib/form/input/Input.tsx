@@ -1,6 +1,7 @@
 import React, { useCallback, useId, useState } from 'react';
-import { ElementWrapper } from '../wrapper/ElementWrapper';
+
 import { Button } from '../../general/button';
+import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { InputActionProps, InputProps } from './Input.types';
 
 const theme = {

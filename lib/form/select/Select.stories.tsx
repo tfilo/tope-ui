@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn, type Mock } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Select } from './Select';
 

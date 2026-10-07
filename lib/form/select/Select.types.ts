@@ -1,4 +1,5 @@
 import type { SelectHTMLAttributes, RefObject } from 'react';
+
 import type { Option } from '../../common/Option';
 import type { OptionGroup } from '../../common/OptionGroup';
 

@@ -1,7 +1,8 @@
-import { expect, fn } from 'storybook/test';
-import Switch from './Switch';
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useCallback, useEffect, useState } from 'react';
+import { expect, fn } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import Switch from './Switch';
 
 const onChange = fn();
 

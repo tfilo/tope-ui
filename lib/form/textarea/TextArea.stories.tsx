@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import React from 'react';
 import { expect, fn } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { TextArea } from './TextArea';
-import React from 'react';
 
 const meta = {
     title: 'Form/TextArea',

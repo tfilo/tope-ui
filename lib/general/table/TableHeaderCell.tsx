@@ -1,8 +1,17 @@
+import { useCallback } from 'react';
 import { ArrowDownIcon, ArrowsUpDownIcon, ArrowUpIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
 import { Button } from '../button';
 import type { TableHeaderCellComponent } from './Table.types';
-import { localization } from '../../utils/constants';
-import { useCallback } from 'react';
+
+const theme = {
+    wrapper: 'flex gap-md',
+    content: 'flex-1',
+    sortButttonWrapper: '-my-md flex items-center gap-xs',
+    sortButton: 'min-w-[32px] min-h-[32px] rounded-md',
+    sortIndex: 'flex aspect-square items-center rounded-full bg-primary-extra-light px-md'
+} as const;
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -34,19 +43,17 @@ export const TableHeaderCell: TableHeaderCellComponent = ({ col, sort, onSortCha
     }, [col.accessor, onSortChange]);
 
     return (
-        <div className='flex gap-md'>
-            <div className='flex-1'>{col.header}</div>
+        <div className={theme.wrapper}>
+            <div className={theme.content}>{col.header}</div>
             {col.sortable && (
-                <div className='-my-md flex items-center gap-xs'>
-                    {isMultiSorted && (
-                        <span className='flex aspect-square items-center rounded-full bg-primary-extra-light px-md'>{sortIndex + 1}</span>
-                    )}
+                <div className={theme.sortButttonWrapper}>
+                    {isMultiSorted && <span className={theme.sortIndex}>{sortIndex + 1}</span>}
                     <Button
                         onClick={handleSort}
                         icon={icon}
                         showChildren={false}
                         variant='transparent'
-                        additionalClassName='min-w-[32px] min-h-[32px] rounded-md'
+                        additionalClassName={theme.sortButton}
                     >
                         {title}
                     </Button>

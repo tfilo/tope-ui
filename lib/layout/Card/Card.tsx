@@ -1,10 +1,22 @@
 import { useCallback, type ElementType } from 'react';
-import type { CardProps } from './Card.types';
-import { isNotBlank } from '../../utils';
-import placeholder from '../../assets/placeholder.png';
 import { PencilSquareIcon } from '@heroicons/react/16/solid';
-import { Button } from '../../general';
+
+import placeholder from '../../assets/placeholder.png';
+
+import { isNotBlank } from '../../utils';
 import { localization } from '../../utils/constants';
+import { Button } from '../../general';
+import type { CardProps } from './Card.types';
+
+const theme = {
+    base: 'relative',
+    actionBtn: 'right-sm top-sm absolute w-[32px]! h-[32px]! fill-black/20 hover:fill-black/80 focus:fill-black/80 rounded-sm',
+    card: (hasOnClick: boolean) =>
+        `rounded-sm border border-default ${hasOnClick ? 'cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`,
+    description: 'bg-secondary-light/20 p-lg text-justify text-base',
+    descriptionText: 'text-default',
+    spacer: 'flex-1'
+} as const;
 
 export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imageUrl = placeholder }) => {
     const hasOnClick = onClick !== undefined;
@@ -32,12 +44,12 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
     );
 
     return (
-        <div className='relative'>
+        <div className={theme.base}>
             {hasOnAction && (
                 <Button
                     icon={PencilSquareIcon}
                     variant='transparent'
-                    additionalClassName='right-sm top-sm absolute w-[32px]! h-[32px]! fill-black/20 hover:fill-black/80 focus:fill-black/80'
+                    additionalClassName={theme.actionBtn}
                     showChildren={false}
                     onClick={handleAction}
                 >
@@ -45,7 +57,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                 </Button>
             )}
             <BaseElement
-                className={`rounded-sm border border-default ${hasOnClick ? 'cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`}
+                className={theme.card(hasOnClick)}
                 onClick={handleClick}
                 style={{
                     backgroundImage: `url(${imageUrl})`,
@@ -53,10 +65,10 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                     backgroundPosition: 'center'
                 }}
             >
-                <div className='flex-1'></div>
+                <div className={theme.spacer}></div>
                 {hasDescription && (
-                    <div className='bg-secondary-light/20 p-lg text-justify text-base'>
-                        <span className='text-default'>{description}</span>
+                    <div className={theme.description}>
+                        <span className={theme.descriptionText}>{description}</span>
                     </div>
                 )}
             </BaseElement>

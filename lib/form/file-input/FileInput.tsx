@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useId, useMemo } from 'react';
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
 import { isNotBlank } from '../../utils/string-utils';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
-import { localization } from '../../utils/constants';
 
 const theme = {
     action: {

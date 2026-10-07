@@ -1,9 +1,18 @@
-import type { RowObject, SortObject, TableProps } from './Table.types';
 import { useCallback, useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+
+import { config } from '../../utils/constants';
+import type { RowObject, SortObject, TableProps } from './Table.types';
 import { TableCell } from './TableCell';
 import { TablePagination } from './TablePagination';
 import { TableHeaderCell } from './TableHeaderCell';
-import { config } from '../../utils/constants';
+
+const theme = {
+    wrapper: 'w-full',
+    scrollWrapper: 'w-full overflow-y-auto',
+    table: 'w-full table-auto border-separate border-spacing-none',
+    headerCell: (additional: string = '') => `border-b border-default p-md text-left font-bold text-default ${additional}`.trim(),
+    bodyCell: (additional: string = '') => `border-b border-default p-md text-left text-default ${additional}`.trim()
+} as const;
 
 /**
  * Base compare method, compares all values as strings except number or bigint that are compared as numbers
@@ -156,18 +165,15 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     }, [_data, columns, hasStaticData, sort]);
 
     return (
-        <div className='w-full'>
-            <div className='w-full overflow-y-auto'>
-                <table className='w-full table-auto border-separate border-spacing-none'>
+        <div className={theme.wrapper}>
+            <div className={theme.scrollWrapper}>
+                <table className={theme.table}>
                     <thead>
                         <tr>
                             {columns.map((col) => (
                                 <th
                                     key={`${col.accessor.toString()}_${col.header}`}
-                                    className={
-                                        'border-b border-default p-md text-left font-bold text-default' +
-                                        (col.additionalClassName ? ` ${col.additionalClassName}` : '')
-                                    }
+                                    className={theme.headerCell(col.additionalClassName)}
                                 >
                                     <TableHeaderCell
                                         col={col}
@@ -184,10 +190,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                                 {columns.map((col) => (
                                     <td
                                         key={`${col.accessor.toString()}_${col.header}`}
-                                        className={
-                                            'border-b border-default p-md text-left text-default' +
-                                            (col.additionalClassName ? ` ${col.additionalClassName}` : '')
-                                        }
+                                        className={theme.bodyCell(col.additionalClassName)}
                                     >
                                         <TableCell
                                             row={row}

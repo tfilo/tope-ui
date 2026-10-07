@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, fn } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Autocomplete } from './Autocomplete';
 

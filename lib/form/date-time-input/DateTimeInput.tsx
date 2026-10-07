@@ -1,8 +1,4 @@
 import React, { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
-import { ElementWrapper } from '../wrapper/ElementWrapper';
-import type { DateTimeInputProps, Day, Month, Slot } from './DateTimeInput.types';
-import { Button } from '../../general';
-import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import {
     addMonths,
     format,
@@ -19,8 +15,48 @@ import {
     parseISO,
     subMonths
 } from 'date-fns';
+import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
+
 import { localization } from '../../utils/constants';
+import { Button } from '../../general';
+import { ElementWrapper } from '../wrapper/ElementWrapper';
+import type { DateTimeInputProps, Day, Month, Slot } from './DateTimeInput.types';
 import { WeekDay } from './WeekDay';
+
+const theme = {
+    action: {
+        button: 'min-w-[30px] min-h-[30px]',
+        rightWrapper: 'relative flex flex-row border-l'
+    },
+    calendar: {
+        wrapper: 'tope-ui-calendar absolute rounded-sm border',
+        base: 'flex size-full flex-col',
+        btns: 'flex flex-row gap-xl border-b p-md',
+        btnPrev: 'min-w-[50px] min-h-[40px]',
+        btnMiddle: 'min-w-[50px] min-h-[40px] flex-1',
+        btnNext: 'min-w-[50px] min-h-[40px]',
+        years: 'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md',
+        yearBtn: 'w-full min-w-full min-h-[32px]',
+        months: 'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md',
+        monthBtn: 'flex-1',
+        days: 'm-md h-none flex-1 table-fixed border-collapse',
+        daysWrapper: 'flex flex-1 flex-row',
+        daysHeader: 'h-3xl max-h-3xl w-[14.2857%]',
+        daysColumn: 'h-3xl max-h-3xl w-[14.2857%] p-xs',
+        dayBtn: 'p-sm w-full! h-full!',
+        times: 'visible max-h-[184px] w-[80px] overflow-y-scroll border-l p-md',
+        timeBtn: 'border-none',
+        timesListItems: 'h-3xl'
+    },
+    fullWidth: 'w-full',
+    flex: 'flex',
+    input: 'min-h-[30px] flex-1 px-md focus:outline-none'
+} as const;
+
+const bgColor = {
+    selected: 'bg-primary-light!',
+    today: 'border border-primary-light!'
+} as const;
 
 const unknownDate = 'UNKNOWN';
 const isoDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
@@ -167,40 +203,6 @@ const formatDate = (
         throw new Error('It is not possible to format date.');
     }
 };
-
-const theme = {
-    action: {
-        button: 'min-w-[30px] min-h-[30px]',
-        rightWrapper: 'relative flex flex-row border-l'
-    },
-    calendar: {
-        wrapper: 'tope-ui-calendar absolute rounded-sm border',
-        base: 'flex size-full flex-col',
-        btns: 'flex flex-row gap-xl border-b p-md',
-        btnPrev: 'min-w-[50px] min-h-[40px]',
-        btnMiddle: 'min-w-[50px] min-h-[40px] flex-1',
-        btnNext: 'min-w-[50px] min-h-[40px]',
-        years: 'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md',
-        yearBtn: 'w-full min-w-full min-h-[32px]',
-        months: 'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md',
-        monthBtn: 'flex-1',
-        days: 'm-md h-none flex-1 table-fixed border-collapse',
-        daysWrapper: 'flex flex-1 flex-row',
-        daysHeader: 'h-3xl max-h-3xl w-[14.2857%]',
-        daysColumn: 'h-3xl max-h-3xl w-[14.2857%] p-xs',
-        dayBtn: 'p-sm w-full! h-full!',
-        times: 'visible max-h-[184px] w-[80px] overflow-y-scroll border-l p-md',
-        timeBtn: 'border-none'
-    },
-    fullWidth: 'w-full',
-    flex: 'flex',
-    input: 'min-h-[30px] flex-1 px-md focus:outline-none'
-} as const;
-
-const bgColor = {
-    selected: 'bg-primary-light!',
-    today: 'border border-primary-light!'
-} as const;
 
 /** Date and DateTime input component that renders as HTMLInputElement element wrapped by parent div containing optional label and error message.
  * DateTimeInput - A date and time picker component.
@@ -1001,7 +1003,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                             <li
                                                 key={ts.minute}
                                                 ref={isNearestSlot ? activeDayRef : null}
-                                                className='h-3xl'
+                                                className={theme.calendar.timesListItems}
                                             >
                                                 <Button
                                                     variant='outline'

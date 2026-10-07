@@ -24,7 +24,7 @@ export default defineConfig({
             formats: ['es', 'umd']
         },
         license: true,
-        rollupOptions: {
+        rolldownOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library
             external: externalDependencies.map((dep) => new RegExp(`^${dep}(/.*)?$`)),

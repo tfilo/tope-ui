@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from 'react';
+
 import type { WeekDay } from './WeekDay';
 
 export type WeekDayType = (typeof WeekDay)[keyof typeof WeekDay];

@@ -1,10 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import Modal from './Modal';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { expect, fn } from 'storybook/test';
-import { Button } from '..';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CheckIcon, FaceSmileIcon, HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+import Modal from './Modal';
 import type { ModalProps } from './Modal.types';
+import { Button } from '../button';
 
 type StorybookOnlyProps = {
     cancelMode: 'default' | 'custom' | 'none';

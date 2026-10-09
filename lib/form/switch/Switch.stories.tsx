@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import Switch from './Switch';
+import type { SwitchProps } from './Switch.types';
+import { useAppForm } from '../../hooks/form';
 
 const onChange = fn();
 
@@ -19,7 +20,6 @@ const meta = {
         }
     },
     argTypes: {
-        onChange: { action: 'changed' },
         id: {
             control: 'text',
             table: {
@@ -45,34 +45,27 @@ const meta = {
             }
         }
     },
-    render: ({ value, onChange, ...args }) => {
-        const [val, setVal] = useState<boolean>(value);
-
-        const handleChange = (val: boolean) => {
-            setVal(val);
-            onChange(val);
-        };
-
-        useEffect(() => {
-            setVal(value);
-        }, [value]);
+    render: (args: SwitchProps, { parameters }) => {
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? false } });
 
         return (
-            <>
-                <p className='pb-lg'>
-                    VALUE: <span>{JSON.stringify(val)}</span>
-                </p>
-                <Switch
-                    {...args}
-                    value={val}
-                    onChange={handleChange}
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.Switch {...args} />}
                 />
-            </>
+            </form>
         );
     },
     args: {
-        onChange: onChange,
-        value: false,
         label: 'Label'
     }
 } satisfies Meta<typeof Switch>;
@@ -81,109 +74,127 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Checked: Story = {
-    args: {
-        value: true,
+    parameters: {
+        defaultValue: true,
         onChange: onChange
     }
 };
 
 export const NotChecked: Story = {
-    args: {
-        value: false,
+    parameters: {
+        defaultValue: false,
         onChange: onChange
     }
 };
 
 export const RequiredChecked: Story = {
     args: {
-        value: true,
-        onChange: onChange,
         required: true
+    },
+    parameters: {
+        defaultValue: true,
+        onChange: onChange
     }
 };
 
 export const RequiredNotChecked: Story = {
     args: {
-        value: false,
-        onChange: onChange,
         required: true
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };
 
 export const ReadOnlyChecked: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByLabelText('Label')).toBeChecked();
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await userEvent.click(canvas.getByRole('checkbox'));
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await expect(canvas.getByLabelText('Label')).toBeChecked();
     },
     args: {
-        value: true,
-        onChange: onChange,
         readOnly: true
+    },
+    parameters: {
+        defaultValue: true,
+        onChange: onChange
     }
 };
 
 export const ReadOnlyNotChecked: Story = {
     args: {
-        value: false,
-        onChange: onChange,
         readOnly: true
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };
 
 export const DisabledChecked: Story = {
     args: {
-        value: true,
-        onChange: onChange,
         disabled: true
+    },
+    parameters: {
+        defaultValue: true,
+        onChange: onChange
     }
 };
 
 export const DisabledNotChecked: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByLabelText('Label')).not.toBeChecked();
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await userEvent.click(canvas.getByRole('checkbox'));
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await expect(canvas.getByLabelText('Label')).not.toBeChecked();
     },
     args: {
-        value: false,
-        onChange: onChange,
         disabled: true
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };
 
 export const WithoutLabel: Story = {
     args: {
-        value: false,
-        onChange: onChange,
         label: undefined
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };
 
 export const CheckedWithErrorAndLabel: Story = {
     args: {
-        value: true,
-        onChange: onChange,
         label: 'Label',
         error: 'Here will be error message'
+    },
+    parameters: {
+        defaultValue: true,
+        onChange: onChange
     }
 };
 
 export const NotCheckedWithErrorAndLabel: Story = {
     args: {
-        value: false,
-        onChange: onChange,
         label: 'Label',
         error: 'Here will be error message'
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };
 
 export const MoreCustomOptions: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         // input
         await expect(canvas.getByRole('checkbox')).toBeVisible();
         await expect(canvas.getByLabelText('Switch label*')).toBeVisible();
@@ -200,20 +211,22 @@ export const MoreCustomOptions: Story = {
         await expect(byLabel).toStrictEqual(byError);
 
         // change value
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await userEvent.click(canvas.getByRole('checkbox'));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
         await expect(canvas.getByLabelText('Switch label*')).toBeChecked();
         await userEvent.click(canvas.getByRole('checkbox'));
-        await expect(args.onChange).toHaveBeenCalledTimes(2);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
         await expect(canvas.getByLabelText('Switch label*')).not.toBeChecked();
     },
     args: {
-        value: false,
         label: 'Switch label',
         error: 'Switch error',
         required: true,
-        onChange: onChange,
         id: 'my-id'
+    },
+    parameters: {
+        defaultValue: false,
+        onChange: onChange
     }
 };

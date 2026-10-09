@@ -1,8 +1,9 @@
-import React from 'react';
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { TextArea } from './TextArea';
+import TextArea from './TextArea';
+import type { TextAreaProps } from './TextArea.types';
+import { useAppForm } from '../../hooks/form';
 
 const meta = {
     title: 'Form/TextArea',
@@ -10,6 +11,26 @@ const meta = {
     tags: ['autodocs'],
     argTypes: {
         disabled: { control: 'boolean' }
+    },
+    render: (args: TextAreaProps, { parameters }) => {
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? '' } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.TextArea {...args} />}
+                />
+            </form>
+        );
     }
 } satisfies Meta<typeof TextArea>;
 
@@ -17,16 +38,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic textarea')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic textarea').tagName).toBe('TEXTAREA');
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
-        await expect(args.onChange).toHaveBeenCalledTimes(17);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(17);
     },
     args: {
-        label: 'Some basic textarea',
-        name: 'basic',
+        label: 'Some basic textarea'
+    },
+    parameters: {
         onChange: fn()
     }
 };
@@ -37,16 +59,6 @@ export const WithMaxLength: Story = {
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
         await expect(canvas.getByRole('textbox').nextSibling).toHaveTextContent('17/160');
     },
-    render: (args) => {
-        const [value, setValue] = React.useState('');
-        return (
-            <TextArea
-                {...args}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-            />
-        );
-    },
     args: {
         label: 'Some basic textarea',
         maxLength: 160
@@ -54,13 +66,15 @@ export const WithMaxLength: Story = {
 };
 
 export const Disabled: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         label: 'Some disabled textarea',
-        disabled: true,
+        disabled: true
+    },
+    parameters: {
         onChange: fn()
     }
 };

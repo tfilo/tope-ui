@@ -2,8 +2,9 @@ import { expect, fn, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/16/solid';
 
-import { Input } from './Input';
-import type { InputActionProps } from './Input.types';
+import Input from './Input';
+import type { InputActionProps, InputProps } from './Input.types';
+import { useAppForm } from '../../hooks/form';
 
 const meta = {
     title: 'Form/Input',
@@ -21,6 +22,26 @@ const meta = {
             options: [undefined, 'UserIcon', 'PlayIcon', 'TrashIcon'],
             mapping: { UserIcon: UserIcon, PlayIcon: PlayIcon, TrashIcon: TrashIcon }
         }
+    },
+    render: (args: InputProps, { parameters }) => {
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? '' } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.Input {...args} />}
+                />
+            </form>
+        );
     }
 } satisfies Meta<typeof Input>;
 
@@ -28,46 +49,50 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ canvas, userEvent, parameters }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('INPUT');
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
-        await expect(args.onChange).toHaveBeenCalledTimes(17);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(17);
     },
     args: {
-        label: 'Some basic input',
-        name: 'basic',
+        label: 'Some basic input'
+    },
+    parameters: {
         onChange: fn()
     }
 };
 
 export const Disabled: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         label: 'Some disabled input',
-        disabled: true,
+        disabled: true
+    },
+    parameters: {
         onChange: fn()
     }
 };
 
 export const Readonly: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Some readonly input')).toBeVisible();
         await expect(canvas.getByLabelText('Some readonly input').tagName).toBe('INPUT');
         await userEvent.type(canvas.getByRole('textbox'), 'aaaaaa');
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await expect(canvas.getByLabelText('Some readonly input')).toHaveValue('This is some text');
     },
     args: {
         label: 'Some readonly input',
-        value: 'This is some text',
-        name: 'basic',
-        readOnly: true,
+        readOnly: true
+    },
+    parameters: {
+        defaultValue: 'This is some text',
         onChange: fn()
     }
 };

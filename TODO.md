@@ -2,7 +2,7 @@
 
 List of components to develop
 
-- [ ] FORM
+- [x] FORM
     - [x] Autocomplete
         - [x] Single
         - [x] Multi-select
@@ -32,7 +32,7 @@ List of components to develop
     - [x] Textarea
         - [x] Optional max-length and visual counter at bottom right
         - [x] Review
-- [ ] GENERAL (Different interactive elements not directly linked to navigation/form/etc)
+- [x] GENERAL (Different interactive elements not directly linked to navigation/form/etc)
     - [x] Button
         - [x] Support elements: `<button>`, `<a>`, `<Link>`
         - [x] Colors: Primary, Secondary, Danger, Outline, Transparent
@@ -53,13 +53,13 @@ List of components to develop
     - [x] List
         - [x] Renders a bulleted list
         - [x] Review
-- [ ] OVERLAYS
+- [x] OVERLAYS
     - [x] Modal
         - [x] Props: Title (string), Body (ReactNode)
         - [x] Footer: onConfirm (required), onCancel? (optional)
         - [x] Size: Normal / Wide
         - [x] Review
-- [ ] LAYOUT
+- [x] LAYOUT
     - [x] Header
         - [x] Right: profile button (optional) and logout
         - [x] Left: navigation buttons / dropdowns with icon (on mobile/tablet icons only)
@@ -104,12 +104,12 @@ List of components to develop
     - [ ] Integrate Autocomplete
     - [ ] Integrate Date
     - [ ] Integrate File
-    - [ ] Integrate Input
+    - [x] Integrate Input
     - [ ] Integrate Select
-    - [ ] Integrate Switch
-    - [ ] Integrate Textarea
+    - [x] Integrate Switch
+    - [x] Integrate Textarea
 - [x] PUBLISH
     - [x] Create github action to publish to NPM
-- [ ] BUILD
+- [x] BUILD
     - [x] Add react compiler
     - [x] Remove useMemo and useCallback

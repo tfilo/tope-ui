@@ -30,7 +30,7 @@ const theme = {
  */
 export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, required, disabled, elementId, children }) => {
     const hasLabel = isNotBlank(label);
-    const hasError = isNotBlank(error);
+    const hasError = Array.isArray(error) ? error.some(isNotBlank) : isNotBlank(error);
     const state = hasError ? 'error' : 'default';
 
     return (
@@ -53,15 +53,32 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
                 </label>
             )}
             <div className={`${theme.component} ${theme.state[state](disabled)} ${theme.base}`}>{children}</div>
-            {hasError && (
-                <label
-                    htmlFor={elementId}
-                    id={`${elementId}-error`}
-                    className={theme.error(disabled)}
-                >
-                    {error}
-                </label>
-            )}
+            {hasError &&
+                (Array.isArray(error) ? (
+                    <>
+                        {error.map((err, idx) => {
+                            return (
+                                <label
+                                    htmlFor={elementId}
+                                    id={`${elementId}-error-${idx}`}
+                                    className={theme.error(disabled)}
+                                    role='alert'
+                                >
+                                    {err}
+                                </label>
+                            );
+                        })}
+                    </>
+                ) : (
+                    <label
+                        htmlFor={elementId}
+                        id={`${elementId}-error`}
+                        className={theme.error(disabled)}
+                        role='alert'
+                    >
+                        {error}
+                    </label>
+                ))}
         </div>
     );
 };

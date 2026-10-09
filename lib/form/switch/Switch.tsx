@@ -1,8 +1,10 @@
 import { useId } from 'react';
 
-import type { SwitchProps } from './switch.types';
+import type { SwitchProps } from './Switch.types';
 import { isNotBlank, sb } from '../../utils/string-utils';
 import { localization } from '../../utils/constants';
+import { useFieldContext } from '../../hooks/form-context';
+import { useSelector } from '@tanstack/react-form';
 
 const theme = {
     wrapper: 'flex flex-1  flex-row items-center gap-md',
@@ -52,31 +54,41 @@ const theme = {
     error: (isDisabled: boolean = false) => (isDisabled ? 'text-disabled' : 'text-danger')
 } as const;
 
-const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, value, onChange, ...props }) => {
+const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, ref, ...props }) => {
     const _id = useId();
     const baseId = id || _id;
     const inputId = `input-${baseId}`;
 
-    const hasLabel = isNotBlank(label);
-    const hasError = isNotBlank(error);
+    const field = useFieldContext<boolean>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
 
-    const borderColor = theme.borderColor(hasError).disabled[sb(!!disabled)].checked[sb(value)];
-    const circleColor = theme.circle.color.disabled[sb(!!disabled)].checked[sb(value)];
+    const hasError = errors.length > 0 || isNotBlank(error);
+
+    const hasLabel = isNotBlank(label);
+
+    const borderColor = theme.borderColor(hasError).disabled[sb(!!disabled)].checked[sb(field.state.value)];
+    const circleColor = theme.circle.color.disabled[sb(!!disabled)].checked[sb(field.state.value)];
 
     return (
         <>
             <div className={theme.wrapper}>
                 <input
-                    {...props}
-                    type='checkbox'
-                    id={inputId}
-                    checked={value}
-                    disabled={disabled}
                     className={theme.srOnly}
+                    type='checkbox'
+                    {...props}
+                    name={field.name}
+                    checked={field.state.value}
+                    disabled={disabled}
                     onChange={(e) => {
                         if (props.readOnly) return;
-                        onChange(e.target.checked);
+                        field.handleChange(e.target.checked);
                     }}
+                    id={inputId}
+                    ref={ref}
                 />
                 <label
                     htmlFor={inputId}
@@ -84,7 +96,7 @@ const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, v
                     className={`${theme.base(!(disabled || props.readOnly))} ${borderColor}`}
                 >
                     <span className={theme.srOnly}>{localization.switch}</span>
-                    <span className={`${theme.circle.base(value)} ${circleColor}`}></span>
+                    <span className={`${theme.circle.base(field.state.value)} ${circleColor}`}></span>
                 </label>
 
                 {hasLabel && (
@@ -106,13 +118,31 @@ const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, v
                 )}
             </div>
             {hasError && (
-                <label
-                    htmlFor={inputId}
-                    id={`${inputId}-error`}
-                    className={theme.error(disabled)}
-                >
-                    {error}
-                </label>
+                <>
+                    {errors.length > 0 ? (
+                        errors.map((err, idx) => {
+                            return (
+                                <label
+                                    htmlFor={inputId}
+                                    id={`${inputId}-error-${idx}`}
+                                    className={theme.error(disabled)}
+                                    role='alert'
+                                >
+                                    {err}
+                                </label>
+                            );
+                        })
+                    ) : (
+                        <label
+                            htmlFor={inputId}
+                            id={`${inputId}-error`}
+                            className={theme.error(disabled)}
+                            role='alert'
+                        >
+                            {error}
+                        </label>
+                    )}
+                </>
             )}
         </>
     );

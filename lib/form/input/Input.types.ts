@@ -12,7 +12,7 @@ export interface InputActionProps {
     disabled?: boolean;
 }
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface BaseProps {
     /** Optional label for input component */
     label?: string;
     /** Optional error message for input component, if not blank, all input is in danger color */
@@ -24,3 +24,6 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     /** Ref to input */
     ref?: RefObject<HTMLInputElement | null>;
 }
+
+export interface InputProps
+    extends Omit<InputHTMLAttributes<HTMLInputElement>, keyof BaseProps | 'value' | 'onChange' | 'onBlur' | 'name'>, BaseProps {}

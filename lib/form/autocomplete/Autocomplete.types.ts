@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes } from 'react';
+
 import type { Option } from '../../common/Option';
 
 export type OnSearchResult = {

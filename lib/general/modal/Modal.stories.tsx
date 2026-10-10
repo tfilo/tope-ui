@@ -1,10 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import Modal from './Modal';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { expect, fn } from 'storybook/test';
-import { Button } from '..';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CheckIcon, FaceSmileIcon, HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
+
+import Modal from './Modal';
 import type { ModalProps } from './Modal.types';
+import { Button } from '../button';
 
 type StorybookOnlyProps = {
     cancelMode: 'default' | 'custom' | 'none';
@@ -96,31 +97,25 @@ const meta = {
         const cancelBtnFromStory = context.initialArgs.cancelLabel;
         const cancelBtnFromControls = cancelLabel;
 
-        const finalCancelLabel = useMemo(() => {
-            if (cancelBtnFromStory || cancelBtnFromStory === null) {
-                return cancelBtnFromStory;
-            } else if (cancelMode === 'none') {
-                return null;
-            } else if (cancelMode === 'custom') {
-                return cancelBtnFromControls;
-            } else {
-                return undefined;
-            }
-        }, [cancelBtnFromControls, cancelBtnFromStory, cancelMode]);
+        const finalCancelLabel =
+            cancelBtnFromStory || cancelBtnFromStory === null
+                ? cancelBtnFromStory
+                : cancelMode === 'none'
+                  ? null
+                  : cancelMode === 'custom'
+                    ? cancelBtnFromControls
+                    : undefined;
 
         useEffect(() => {
             setShowModal(openModal);
         }, [openModal]);
 
-        const onCloseHandler = useCallback(
-            (confirm: boolean) => {
-                if (onClose) {
-                    onClose(confirm);
-                }
-                setShowModal(false);
-            },
-            [onClose]
-        );
+        const onCloseHandler = (confirm: boolean) => {
+            if (onClose) {
+                onClose(confirm);
+            }
+            setShowModal(false);
+        };
 
         return (
             <>

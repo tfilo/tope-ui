@@ -1,8 +1,11 @@
-import React, { useId, type ChangeEvent } from 'react';
-import { ElementWrapper } from '../wrapper/ElementWrapper';
-import { isNotBlank } from '../../utils/string-utils';
-import type { TextAreaProps } from './TextArea.types';
+import React, { useId } from 'react';
+import { useSelector } from '@tanstack/react-form';
+
+import { useFieldContext } from '../../hooks/form-context';
 import { localization } from '../../utils/constants';
+import { ElementWrapper } from '../wrapper/ElementWrapper';
+import type { TextAreaProps } from './TextArea.types';
+import { isNotBlank } from '../../utils/string-utils';
 
 const theme = {
     base: 'flex-1 focus:outline-0 px-md py-sm',
@@ -14,24 +17,26 @@ const theme = {
  * TextArea component that renders as HTMLTextAreaElement element wrapped by parent div
  * containing optional label and error message.
  */
-export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onChange, value, ...props }) => {
+const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, ...props }) => {
     const _id = useId();
     const textareaId = id || `textarea-${_id}`;
     const hasMaxLenght = props.maxLength !== undefined;
-    const hasError = isNotBlank(error);
 
-    const count = value ? String(value).length : 0;
+    const field = useFieldContext<string>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
 
-    const handleOnChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        if (onChange !== undefined && typeof onChange === 'function') {
-            onChange(e);
-        }
-    };
+    const hasError = errors.length > 0 || isNotBlank(error);
+
+    const count = field.state.value ? String(field.state.value).length : 0;
 
     return (
         <ElementWrapper
             label={label}
-            error={error}
+            error={error ?? errors}
             required={props.required}
             disabled={props.disabled}
             elementId={textareaId}
@@ -41,9 +46,11 @@ export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onCha
                     className={theme.base}
                     rows={4}
                     {...props}
+                    name={field.name}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
                     id={textareaId}
-                    value={value}
-                    onChange={handleOnChange}
                     ref={ref}
                 />
                 {hasMaxLenght && !hasError && (
@@ -58,3 +65,5 @@ export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, onCha
         </ElementWrapper>
     );
 };
+
+export default TextArea;

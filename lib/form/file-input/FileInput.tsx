@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useId, useMemo } from 'react';
+import React, { useEffect, useId } from 'react';
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
 import { isNotBlank } from '../../utils/string-utils';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
-import { localization } from '../../utils/constants';
 
 const theme = {
     action: {
@@ -41,47 +42,34 @@ export const FileInput: React.FC<FileInputProps> = ({
     const hasLabel = isNotBlank(label);
     const hasError = isNotBlank(error);
 
-    const handleSelect = useCallback(() => {
+    const handleSelect = () => {
         hiddenFileInputRef.current?.click();
-    }, []);
+    };
 
-    const handleChange = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement>) => {
-            if (onChange && event.currentTarget.files) {
-                if (multiple) {
-                    const files = Array.from(event.currentTarget.files);
-                    onChange(files);
-                } else {
-                    const files = Array.from(event.currentTarget.files);
-                    onChange(files.find(() => true) ?? null);
-                }
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (onChange && event.currentTarget.files) {
+            if (multiple) {
+                const files = Array.from(event.currentTarget.files);
+                onChange(files);
+            } else {
+                const files = Array.from(event.currentTarget.files);
+                onChange(files.find(() => true) ?? null);
             }
-        },
-        [onChange, multiple]
-    );
-
-    const inputValue = useMemo(() => {
-        if (Array.isArray(value)) {
-            return value;
-        } else if (value instanceof File) {
-            return [value];
         }
-        return [];
-    }, [value]);
+    };
 
-    const handleRemoveFile = useCallback(
-        (fileToRemove: File) => {
-            if (onChange) {
-                if (multiple && Array.isArray(value)) {
-                    const newValue = value.filter((file) => file !== fileToRemove);
-                    onChange(newValue);
-                } else if (!multiple && value instanceof File && value === fileToRemove) {
-                    onChange(null);
-                }
+    const inputValue = Array.isArray(value) ? value : value instanceof File ? [value] : [];
+
+    const handleRemoveFile = (fileToRemove: File) => {
+        if (onChange) {
+            if (multiple && Array.isArray(value)) {
+                const newValue = value.filter((file) => file !== fileToRemove);
+                onChange(newValue);
+            } else if (!multiple && value instanceof File && value === fileToRemove) {
+                onChange(null);
             }
-        },
-        [onChange, value, multiple]
-    );
+        }
+    };
 
     useEffect(() => {
         // Simulate accesibility behavior of native file input where clicking on label or error message focuses the input element. This is needed as we are using div as main element instead of native input.
@@ -98,16 +86,14 @@ export const FileInput: React.FC<FileInputProps> = ({
         };
     }, [inputId, hasError]);
 
-    const labeledBy = useMemo(() => {
-        const labeledBy = [];
-        if (hasLabel) {
-            labeledBy.push(`${inputId}-label`);
-        }
-        if (hasError) {
-            labeledBy.push(`${inputId}-error`);
-        }
-        return labeledBy.length > 0 ? labeledBy.join(' ') : undefined;
-    }, [hasError, hasLabel, inputId]);
+    const labeledByArr = [];
+    if (hasLabel) {
+        labeledByArr.push(`${inputId}-label`);
+    }
+    if (hasError) {
+        labeledByArr.push(`${inputId}-error`);
+    }
+    const labeledBy = labeledByArr.length > 0 ? labeledByArr.join(' ') : undefined;
 
     return (
         <ElementWrapper

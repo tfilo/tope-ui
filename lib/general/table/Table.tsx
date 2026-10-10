@@ -1,9 +1,18 @@
+import { useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+
+import { config } from '../../utils/constants';
 import type { RowObject, SortObject, TableProps } from './Table.types';
-import { useCallback, useEffect, useEffectEvent, useState, type ReactElement } from 'react';
 import { TableCell } from './TableCell';
 import { TablePagination } from './TablePagination';
 import { TableHeaderCell } from './TableHeaderCell';
-import { config } from '../../utils/constants';
+
+const theme = {
+    wrapper: 'w-full',
+    scrollWrapper: 'w-full overflow-y-auto',
+    table: 'w-full table-auto border-separate border-spacing-none',
+    headerCell: (additional: string = '') => `border-b border-default p-md text-left font-bold text-default ${additional}`.trim(),
+    bodyCell: (additional: string = '') => `border-b border-default p-md text-left text-default ${additional}`.trim()
+} as const;
 
 /**
  * Base compare method, compares all values as strings except number or bigint that are compared as numbers
@@ -62,23 +71,23 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     const hasFetch = onFetch !== undefined;
     const totalPages = Math.ceil(totalRecords / pageSize);
 
-    const onPrevPage = useCallback(() => {
+    const onPrevPage = () => {
         setPage((prev) => {
             return Math.max(0, prev - 1);
         });
-    }, []);
+    };
 
-    const onNextPage = useCallback(() => {
+    const onNextPage = () => {
         setPage((prev) => {
             return Math.min(totalPages - 1, prev + 1);
         });
-    }, [totalPages]);
+    };
 
-    const onPageChange = useCallback((e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
+    const onPageChange = (e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
         setPage(+e.currentTarget.value);
-    }, []);
+    };
 
-    const onSortChange = useCallback((accessor: keyof TData) => {
+    const onSortChange = (accessor: keyof TData) => {
         setSort((prev) => {
             let result = [...prev];
             const idx = result.findIndex((s) => s.accessor === accessor);
@@ -96,7 +105,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
             return result;
         });
         setPage(0);
-    }, []);
+    };
 
     const onSetData = useEffectEvent((data: Readonly<TData[]>, page?: number, _pageSize?: number, totalRecords?: number) => {
         if (_pageSize !== undefined && _pageSize !== pageSize) {
@@ -156,18 +165,15 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     }, [_data, columns, hasStaticData, sort]);
 
     return (
-        <div className='w-full'>
-            <div className='overflow-y-auto w-full'>
-                <table className='w-full table-auto border-separate border-spacing-none'>
+        <div className={theme.wrapper}>
+            <div className={theme.scrollWrapper}>
+                <table className={theme.table}>
                     <thead>
                         <tr>
                             {columns.map((col) => (
                                 <th
                                     key={`${col.accessor.toString()}_${col.header}`}
-                                    className={
-                                        'border-b border-default p-md text-left font-bold text-default' +
-                                        (col.additionalClassName ? ` ${col.additionalClassName}` : '')
-                                    }
+                                    className={theme.headerCell(col.additionalClassName)}
                                 >
                                     <TableHeaderCell
                                         col={col}
@@ -184,10 +190,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                                 {columns.map((col) => (
                                     <td
                                         key={`${col.accessor.toString()}_${col.header}`}
-                                        className={
-                                            'border-b border-default p-md text-left text-default' +
-                                            (col.additionalClassName ? ` ${col.additionalClassName}` : '')
-                                        }
+                                        className={theme.bodyCell(col.additionalClassName)}
                                     >
                                         <TableCell
                                             row={row}

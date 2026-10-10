@@ -1,4 +1,5 @@
 import type { ElementType } from 'react';
+
 import { isNotBlank } from '../../utils';
 import type { SectionProps } from './Section.types';
 

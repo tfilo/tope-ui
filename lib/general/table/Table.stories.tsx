@@ -1,11 +1,11 @@
+import { expect } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
-import { Table } from './Table';
-import { Button } from '../button';
 import { PencilIcon } from '@heroicons/react/16/solid';
+
+import { Button } from '../button';
+import { Table } from './Table';
 import { type SortObject } from './Table.types';
 import { createColumns } from './table-utils';
-import { expect } from 'storybook/test';
 
 const meta = {
     title: 'General/Table',

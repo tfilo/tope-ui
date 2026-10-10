@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-
-import { Header } from './Header';
-import { Bars3Icon, CameraIcon, MapIcon, UserIcon, UsersIcon } from '@heroicons/react/16/solid';
 import { expect, fn } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Bars3Icon, CameraIcon, MapIcon, UserIcon, UsersIcon } from '@heroicons/react/16/solid';
+
 import { Content } from '../Content';
 import { Page } from '../Page/Page';
+import { Header } from './Header';
 
 const meta = {
     title: 'Layout/Header',
@@ -15,7 +15,7 @@ const meta = {
     },
     decorators: [
         (Story) => (
-            <div className='flex flex-col h-[600px] overflow-hidden'>
+            <div className='flex h-[600px] flex-col overflow-hidden'>
                 <Story />
                 <Content>
                     <Page title='Page content under header'>
@@ -110,7 +110,7 @@ export const MenuOnly: Story = {
     }
 };
 
-export const LogouyOnly: Story = {
+export const LogoutOnly: Story = {
     args: {
         onLogout: fn()
     }

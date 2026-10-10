@@ -1,6 +1,9 @@
-import React, { useCallback, useId, useState } from 'react';
-import { ElementWrapper } from '../wrapper/ElementWrapper';
+import React, { useId, useState } from 'react';
+import { useSelector } from '@tanstack/react-form';
+
+import { useFieldContext } from '../../hooks/form-context';
 import { Button } from '../../general/button';
+import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { InputActionProps, InputProps } from './Input.types';
 
 const theme = {
@@ -17,7 +20,7 @@ const theme = {
 const InputAction: React.FC<InputActionProps> = (props) => {
     const [processing, setProcessing] = useState(false);
 
-    const handleClick = useCallback(async () => {
+    const handleClick = async () => {
         if (props.onClick) {
             setProcessing(true);
             try {
@@ -26,7 +29,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
                 setProcessing(false);
             }
         }
-    }, [props]);
+    };
 
     if (!props.onClick) {
         const Icon = props.icon;
@@ -59,9 +62,16 @@ const InputAction: React.FC<InputActionProps> = (props) => {
  * Input component that renders as HTMLInputElement element wrapped by parent div
  * containing optional label and error message.
  */
-export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, ref, ...props }) => {
+const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, ref, ...props }) => {
     const _id = useId();
     const inputId = id || `input-${_id}`;
+
+    const field = useFieldContext<string>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
 
     const startActionsArray = Array.isArray(startAction) ? startAction : startAction ? [startAction] : [];
     const endActionsArray = Array.isArray(endAction) ? endAction : endAction ? [endAction] : [];
@@ -69,7 +79,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
     return (
         <ElementWrapper
             label={label}
-            error={error}
+            error={error ?? errors}
             required={props.required}
             disabled={props.disabled}
             elementId={inputId}
@@ -88,6 +98,10 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
             <input
                 className={theme.input}
                 {...props}
+                name={field.name}
+                value={field.state.value}
+                onChange={(e) => field.handleChange(e.target.value)}
+                onBlur={field.handleBlur}
                 id={inputId}
                 ref={ref}
             />
@@ -105,3 +119,5 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
         </ElementWrapper>
     );
 };
+
+export default Input;

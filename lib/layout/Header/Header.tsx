@@ -1,9 +1,9 @@
 import { ArrowLeftStartOnRectangleIcon, UserCircleIcon } from '@heroicons/react/16/solid';
+
+import { localization } from '../../utils/constants';
+import useWindowSize from '../../hooks/useWindowSize';
 import { Button, Dropdown } from '../../general';
 import type { HeaderProps } from './Header.types';
-import useWindowSize from '../../hooks/useWindowSize';
-import { useMemo } from 'react';
-import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'border-b border-default flex flex-row gap-xl shadow',
@@ -16,12 +16,8 @@ const theme = {
  */
 export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null }) => {
     const hasProfileOrLogout = onProfile !== null || onLogout !== null;
-
     const size = useWindowSize();
-
-    const isMobile = useMemo(() => {
-        return size === 'mobile';
-    }, [size]);
+    const isMobile = size === 'mobile';
 
     return (
         <header className={theme.base}>

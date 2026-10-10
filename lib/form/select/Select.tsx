@@ -1,11 +1,13 @@
 import { useId } from 'react';
+
+import { localization } from '../../utils/constants';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { SelectProps } from './Select.types';
-import { localization } from '../../utils/constants';
 
 const theme = {
     base: 'flex-1 focus:outline-none px-md min-h-[30px]',
-    multiselect: 'py-md'
+    multiselect: 'py-md',
+    option: 'rounded-sm p-xs'
 };
 
 /**
@@ -55,7 +57,7 @@ export const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, 
                             key={option.value}
                             value={option.value}
                             disabled={option.disabled}
-                            className='p-xs rounded-sm'
+                            className={theme.option}
                         >
                             {option.label}
                         </option>

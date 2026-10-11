@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
-import { Select } from '../../form/select';
+import { Dropdown } from '../dropdown/Dropdown';
 import { Button } from '../button';
 import { type TablePaginationProps } from './Table.types';
 
@@ -13,7 +13,7 @@ const theme = {
 export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, onPrevPage, onPageChange, page, totalPages }) => {
     const paginationOptions = [...new Array(totalPages).keys()].map((i) => ({
         label: `${i + 1}`,
-        value: `${i}`
+        onClick: () => onPageChange(i)
     }));
 
     return (
@@ -29,12 +29,15 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
             </Button>
             <div className={theme.pageInfo}>
                 {localization.page}
-                <Select
+                <Dropdown
                     options={paginationOptions}
-                    value={page.toString()}
-                    onChange={onPageChange}
-                    aria-label={localization.currentPage}
-                />
+
+                    buttonProps={{
+                        'aria-label': localization.currentPage
+                    }}
+                >
+                    {page + 1}
+                </Dropdown>
                 {localization.of} {totalPages}
             </div>
             <Button

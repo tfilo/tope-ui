@@ -1,9 +1,9 @@
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import TextArea from './TextArea';
-import type { TextAreaProps } from './TextArea.types';
 import { useAppForm } from '../../hooks/form';
+import type { TextAreaProps } from './TextArea.types';
+import TextArea from './TextArea';
 
 const meta = {
     title: 'Form/TextArea',

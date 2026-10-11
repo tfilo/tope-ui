@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
 import { expect, fn, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import DateTimeInput from './DateTimeInput';
 import { WeekDay } from './WeekDay';
+import { useAppForm } from '../../hooks/form';
 
 const onChange = fn();
 
@@ -20,7 +20,6 @@ const meta = {
         }
     },
     argTypes: {
-        onChange: { action: 'changed' },
         type: {
             control: 'radio',
             options: ['date', 'dateTime']
@@ -39,34 +38,33 @@ const meta = {
             control: { type: 'number', min: 1, max: 1440 }
         }
     },
-    render: ({ value, onChange, ...args }) => {
-        const [val, setVal] = useState<string | null>(value);
-
-        const handleChange = (val: string | null) => {
-            setVal(val);
-            onChange(val);
-        };
-
-        useEffect(() => {
-            setVal(value);
-        }, [value]);
+    render: (args, { parameters }) => {
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? '' } });
 
         return (
-            <>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
                 <p className='pb-lg'>
-                    VALUE: <span>{JSON.stringify(val)}</span>
+                    <form.Subscribe selector={(state) => state.values.basic}>
+                        {(basic) => <span>VALUE: {JSON.stringify(basic)}</span>}
+                    </form.Subscribe>
                 </p>
-                <DateTimeInput
-                    {...args}
-                    value={val}
-                    onChange={handleChange}
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: (val) => {
+                            console.log('val', val.value);
+                            parameters.onChange(val.value);
+                        }
+                    }}
+                    children={(field) => <field.DateTimeInput {...args} />}
                 />
-            </>
+            </form>
         );
-    },
-    args: {
-        onChange: onChange,
-        value: null
     }
 } satisfies Meta<typeof DateTimeInput>;
 
@@ -76,42 +74,59 @@ type Story = StoryObj<typeof meta>;
 export const DateInput: Story = {
     args: {
         type: 'date'
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const BasicDateTimeInput: Story = {
     args: {
         type: 'dateTime'
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const WithValue: Story = {
     args: {
-        type: 'dateTime',
-        value: '2026-12-12T12:00:00'
+        type: 'dateTime'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };
 
 export const WithoutValue: Story = {
     args: {
-        type: 'dateTime',
-        value: null
+        type: 'dateTime'
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const WithLabel: Story = {
     args: {
         type: 'dateTime',
-        value: '2026-12-12T12:00:00',
         label: 'Input name'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };
 
 export const WithError: Story = {
     args: {
         type: 'dateTime',
-        value: '2026-12-12T12:00:00',
         error: 'Input error'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };
 
@@ -119,6 +134,9 @@ export const CustomPlaceholder: Story = {
     args: {
         type: 'dateTime',
         placeholder: 'Placeholder'
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
@@ -126,6 +144,9 @@ export const CustomLastDayInWeek: Story = {
     args: {
         type: 'dateTime',
         lastDayInWeek: WeekDay.Wednesday
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
@@ -133,44 +154,59 @@ export const CustomSlots: Story = {
     args: {
         type: 'dateTime',
         slots: 180
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const CustomInputFormat: Story = {
     args: {
         type: 'dateTime',
-        value: '2026-12-12T12:00:00',
         inputFormat: 'yyyy/MM/dd HH:mm:ss'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };
 
 export const CustomInputIconTitle: Story = {
     args: {
         type: 'dateTime',
-        value: '2026-12-12T12:00:00',
         inputIconTitle: 'calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };
 
 export const Disabled: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.type(canvas.getByRole('textbox'), '03.04.2025 13:30:00');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         type: 'dateTime',
         disabled: true
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const Readonly: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.type(canvas.getByRole('textbox'), '03.04.2025 13:30:00');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         type: 'dateTime',
         readOnly: true
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
@@ -179,6 +215,9 @@ export const Required: Story = {
         type: 'dateTime',
         required: true,
         label: 'Input label'
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
@@ -186,11 +225,14 @@ export const DisableAutoCloseDateTimePicker: Story = {
     args: {
         type: 'dateTime',
         closeDateTimePickerIfSelected: false
+    },
+    parameters: {
+        onChange: onChange
     }
 };
 
 export const MoreCustomOptions: Story = {
-    play: async ({ args, canvas, canvasElement, userEvent }) => {
+    play: async ({ parameters, canvas, canvasElement, userEvent }) => {
         // input
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Input name*')).toBeVisible();
@@ -209,16 +251,16 @@ export const MoreCustomOptions: Story = {
         await expect(canvas.getByRole('textbox').parentElement?.nextSibling).toHaveTextContent('Input error');
 
         // change value
-        await expect(args.onChange).toHaveBeenCalledTimes(0);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(0);
         await userEvent.clear(canvas.getByLabelText('Input name*'));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
-        await expect(args.onChange).toHaveBeenLastCalledWith(null);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenLastCalledWith('');
         await expect(canvas.getByLabelText('Input name*')).toHaveValue('');
         await userEvent.type(canvas.getByRole('textbox'), '2025/04/03 13:30:00');
-        await expect(args.onChange).toHaveBeenCalledTimes(20);
-        await expect(args.onChange).toHaveBeenLastCalledWith('2025-04-03T13:30:00');
+        await expect(parameters.onChange).toHaveBeenCalledTimes(20);
+        await expect(parameters.onChange).toHaveBeenLastCalledWith('2025-04-03T13:30:00');
 
-        // placeholder
+        // // placeholder
         await userEvent.clear(canvas.getByLabelText('Input name*'));
         await expect(canvas.getByRole('textbox')).toHaveAttribute('placeholder', 'Placeholder');
 
@@ -238,7 +280,7 @@ export const MoreCustomOptions: Story = {
         await userEvent.click(canvas.getByLabelText('Input name*'));
         await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
 
-        await expect(args.onChange).toHaveBeenCalledTimes(21);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(21);
         // month year list
         await userEvent.click(btn);
         const calendar = canvasElement.querySelector<HTMLElement>('div[popover="manual"]');
@@ -282,11 +324,10 @@ export const MoreCustomOptions: Story = {
         await userEvent.click(day10Button);
 
         await expect(canvasElement.querySelector('div[popover="manual"]')).not.toBeVisible();
-        await expect(args.onChange).toHaveBeenCalledTimes(22);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(22);
     },
     args: {
         type: 'dateTime',
-        value: '2026-12-12T12:00:00',
         label: 'Input name',
         placeholder: 'Placeholder',
         error: 'Input error',
@@ -296,5 +337,9 @@ export const MoreCustomOptions: Story = {
         inputIconTitle: 'calendar',
         required: true,
         id: 'calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-12-12T12:00:00'
     }
 };

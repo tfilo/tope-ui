@@ -6,7 +6,7 @@ import type { DropdownProps } from './Dropdown.types';
 
 const theme = {
     wrapper: 'relative',
-    button: 'flex cursor-pointer flex-row gap-sm focus:outline-none disabled:cursor-default',
+    button: 'w-full flex cursor-pointer flex-row gap-sm focus:outline-none disabled:cursor-default',
     icon: 'w-xl fill-inherit',
     dropdown: 'tope-ui-dropdown absolute rounded-sm border p-sm',
     dropdownItems: 'flex max-h-[min(200px,50vh)] w-full flex-col',

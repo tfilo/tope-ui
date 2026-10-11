@@ -102,10 +102,10 @@ List of components to develop
 - [ ] INTEGRATION TO TANSTACK
     - [ ] Read documentation how to integrate components with tanstack form
     - [ ] Integrate Autocomplete
-    - [ ] Integrate Date
+    - [x] Integrate Date
     - [ ] Integrate File
     - [x] Integrate Input
-    - [ ] Integrate Select
+    - [x] Integrate Select
     - [x] Integrate Switch
     - [x] Integrate Textarea
 - [x] PUBLISH

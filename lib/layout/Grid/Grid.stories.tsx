@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Select } from '../../form';
 import { Column } from '../Column';
 import { Grid } from './Grid';
 import { useAppForm } from '../../hooks';
@@ -19,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     render: () => {
-        const form = useAppForm({ defaultValues: { basic1: '', basic2: '', basic3: '', basic4: '' } });
+        const form = useAppForm({ defaultValues: { basic1: '', basic2: '', basic3: '', basic4: '', basic5: '' } });
         return (
             <form
                 onSubmit={(e) => {
@@ -38,7 +37,7 @@ export const Default: Story = {
                     >
                         <form.AppField
                             name='basic1'
-                            children={(field) => <field.TextArea label='Text textarea' />}
+                            children={(field) => <field.TextArea label='Test textarea' />}
                         />
                     </Column>
                     <Column key='3'>
@@ -55,8 +54,8 @@ export const Default: Story = {
                     </Column>
                     <Column key='5'>
                         <form.AppField
-                            name='basic3'
-                            children={(field) => <field.Input label='Text input' />}
+                            name='basic2'
+                            children={(field) => <field.Input label='Test input' />}
                         />
                     </Column>
                     <Column
@@ -72,27 +71,32 @@ export const Default: Story = {
                         necessitatibus officiis veniam nesciunt dolor sint natus, sequi doloremque.
                     </Column>
                     <Column key='8'>
-                        <Select
-                            label='Test select'
-                            options={[
-                                { label: 'Option 1', value: '1' },
-                                { label: 'Option 2', value: '2' },
-                                { label: 'Option 3', value: '3' }
-                            ]}
+                        <form.AppField
+                            name='basic3'
+                            children={(field) => (
+                                <field.Select
+                                    label='Test select'
+                                    options={[
+                                        { label: 'Option 1', value: '1' },
+                                        { label: 'Option 2', value: '2' },
+                                        { label: 'Option 3', value: '3' }
+                                    ]}
+                                />
+                            )}
                         />
                     </Column>
                     <Column key='9'>
                         <form.AppField
                             name='basic4'
-                            children={(field) => <field.Input label='Text input' />}
+                            children={(field) => <field.Input label='Test input' />}
                         />
                     </Column>
                     <Column key='10'>
                         <form.AppField
-                            name='basic2'
+                            name='basic5'
                             children={(field) => (
                                 <field.TextArea
-                                    label='Text textarea'
+                                    label='Test textarea'
                                     maxLength={100}
                                     rows={8}
                                 />

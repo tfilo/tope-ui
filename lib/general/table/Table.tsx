@@ -83,10 +83,6 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
         });
     };
 
-    const onPageChange = (e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
-        setPage(+e.currentTarget.value);
-    };
-
     const onSortChange = (accessor: keyof TData) => {
         setSort((prev) => {
             let result = [...prev];
@@ -207,7 +203,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                 <TablePagination
                     onPrevPage={onPrevPage}
                     onNextPage={onNextPage}
-                    onPageChange={onPageChange}
+                    onPageChange={setPage}
                     page={page}
                     totalPages={totalPages}
                 />

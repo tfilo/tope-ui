@@ -1,8 +1,9 @@
-import { useState } from 'react';
 import { expect, fn, type Mock } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Select } from './Select';
+import { useAppForm } from '../../hooks/form';
+import type { SelectProps } from './Select.types';
+import Select from './Select';
 
 const meta = {
     title: 'Form/Select',
@@ -10,6 +11,28 @@ const meta = {
     tags: ['autodocs'],
     argTypes: {
         disabled: { control: 'boolean' }
+    },
+    render: (args: SelectProps, { parameters }) => {
+        const defVal = args.multiple === true ? [] : '';
+
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? defVal } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.Select {...args} />}
+                />
+            </form>
+        );
     }
 } satisfies Meta<typeof Select>;
 
@@ -17,35 +40,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
-    render: (args) => {
-        const [value, setValue] = useState<string>('');
-        return (
-            <Select
-                {...args}
-                value={value}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => {
-                    setValue(e.target.value);
-                    if (args.onChange) {
-                        args.onChange(e);
-                    }
-                }}
-            />
-        );
-    },
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('combobox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic select')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic select').tagName).toBe('SELECT');
         await userEvent.selectOptions(canvas.getByRole('combobox'), 'option3');
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
-        (args.onChange as Mock).mockClear();
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        (parameters.onChange as Mock).mockClear();
         await userEvent.selectOptions(canvas.getByRole('combobox'), 'option2');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         label: 'Some basic select',
-        name: 'basic',
-        onChange: fn(),
         allowEmptyOption: true,
         options: [
             { value: 'option1', label: 'Option 1' },
@@ -59,23 +65,28 @@ export const Basic: Story = {
                 ]
             }
         ]
+    },
+    parameters: {
+        onChange: fn()
     }
 };
 
 export const Disabled: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.selectOptions(canvas.getByRole('combobox'), 'option3');
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
         label: 'Some disabled select',
         disabled: true,
-        onChange: fn(),
         options: [
             { value: 'option1', label: 'Option 1' },
             { value: 'option2', label: 'Option 2', disabled: true },
             { value: 'option3', label: 'Option 3' }
         ]
+    },
+    parameters: {
+        onChange: fn()
     }
 };
 
@@ -146,21 +157,23 @@ export const SelectOnly: Story = {
 };
 
 export const MultiSelect: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         const select = canvas.getByRole('listbox');
         await expect(select).toBeVisible();
         await userEvent.selectOptions(select, ['option1', 'option3']);
-        await expect(args.onChange).toHaveBeenCalledTimes(2);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
     },
     args: {
         label: 'Some multi select',
-        name: 'multi-select',
         multiple: true,
-        onChange: fn(),
         options: [
             { value: 'option1', label: 'Option 1' },
             { value: 'option2', label: 'Option 2' },
             { value: 'option3', label: 'Option 3' }
         ]
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: []
     }
 };

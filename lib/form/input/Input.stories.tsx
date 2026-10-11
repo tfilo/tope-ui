@@ -2,9 +2,9 @@ import { expect, fn, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, EyeIcon } from '@heroicons/react/16/solid';
 
-import Input from './Input';
-import type { InputActionProps, InputProps } from './Input.types';
 import { useAppForm } from '../../hooks/form';
+import type { InputActionProps, InputProps } from './Input.types';
+import Input from './Input';
 
 const meta = {
     title: 'Form/Input',

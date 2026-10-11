@@ -16,12 +16,14 @@ import {
     subMonths
 } from 'date-fns';
 import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
+import { useSelector } from '@tanstack/react-form';
 
 import { localization } from '../../utils/constants';
 import { Button } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { DateTimeInputProps, Day, Month, Slot } from './DateTimeInput.types';
 import { WeekDay } from './WeekDay';
+import { useFieldContext } from '../../hooks/form-context';
 
 const theme = {
     action: {
@@ -116,19 +118,19 @@ const generateTimeSlots = (interval: number): Slot[] => {
  * @param {string | undefined} dateTime - The raw date/time string from the input field.
  * @param {boolean} hasTime - Flag to determine the output format (Date vs DateTime).
  * @param {string} inputFormatPattern - The pattern used to parse the input (e.g., 'dd.MM.yyyy HH:mm:ss').
- * @returns {string | null} A string in "yyyy-MM-dd" or "yyyy-MM-dd'T'HH:mm:ss" format, or null if dateTime is empty string or 'UNKNOWN' if dateTime is invalid.
+ * @returns {string} A string in "yyyy-MM-dd" or "yyyy-MM-dd'T'HH:mm:ss" format, or '' if dateTime is empty string or 'UNKNOWN' if dateTime is invalid.
  * @example
  * // Input: "26.03.2026", Pattern: "dd.MM.yyyy" -> Returns "2026-03-26"
  * formatToISO("26.03.2026", false, defaultDateInputPattern);
  * @example
- * // Input: "", Pattern: Pattern: "dd.MM.yyyy" -> Returns null
+ * // Input: "", Pattern: Pattern: "dd.MM.yyyy" -> Returns ""
  * formatToISO("", false, defaultDateInputPattern);
  * @example
  * // Input: "26.02.300", Pattern: "dd.MM.yyyy" -> Returns "UNKNOWN"
  * formatToISO("26.02.300", false, defaultDateInputPattern);
  */
-const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormatPattern: string): string | null => {
-    if (!dateTime?.trim()) return null;
+const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormatPattern: string): string => {
+    if (!dateTime?.trim()) return '';
     const parsedDate = parse(dateTime, inputFormatPattern, new Date()); // convert string into Date object according formatPattern
     if (!isValid(parsedDate) || getYear(parsedDate) < minYear || getYear(parsedDate) > maxYear) {
         // 'Invalid format or year out of the range');
@@ -227,12 +229,18 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     slots = 15,
     inputFormat,
     placeholder,
-    value,
-    onChange,
     inputIconTitle,
     closeDateTimePickerIfSelected = true,
     ...props
 }) => {
+    const field = useFieldContext<string>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
+    const value = field.state.value;
+
     const hasTime = type === 'dateTime';
 
     const [isOpen, setIsOpen] = useState(false);
@@ -484,7 +492,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
             setSelectedDate(null);
             setSelectedMinutes(null);
             setSelectedSeconds(null);
-            onChange(null);
+            field.handleChange('');
         } else if (rawValue.trim().length === inputFormatPattern.length) {
             // Attempt to parse the string using the provided pattern. The third argument 'new Date()' acts as a reference for missing parts (e.g., if the pattern only has time, it takes today's date).
             const parsedDate = parse(rawValue, inputFormatPattern, new Date());
@@ -507,14 +515,14 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 }
 
                 const res = hasTime ? format(parsedDate, isoDateTimeFormat) : format(parsedDate, isoDateFormat);
-                onChange(res);
+                field.handleChange(res);
             } else {
                 // Date is invalid (parsedDate is invalid, or year is out of the range)
-                onChange(unknownDate);
+                field.handleChange(unknownDate);
             }
         } else {
             // Date is invalid (user is still typing)
-            onChange(unknownDate);
+            field.handleChange(unknownDate);
         }
     };
 
@@ -534,7 +542,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const handleDateSelection = (formattedDate: string, closeDateTimePicker: boolean = true) => {
         setInputValue(formattedDate);
         const res = formatToISO(formattedDate, hasTime, inputFormatPattern);
-        onChange(res);
+        field.handleChange(res);
         if (closeDateTimePicker && closeDateTimePickerIfSelected) {
             // close date-time picker
             handleCalendarClose();
@@ -729,7 +737,7 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         <>
             <ElementWrapper
                 label={label}
-                error={error}
+                error={error ?? errors}
                 required={props.required}
                 disabled={props.disabled}
                 elementId={inputId}

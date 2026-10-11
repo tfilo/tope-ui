@@ -1,18 +1,20 @@
-/* eslint-disable react-refresh/only-export-components */
-import { lazy } from 'react';
 import { createFormHook } from '@tanstack/react-form';
 
 import { fieldContext, formContext } from './form-context.tsx';
 
-const Input = lazy(() => import('../form/input/Input.tsx'));
-const TextArea = lazy(() => import('../form/textarea/TextArea.tsx'));
-const Switch = lazy(() => import('../form/switch/Switch.tsx'));
+import DateTimeInput from '../form/date-time-input/DateTimeInput.tsx';
+import Input from '../form/input/Input.tsx';
+import Select from '../form/select/Select.tsx';
+import Switch from '../form/switch/Switch.tsx';
+import TextArea from '../form/textarea/TextArea.tsx';
 
 export const { useAppForm, withForm, withFieldGroup } = createFormHook({
     fieldComponents: {
+        DateTimeInput,
         Input,
         TextArea,
-        Switch
+        Switch,
+        Select
     },
     formComponents: {},
     fieldContext,

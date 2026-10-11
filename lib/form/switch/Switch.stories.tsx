@@ -1,9 +1,9 @@
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import Switch from './Switch';
-import type { SwitchProps } from './Switch.types';
 import { useAppForm } from '../../hooks/form';
+import type { SwitchProps } from './Switch.types';
+import Switch from './Switch';
 
 const onChange = fn();
 

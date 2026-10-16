@@ -100,10 +100,10 @@ List of components to develop
     - [x] Add localization option to all components that uses some hardcoded internal texts
     - [x] Review if all text are available for localization
 - [ ] INTEGRATION TO TANSTACK
-    - [ ] Read documentation how to integrate components with tanstack form
-    - [ ] Integrate Autocomplete
+    - [x] Read documentation how to integrate components with tanstack form
+    - [x] Integrate Autocomplete
     - [x] Integrate Date
-    - [ ] Integrate File
+    - [x] Integrate File
     - [x] Integrate Input
     - [x] Integrate Select
     - [x] Integrate Switch

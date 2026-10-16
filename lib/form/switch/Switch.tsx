@@ -9,7 +9,7 @@ import { useSelector } from '@tanstack/react-form';
 const theme = {
     wrapper: 'flex flex-1  flex-row items-center gap-md',
     base: (cursorPointer: boolean = false) =>
-        `${cursorPointer ? 'cursor-pointer' : ''} flex h-[28px] w-[48px] items-center rounded-full border-2 transition-colors duration-500`,
+        `${cursorPointer ? 'cursor-pointer' : ''} flex h-[28px] w-[48px] items-center rounded-full border-2 transition-colors duration-500 peer-focus-visible:outline-2 peer-focus-visible:outline-primary peer-focus-visible:outline-offset-1`,
     borderColor: (hasError: boolean = false) => {
         return {
             disabled: {
@@ -48,13 +48,13 @@ const theme = {
             }
         }
     },
-    srOnly: 'sr-only',
+    srOnly: 'peer sr-only',
     label: (isDisabled: boolean = false) => `${isDisabled ? 'text-disabled' : 'text-default'} flex flex-row gap-xs`,
     star: (isDisabled: boolean = false) => (isDisabled ? 'text-disabled' : 'text-danger'),
     error: (isDisabled: boolean = false) => (isDisabled ? 'text-disabled' : 'text-danger')
 } as const;
 
-const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, ref, ...props }) => {
+export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, ...props }) => {
     const _id = useId();
     const baseId = id || _id;
     const inputId = `input-${baseId}`;
@@ -88,7 +88,7 @@ const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, r
                         field.handleChange(e.target.checked);
                     }}
                     id={inputId}
-                    ref={ref}
+                    onBlur={field.handleBlur}
                 />
                 <label
                     htmlFor={inputId}
@@ -147,5 +147,3 @@ const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, r
         </>
     );
 };
-
-export default Switch;

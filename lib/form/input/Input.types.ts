@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, RefObject } from 'react';
+import type { InputHTMLAttributes } from 'react';
 import type { Icon } from '../../common/Icon';
 
 export interface InputActionProps {
@@ -21,8 +21,6 @@ interface BaseProps {
     startAction?: Array<InputActionProps> | InputActionProps;
     /** Optional buttons or icons at end of input */
     endAction?: Array<InputActionProps> | InputActionProps;
-    /** Ref to input */
-    ref?: RefObject<HTMLInputElement | null>;
 }
 
 export interface InputProps

@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
 
 import { isBlank, isNotBlank } from '../../utils/string-utils';
@@ -7,6 +7,8 @@ import type { Option } from '../../common/Option';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { AutocompleteProps, OnSearchResult } from './Autocomplete.types';
+import { useFieldContext } from '../../hooks/form-context';
+import { useSelector } from '@tanstack/react-form';
 
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
@@ -32,8 +34,6 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     id,
     label,
     error,
-    value,
-    onChange,
     onSearch,
     onFetch,
     multiple = false,
@@ -42,6 +42,19 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     ...props
 }) => {
     const _id = useId();
+
+    const field = useFieldContext<string | string[]>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
+
+    const value = useMemo(
+        () => (multiple ? (Array.isArray(field.state.value) ? field.state.value : []) : (field.state.value as string)),
+        [field.state.value, multiple]
+    );
+
     const searchAbortController = useRef<AbortController | null>(null);
     const nextPageAbortController = useRef<AbortController | null>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
@@ -180,6 +193,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         handleOptionsClose();
         setDisplayValue('');
+        field.handleBlur();
     };
 
     // Handle option selection from dropdown
@@ -269,10 +283,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             if (multiple === false) {
                 if (selectedOption.length === 0) {
                     if (value !== null) {
-                        (onChange as (value: string | null) => void)(null);
+                        field.handleChange('');
                     }
                 } else if (value !== selectedOption[0].value) {
-                    (onChange as (value: string | null) => void)(selectedOption[0].value);
+                    field.handleChange(selectedOption[0].value);
                 }
             } else {
                 const allSelected =
@@ -281,7 +295,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     value.length === selectedOption.length;
 
                 if (!allSelected) {
-                    (onChange as (value: string[]) => void)(selectedOption.map((o) => o.value));
+                    field.handleChange(selectedOption.map((o) => o.value));
                 }
             }
         }
@@ -373,7 +387,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     return (
         <ElementWrapper
             label={label}
-            error={error}
+            error={error ?? errors}
             required={props.required}
             disabled={disabled}
             elementId={autocompleteId}
@@ -397,6 +411,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             className={theme.input}
                             {...props}
                             value={displayValue}
+                            name={field.name}
                             disabled={disabled || isFetching}
                             onChange={handleDisplayValueChange}
                             onKeyDown={handleKeyDown}

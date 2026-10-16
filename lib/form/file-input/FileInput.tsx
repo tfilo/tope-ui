@@ -6,6 +6,8 @@ import { isNotBlank } from '../../utils/string-utils';
 import { Button, Tag } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { FileInputProps } from './FileInput.types';
+import { useFieldContext } from '../../hooks/form-context';
+import { useSelector } from '@tanstack/react-form';
 
 const theme = {
     action: {
@@ -23,51 +25,44 @@ const theme = {
  * containing optional label and error message. Internally uses hidden file input to handle file selection and displays selected files as tags.
  * Supports both single and multiple file selection.
  */
-export const FileInput: React.FC<FileInputProps> = ({
-    id,
-    label,
-    error,
-    name,
-    value,
-    accept,
-    multiple,
-    disabled,
-    required,
-    readOnly,
-    onChange
-}) => {
+export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, multiple, disabled, required, readOnly }) => {
     const _id = useId();
     const hiddenFileInputRef = React.useRef<HTMLInputElement | null>(null);
     const inputId = id || `input-${_id}`;
     const hasLabel = isNotBlank(label);
     const hasError = isNotBlank(error);
 
+    const field = useFieldContext<File | File[] | null>();
+    const rawErrors = useSelector(field.store, (state) => state.meta.errors);
+    const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
+    const errors = isTouched
+        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
+        : [];
+
     const handleSelect = () => {
         hiddenFileInputRef.current?.click();
     };
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (onChange && event.currentTarget.files) {
+        if (event.currentTarget.files) {
             if (multiple) {
                 const files = Array.from(event.currentTarget.files);
-                onChange(files);
+                field.handleChange(files);
             } else {
                 const files = Array.from(event.currentTarget.files);
-                onChange(files.find(() => true) ?? null);
+                field.handleChange(files.find(() => true) ?? null);
             }
         }
     };
 
-    const inputValue = Array.isArray(value) ? value : value instanceof File ? [value] : [];
+    const inputValue = Array.isArray(field.state.value) ? field.state.value : field.state.value instanceof File ? [field.state.value] : [];
 
     const handleRemoveFile = (fileToRemove: File) => {
-        if (onChange) {
-            if (multiple && Array.isArray(value)) {
-                const newValue = value.filter((file) => file !== fileToRemove);
-                onChange(newValue);
-            } else if (!multiple && value instanceof File && value === fileToRemove) {
-                onChange(null);
-            }
+        if (multiple && Array.isArray(field.state.value)) {
+            const newValue = field.state.value.filter((file) => file !== fileToRemove);
+            field.handleChange(newValue);
+        } else if (!multiple && field.state.value instanceof File && field.state.value === fileToRemove) {
+            field.handleChange(null);
         }
     };
 
@@ -98,7 +93,7 @@ export const FileInput: React.FC<FileInputProps> = ({
     return (
         <ElementWrapper
             label={label}
-            error={error}
+            error={error ?? errors}
             required={required}
             disabled={disabled}
             elementId={inputId}
@@ -109,6 +104,7 @@ export const FileInput: React.FC<FileInputProps> = ({
                 role='textbox'
                 aria-labelledby={labeledBy}
                 tabIndex={0}
+                onBlur={field.handleBlur}
             >
                 {inputValue.map((option) => (
                     <Tag
@@ -121,7 +117,7 @@ export const FileInput: React.FC<FileInputProps> = ({
             </div>
             <input
                 type='file'
-                name={name}
+                name={field.name}
                 className='hidden'
                 ref={hiddenFileInputRef}
                 onChange={handleChange}
@@ -137,6 +133,7 @@ export const FileInput: React.FC<FileInputProps> = ({
                     onClick={handleSelect}
                     disabled={disabled || readOnly}
                     additionalClassName={theme.action.button}
+                    onBlur={field.handleBlur}
                 >
                     {localization.selectFile}
                 </Button>

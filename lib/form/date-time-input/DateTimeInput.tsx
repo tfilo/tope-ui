@@ -165,8 +165,7 @@ const formatFromISO = (dateTime: string | null, inputFormatPattern: string): str
             return '';
         }
         return format(date, inputFormatPattern);
-    } catch (error) {
-        console.error('Error formatting ISO date:', error);
+    } catch {
         return '';
     }
 };
@@ -220,7 +219,7 @@ const formatDate = (
  * lastDayInWeek={DaysEnum.Monday}
  * />
  */
-const DateTimeInput: React.FC<DateTimeInputProps> = ({
+export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     id,
     label,
     error,
@@ -749,7 +748,9 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     id={inputId}
                     placeholder={inputPlaceholder}
                     value={inputValue}
+                    name={field.name}
                     onChange={handleInputChange}
+                    onBlur={field.handleBlur}
                 />
                 <div className={theme.action.rightWrapper}>
                     <Button
@@ -1020,5 +1021,3 @@ const DateTimeInput: React.FC<DateTimeInputProps> = ({
         </>
     );
 };
-
-export default DateTimeInput;

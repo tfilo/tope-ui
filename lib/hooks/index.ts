@@ -1,3 +1,3 @@
 export * from './form-context';
-export * from './useWindowSize';
+export * from './use-window-size';
 export * from './form';

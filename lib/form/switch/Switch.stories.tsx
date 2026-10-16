@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
 import type { SwitchProps } from './Switch.types';
-import Switch from './Switch';
+import { Switch } from './Switch';
 
 const onChange = fn();
 

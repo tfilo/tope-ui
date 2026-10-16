@@ -23,7 +23,7 @@ const theme = {
 };
 
 /** Modal component that renders as HTMLDialogElement */
-const Modal: React.FC<ModalProps> = ({
+export const Modal: React.FC<ModalProps> = ({
     closedby = 'any', // should close dialog after backdrop click or esc press
     title,
     body,
@@ -103,5 +103,3 @@ const Modal: React.FC<ModalProps> = ({
         </dialog>
     );
 };
-
-export default Modal;

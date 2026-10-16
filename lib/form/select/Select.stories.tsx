@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
 import type { SelectProps } from './Select.types';
-import Select from './Select';
+import { Select } from './Select';
 
 const meta = {
     title: 'Form/Select',

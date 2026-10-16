@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
  *
  * @returns window size as 'desktop', 'tablet' or 'mobile'
  */
-const useWindowSize = () => {
+export const useWindowSize = () => {
     const [windowSize, setWindowSize] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -28,5 +28,3 @@ const useWindowSize = () => {
 
     return 'mobile';
 };
-
-export default useWindowSize;

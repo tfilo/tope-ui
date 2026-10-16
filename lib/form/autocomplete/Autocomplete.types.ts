@@ -8,24 +8,7 @@ export type OnSearchResult = {
     options: Option[];
 };
 
-type MultiAutocomplete = {
-    /** Multiautocomplete */
-    multiple: true;
-    /** value */
-    value: string[];
-    /** onChange callback to handle value changes */
-    onChange: (value: string[]) => void;
-};
-interface SingleAutocomplete {
-    /** Multiautocomplete */
-    multiple?: false;
-    /** value */
-    value: string | null;
-    /** onChange callback to handle value changes */
-    onChange: (value: string | null) => void;
-}
-
-interface BaseAutocompleteProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'ref' | 'value' | 'onChange' | 'multiple'> {
+interface BaseProps {
     /** Optional label for input component */
     label?: string;
     /** Optional error message for input component, if not blank, all input is in danger color */
@@ -38,4 +21,5 @@ interface BaseAutocompleteProps extends Omit<InputHTMLAttributes<HTMLInputElemen
     pageSize?: number;
 }
 
-export type AutocompleteProps = BaseAutocompleteProps & (SingleAutocomplete | MultiAutocomplete);
+export interface AutocompleteProps
+    extends Omit<InputHTMLAttributes<HTMLInputElement>, keyof BaseProps | 'ref' | 'value' | 'onChange'>, BaseProps {}

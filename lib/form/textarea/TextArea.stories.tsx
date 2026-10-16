@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
 import type { TextAreaProps } from './TextArea.types';
-import TextArea from './TextArea';
+import { TextArea } from './TextArea';
 
 const meta = {
     title: 'Form/TextArea',

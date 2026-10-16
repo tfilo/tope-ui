@@ -1,7 +1,8 @@
-import { useState } from 'react';
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { useAppForm } from '../../hooks/form';
+import type { AutocompleteProps } from './Autocomplete.types';
 import { Autocomplete } from './Autocomplete';
 
 const meta = {
@@ -11,6 +12,28 @@ const meta = {
     argTypes: {
         disabled: { control: 'boolean' },
         multiple: { control: false }
+    },
+    render: (args: AutocompleteProps, { parameters }) => {
+        const defVal = args.multiple === true ? [] : '';
+
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? defVal } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.Autocomplete {...args} />}
+                />
+            </form>
+        );
     }
 } satisfies Meta<typeof Autocomplete>;
 
@@ -49,7 +72,7 @@ const options = [
 ];
 
 export const Basic: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Autocomplete')).toBeVisible();
         await expect(canvas.getByLabelText('Autocomplete').tagName).toBe('INPUT');
@@ -66,7 +89,7 @@ export const Basic: Story = {
             ?.click();
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
 
         await expect(canvas.queryByText('Guava')).toBeNull();
         await expect(canvas.getByText('Apple')).toBeVisible();
@@ -77,32 +100,11 @@ export const Basic: Story = {
         await userEvent.click(removeButton);
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).toHaveBeenCalledTimes(2);
-    },
-    render: (args) => {
-        const [value, setValue] = useState<string | null>('guava');
-
-        const handleChange = (value: string | null) => {
-            setValue(value);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: string | null) => void)(value);
-            }
-        };
-
-        return (
-            <Autocomplete
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
     },
     args: {
         label: 'Autocomplete',
         name: 'basic',
-        onChange: fn(),
-        value: null,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
@@ -128,11 +130,15 @@ export const Basic: Story = {
                 ); // Simulate network delay
             });
         }
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: 'guava'
     }
 };
 
 export const Multiple: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('MultiAutocomplete')).toBeVisible();
         await expect(canvas.getByLabelText('MultiAutocomplete').tagName).toBe('INPUT');
@@ -151,7 +157,7 @@ export const Multiple: Story = {
             ?.click();
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
 
         await expect(canvas.queryByText('Guava')).toBeVisible();
         await expect(canvas.getByText('Guava').tagName).toBe('BUTTON');
@@ -164,7 +170,7 @@ export const Multiple: Story = {
         await userEvent.click(canvas.getByLabelText('Remove Apple'));
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).toHaveBeenCalledTimes(2);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
 
         await expect(canvas.queryByText('Guava')).toBeVisible();
         await expect(canvas.queryByText('Kiwi')).toBeVisible();
@@ -174,36 +180,16 @@ export const Multiple: Story = {
         await userEvent.click(canvas.getByLabelText('Remove Guava'));
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).toHaveBeenCalledTimes(3);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(3);
 
         await expect(canvas.queryByText('Guava')).toBeNull();
         await expect(canvas.queryByText('Kiwi')).toBeVisible();
         await expect(canvas.queryByText('Apple')).toBeNull();
     },
-    render: (args) => {
-        const [value, setValue] = useState<string[]>(['guava', 'kiwi']);
-
-        const handleChange = (value: string[]) => {
-            setValue(value);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: string[]) => void)(value);
-            }
-        };
-
-        return (
-            <Autocomplete
-                {...args}
-                multiple={true}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'MultiAutocomplete',
         name: 'basic',
-        onChange: fn(),
-        value: null,
+        multiple: true,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
@@ -229,11 +215,15 @@ export const Multiple: Story = {
                 ); // Simulate network delay
             });
         }
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: ['guava', 'kiwi']
     }
 };
 
 export const Disabled: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Autocomplete')).toBeVisible();
         await expect(canvas.getByLabelText('Autocomplete').tagName).toBe('INPUT');
@@ -252,35 +242,14 @@ export const Disabled: Story = {
             ?.click();
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
-        await expect(args.onChange).not.toHaveBeenCalled();
+        await expect(parameters.onChange).not.toHaveBeenCalled();
 
         await expect(canvas.queryByText('Apple')).toBeNull();
         await expect(canvas.getByText('Guava')).toBeVisible();
     },
-    render: (args) => {
-        const [value, setValue] = useState<string | null>('guava');
-
-        const handleChange = (value: string | null) => {
-            setValue(value);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: string | null) => void)(value);
-            }
-        };
-
-        return (
-            <Autocomplete
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'Autocomplete',
         name: 'basic',
-        onChange: fn(),
-        value: null,
         disabled: true,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
@@ -307,6 +276,10 @@ export const Disabled: Story = {
                 ); // Simulate network delay
             });
         }
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: 'guava'
     }
 };
 
@@ -331,8 +304,6 @@ export const Required: Story = {
     args: {
         label: 'This is required autocomplete',
         required: true,
-        onChange: fn(),
-        value: null,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
@@ -384,8 +355,6 @@ export const Error: Story = {
         required: true,
         placeholder: 'This is placeholder...',
         error: 'This field is required!',
-        onChange: fn(),
-        value: null,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
@@ -420,8 +389,6 @@ export const AutocompleteOnly: Story = {
     },
     args: {
         'aria-label': 'Labelless autocomplete',
-        onChange: fn(),
-        value: null,
         onSearch: async (query: string, page, pageSize) => {
             return new Promise((resolve) => {
                 setTimeout(
@@ -447,5 +414,9 @@ export const AutocompleteOnly: Story = {
                 ); // Simulate network delay
             });
         }
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: ''
     }
 };

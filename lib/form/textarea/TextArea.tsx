@@ -17,7 +17,7 @@ const theme = {
  * TextArea component that renders as HTMLTextAreaElement element wrapped by parent div
  * containing optional label and error message.
  */
-const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, ...props }) => {
+export const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ...props }) => {
     const _id = useId();
     const textareaId = id || `textarea-${_id}`;
     const hasMaxLenght = props.maxLength !== undefined;
@@ -51,7 +51,6 @@ const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, ...props }) 
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     id={textareaId}
-                    ref={ref}
                 />
                 {hasMaxLenght && !hasError && (
                     <span
@@ -65,5 +64,3 @@ const TextArea: React.FC<TextAreaProps> = ({ id, label, error, ref, ...props }) 
         </ElementWrapper>
     );
 };
-
-export default TextArea;

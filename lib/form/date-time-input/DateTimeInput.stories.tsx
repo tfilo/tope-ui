@@ -1,7 +1,7 @@
 import { expect, fn, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import DateTimeInput from './DateTimeInput';
+import { DateTimeInput } from './DateTimeInput';
 import { WeekDay } from './WeekDay';
 import { useAppForm } from '../../hooks/form';
 
@@ -57,7 +57,6 @@ const meta = {
                     name='basic'
                     listeners={{
                         onChange: (val) => {
-                            console.log('val', val.value);
                             parameters.onChange(val.value);
                         }
                     }}

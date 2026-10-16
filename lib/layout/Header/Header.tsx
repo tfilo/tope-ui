@@ -1,7 +1,7 @@
 import { ArrowLeftStartOnRectangleIcon, UserCircleIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
-import useWindowSize from '../../hooks/useWindowSize';
+import { useWindowSize } from '../../hooks/use-window-size';
 import { Button, Dropdown } from '../../general';
 import type { HeaderProps } from './Header.types';
 

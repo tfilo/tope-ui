@@ -16,7 +16,7 @@ const theme = {
  * Select component that renders as HTMLSelectElement element wrapped by parent div
  * containing optional label and error message.
  */
-const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, allowEmptyOption, multiple = false, ...props }) => {
+export const Select: React.FC<SelectProps> = ({ id, label, error, options, allowEmptyOption, multiple = false, ...props }) => {
     const _id = useId();
     const selectId = id || `select-${_id}`;
 
@@ -54,7 +54,6 @@ const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, allowEm
                 onChange={handleChange}
                 onBlur={field.handleBlur}
                 id={selectId}
-                ref={ref}
             >
                 {allowEmptyOption && !multiple && <option value=''>{localization.emptyOptionLabel}</option>}
                 {options.map((option) => {
@@ -91,5 +90,3 @@ const Select: React.FC<SelectProps> = ({ id, label, error, ref, options, allowEm
         </ElementWrapper>
     );
 };
-
-export default Select;

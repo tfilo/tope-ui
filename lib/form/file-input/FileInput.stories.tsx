@@ -1,8 +1,9 @@
-import { useState } from 'react';
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import type { FileInputProps } from './FileInput.types';
 import { FileInput } from './FileInput';
+import { useAppForm } from '../../hooks/form';
 
 const meta = {
     title: 'Form/FileInput',
@@ -10,6 +11,28 @@ const meta = {
     tags: ['autodocs'],
     argTypes: {
         disabled: { control: 'boolean' }
+    },
+    render: (args: FileInputProps, { parameters }) => {
+        const defVal = args.multiple === true ? [] : '';
+
+        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? defVal } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    listeners={{
+                        onChange: parameters.onChange
+                    }}
+                    children={(field) => <field.FileInput {...args} />}
+                />
+            </form>
+        );
     }
 } satisfies Meta<typeof FileInput>;
 
@@ -17,7 +40,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('DIV');
@@ -25,32 +48,14 @@ export const Basic: Story = {
         await expect(canvas.queryByTitle('Select file')).toBeVisible();
         await expect(canvas.queryByTitle('Select file')).toBeEnabled();
         await userEvent.click(canvas.getByLabelText('Remove example.txt'));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
-    },
-    render: (args) => {
-        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
-
-        const handleChange = (newValue: File | null) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File | null) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
     },
     args: {
-        label: 'Some basic input',
-        name: 'basic',
-        value: null,
-        onChange: fn()
+        label: 'Some basic input'
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: new File([], 'example.txt')
     }
 };
 
@@ -64,31 +69,13 @@ export const Disabled: Story = {
         await expect(canvas.queryByTitle('Select file')).toBeVisible();
         await expect(canvas.queryByTitle('Select file')).toBeDisabled();
     },
-    render: (args) => {
-        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
-
-        const handleChange = (newValue: File | null) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File | null) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'Some basic input',
-        name: 'basic',
-        value: null,
-        disabled: true,
-        onChange: fn()
+        disabled: true
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: new File([], 'example.txt')
     }
 };
 
@@ -102,31 +89,13 @@ export const Readonly: Story = {
         await expect(canvas.queryByTitle('Select file')).toBeVisible();
         await expect(canvas.queryByTitle('Select file')).toBeDisabled();
     },
-    render: (args) => {
-        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
-
-        const handleChange = (newValue: File | null) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File | null) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'Some basic input',
-        name: 'basic',
-        value: null,
-        readOnly: true,
-        onChange: fn()
+        readOnly: true
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: new File([], 'example.txt')
     }
 };
 
@@ -143,77 +112,37 @@ export const Required: Story = {
             })
         ).toHaveTextContent('*');
     },
-    render: (args) => {
-        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
-
-        const handleChange = (newValue: File | null) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File | null) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'This is required fileinput',
-        required: true,
-        name: 'basic',
-        value: null,
-        onChange: fn()
+        required: true
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: new File([], 'example.txt')
     }
 };
 
 export const Multiple: Story = {
-    play: async ({ args, canvas, userEvent }) => {
+    play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('textbox')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example1.txt');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example2.txt');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example3.txt');
         await userEvent.click(canvas.getByLabelText('Remove example2.txt'));
-        await expect(args.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
         await userEvent.click(canvas.getByLabelText('Remove example3.txt'));
-        await expect(args.onChange).toHaveBeenCalledTimes(2);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example1.txt');
         await expect(canvas.getByLabelText('Some basic input')).not.toHaveTextContent('example2.txt');
         await expect(canvas.getByLabelText('Some basic input')).not.toHaveTextContent('example3.txt');
     },
-    render: (args) => {
-        const [value, setValue] = useState<File[]>([
-            new File([], 'example1.txt'),
-            new File([], 'example2.txt'),
-            new File([], 'example3.txt')
-        ]);
-
-        const handleChange = (newValue: File[]) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File[]) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={true}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'Some basic input',
-        name: 'basic',
-        multiple: true,
-        value: [],
-        onChange: fn()
+        multiple: true
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: [new File([], 'example1.txt'), new File([], 'example2.txt'), new File([], 'example3.txt')]
     }
 };
 
@@ -230,31 +159,13 @@ export const Error: Story = {
         await expect(canvas.getByRole('textbox').parentElement?.previousSibling).toHaveTextContent('This is required fileinput');
         await expect(canvas.getByRole('textbox').parentElement?.nextSibling).toHaveTextContent('This field is required!');
     },
-    render: (args) => {
-        const [value, setValue] = useState<File | null>(new File([], 'example.txt'));
-
-        const handleChange = (newValue: File | null) => {
-            setValue(newValue);
-            if (args.onChange !== undefined) {
-                (args.onChange as (value: File | null) => void)(newValue);
-            }
-        };
-
-        return (
-            <FileInput
-                {...args}
-                multiple={false}
-                value={value}
-                onChange={handleChange}
-            />
-        );
-    },
     args: {
         label: 'This is required fileinput',
         required: true,
-        name: 'basic',
-        error: 'This field is required!',
-        value: null,
-        onChange: fn()
+        error: 'This field is required!'
+    },
+    parameters: {
+        onChange: fn(),
+        defaultValue: new File([], 'example.txt')
     }
 };

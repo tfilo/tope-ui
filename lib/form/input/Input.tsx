@@ -62,7 +62,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
  * Input component that renders as HTMLInputElement element wrapped by parent div
  * containing optional label and error message.
  */
-const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, ref, ...props }) => {
+export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, ...props }) => {
     const _id = useId();
     const inputId = id || `input-${_id}`;
 
@@ -103,7 +103,6 @@ const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error,
                 onChange={(e) => field.handleChange(e.target.value)}
                 onBlur={field.handleBlur}
                 id={inputId}
-                ref={ref}
             />
             {endActionsArray.length > 0 && (
                 <div className={theme.action.rightWrapper}>
@@ -119,5 +118,3 @@ const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error,
         </ElementWrapper>
     );
 };
-
-export default Input;

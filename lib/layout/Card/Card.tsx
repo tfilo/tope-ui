@@ -1,7 +1,7 @@
 import { type ElementType } from 'react';
 import { PencilSquareIcon } from '@heroicons/react/16/solid';
 
-import placeholder from '../../assets/placeholder.png';
+import placeholder from '../../assets/placeholder.svg';
 
 import { isNotBlank } from '../../utils';
 import { localization } from '../../utils/constants';

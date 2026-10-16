@@ -4,7 +4,7 @@ import { UserIcon, PlayIcon, TrashIcon, PlusCircleIcon, MagnifyingGlassIcon, Eye
 
 import { useAppForm } from '../../hooks/form';
 import type { InputActionProps, InputProps } from './Input.types';
-import Input from './Input';
+import { Input } from './Input';
 
 const meta = {
     title: 'Form/Input',

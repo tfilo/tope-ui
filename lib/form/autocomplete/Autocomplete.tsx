@@ -25,7 +25,7 @@ const theme = {
         button: 'focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between',
         buttonIcon: 'w-xl fill-primary'
     }
-};
+} as const;
 
 /**
  * Autocomplete component with ability to search and fetch items

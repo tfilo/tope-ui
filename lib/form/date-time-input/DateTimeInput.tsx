@@ -39,7 +39,7 @@ const theme = {
         btnNext: 'min-w-[50px] min-h-[40px]',
         years: 'grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md',
         yearBtn: 'w-full min-w-full min-h-[32px]',
-        months: 'grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md',
+        months: 'grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md',
         monthBtn: 'flex-1',
         days: 'm-md h-none flex-1 table-fixed border-collapse',
         daysWrapper: 'flex flex-1 flex-row',
@@ -781,7 +781,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 style={{
                     positionAnchor: `--calendar_${baseId}`,
                     width: hasTime ? '384px' : '298px', // width: table -> 7 columns = 7 * 40px = 280px , timeslots -> 80 px, , 'gap-md' -> 8 px
-                    height: '243px'
+                    minHeight: '243px'
                 }}
                 ref={calendarRef}
             >

@@ -10,7 +10,7 @@ const theme = {
     base: 'flex-1 focus:outline-none px-md min-h-[30px]',
     multiselect: 'py-md',
     option: 'rounded-sm p-xs'
-};
+} as const;
 
 /**
  * Select component that renders as HTMLSelectElement element wrapped by parent div

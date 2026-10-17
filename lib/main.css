@@ -7,6 +7,7 @@
     margin-right: 16px;
     top: calc(anchor(bottom) + 6px);
     left: calc(anchor(left) - 2px);
+    border: 1px solid var(--border-color-default); /* Safari fix */
 
     position-try: --dropdown-bottom-left-align, --dropdown-top-right-align, --dropdown-top-left-align;
 }
@@ -37,6 +38,7 @@
     left: calc(anchor(left) - 2px);
     right: calc(anchor(right) - 2px);
     width: auto;
+    border: 1px solid var(--border-color-default); /* Safari fix */
 
     position-try: --autocomplete-top-align;
 }
@@ -51,11 +53,12 @@
     top: calc(anchor(bottom) + 6px);
     right: calc(anchor(right) - 2px);
     left: auto;
+    border: 1px solid var(--border-color-default); /* Safari fix */
 
     position-try: --calendar-top-align;
 }
 
-@position-try --autocomplete-top-align {
+@position-try --calendar-top-align {
     bottom: calc(anchor(top) + 6px);
     top: auto;
 }

@@ -15,10 +15,7 @@ export const SubscribeButton: React.FC<Omit<ButtonProps<'button'>, 'as' | 'ref' 
                 <Button
                     disabled={isSubmitting || disabled}
                     type={'submit'}
-                    onClick={(e) => {
-                        console.log('EVENT', e);
-                        onClick?.(e);
-                    }}
+                    onClick={onClick}
                     {...props}
                 >
                     {children}

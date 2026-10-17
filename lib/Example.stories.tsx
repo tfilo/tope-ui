@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Column, Content, Flex, Grid, Header, Page, Section } from './layout';
-import { MapIcon } from '@heroicons/react/16/solid';
 import { fn } from 'storybook/test';
 import { useAppForm } from './hooks';
 import type { OnSearchResult } from './form/autocomplete/Autocomplete.types';
@@ -16,6 +15,55 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const titlesBefore = [
+    { label: 'Bc.', value: 'Bc.' },
+    { label: 'Bc. art.', value: 'Bc. art.' },
+    { label: 'Mgr.', value: 'Mgr.' },
+    { label: 'Mgr. art.', value: 'Mgr. art.' },
+    { label: 'Ing.', value: 'Ing.' },
+    { label: 'Ing. arch.', value: 'Ing. arch.' },
+    { label: 'JUDr.', value: 'JUDr.' },
+    { label: 'PhDr.', value: 'PhDr.' },
+    { label: 'RNDr.', value: 'RNDr.' },
+    { label: 'PaedDr.', value: 'PaedDr.' },
+    { label: 'PharmDr.', value: 'PharmDr.' },
+    { label: 'ThDr.', value: 'ThDr.' },
+    { label: 'RSDr.', value: 'RSDr.' },
+    { label: 'RCDr.', value: 'RCDr.' },
+    { label: 'MUDr.', value: 'MUDr.' },
+    { label: 'MDDr.', value: 'MDDr.' },
+    { label: 'MVDr.', value: 'MVDr.' },
+    { label: 'ThLic.', value: 'ThLic.' },
+    { label: 'doc.', value: 'doc.' },
+    { label: 'prof.', value: 'prof.' },
+    { label: 'dr. h. c.', value: 'dr. h. c.' },
+    { label: 'akad.', value: 'akad.' }
+];
+
+const titlesAfter = [
+    { label: 'PhD.', value: 'PhD.' },
+    { label: 'ArtD.', value: 'ArtD.' },
+    { label: 'CSc.', value: 'CSc.' },
+    { label: 'DrSc.', value: 'DrSc.' },
+    { label: 'DiS.', value: 'DiS.' },
+    { label: 'DiS. art.', value: 'DiS. art.' },
+    { label: 'MBA', value: 'MBA' },
+    { label: 'MPH', value: 'MPH' },
+    { label: 'LL.M.', value: 'LL.M.' },
+    { label: 'MSc.', value: 'MSc.' },
+    { label: 'MA', value: 'MA' },
+    { label: 'BBA', value: 'BBA' },
+    { label: 'DBA', value: 'DBA' },
+    { label: 'MPA', value: 'MPA' },
+    { label: 'MHA', value: 'MHA' },
+    { label: 'MIM', value: 'MIM' },
+    { label: 'EMBA', value: 'EMBA' },
+    { label: 'MSW', value: 'MSW' },
+    { label: 'MBBS', value: 'MBBS' },
+    { label: 'FEBS', value: 'FEBS' },
+    { label: 'FRCS', value: 'FRCS' }
+];
 
 const countries = [
     { label: 'Afghanistan', value: 'AF' },
@@ -239,196 +287,183 @@ const onFetch = async (value: string) => {
     });
 };
 
-const ExampleForm: React.FC = () => {
-    const form = useAppForm({
-        defaultValues: {
-            titleBefore: '',
-            name: '',
-            surname: '',
-            titleAfter: '',
-            address: {
-                street: '',
-                buildingNumber: '',
-                contry: '',
-                zip: ''
-            },
-            note: ''
-        },
-        onSubmit: ({ value }) => {
-            alert(JSON.stringify(value, null, 2));
-        }
-    });
-
-    return (
-        <form
-            onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-            }}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter') e.preventDefault();
-            }}
-        >
-            <Page title='Example page'>
-                <Grid maxRows={4}>
-                    <Column>
-                        <form.AppField
-                            name='titleBefore'
-                            children={(field) => (
-                                <field.Select
-                                    label='Title before'
-                                    allowEmptyOption
-                                    options={[
-                                        { label: 'Bc.', value: 'Bc.' },
-                                        { label: 'Bc. art.', value: 'Bc. art.' },
-                                        { label: 'Mgr.', value: 'Mgr.' },
-                                        { label: 'Mgr. art.', value: 'Mgr. art.' },
-                                        { label: 'Ing.', value: 'Ing.' },
-                                        { label: 'Ing. arch.', value: 'Ing. arch.' },
-                                        { label: 'JUDr.', value: 'JUDr.' },
-                                        { label: 'PhDr.', value: 'PhDr.' },
-                                        { label: 'RNDr.', value: 'RNDr.' },
-                                        { label: 'PaedDr.', value: 'PaedDr.' },
-                                        { label: 'PharmDr.', value: 'PharmDr.' },
-                                        { label: 'ThDr.', value: 'ThDr.' },
-                                        { label: 'RSDr.', value: 'RSDr.' },
-                                        { label: 'RCDr.', value: 'RCDr.' },
-                                        { label: 'MUDr.', value: 'MUDr.' },
-                                        { label: 'MDDr.', value: 'MDDr.' },
-                                        { label: 'MVDr.', value: 'MVDr.' },
-                                        { label: 'ThLic.', value: 'ThLic.' },
-                                        { label: 'doc.', value: 'doc.' },
-                                        { label: 'prof.', value: 'prof.' },
-                                        { label: 'dr. h. c.', value: 'dr. h. c.' },
-                                        { label: 'akad.', value: 'akad.' }
-                                    ]}
-                                />
-                            )}
-                        />
-                    </Column>
-                    <Column colspan={2}>
-                        <Grid maxRows={2}>
-                            <Column>
-                                <form.AppField
-                                    name='name'
-                                    children={(field) => <field.Input label='First name' />}
-                                />
-                            </Column>
-                            <Column>
-                                <form.AppField
-                                    name='surname'
-                                    children={(field) => <field.Input label='Last name' />}
-                                />
-                            </Column>
-                        </Grid>
-                    </Column>
-                    <Column>
-                        <form.AppField
-                            name='titleBefore'
-                            children={(field) => (
-                                <field.Select
-                                    label='Title after'
-                                    allowEmptyOption
-                                    options={[
-                                        { label: 'PhD.', value: 'PhD.' },
-                                        { label: 'ArtD.', value: 'ArtD.' },
-                                        { label: 'CSc.', value: 'CSc.' },
-                                        { label: 'DrSc.', value: 'DrSc.' },
-                                        { label: 'DiS.', value: 'DiS.' },
-                                        { label: 'DiS. art.', value: 'DiS. art.' },
-                                        { label: 'MBA', value: 'MBA' },
-                                        { label: 'MPH', value: 'MPH' },
-                                        { label: 'LL.M.', value: 'LL.M.' },
-                                        { label: 'MSc.', value: 'MSc.' },
-                                        { label: 'MA', value: 'MA' },
-                                        { label: 'BBA', value: 'BBA' },
-                                        { label: 'DBA', value: 'DBA' },
-                                        { label: 'MPA', value: 'MPA' },
-                                        { label: 'MHA', value: 'MHA' },
-                                        { label: 'MIM', value: 'MIM' },
-                                        { label: 'EMBA', value: 'EMBA' },
-                                        { label: 'MSW', value: 'MSW' },
-                                        { label: 'MBBS', value: 'MBBS' },
-                                        { label: 'FEBS', value: 'FEBS' },
-                                        { label: 'FRCS', value: 'FRCS' }
-                                    ]}
-                                />
-                            )}
-                        />
-                    </Column>
-                </Grid>
-                <Section title='Address'>
-                    <Grid maxRows={1}>
-                        <Column>
-                            <form.AppField
-                                name='address.street'
-                                children={(field) => <field.Input label='Street' />}
-                            />
-                        </Column>
-                        <Column>
-                            <form.AppField
-                                name='address.buildingNumber'
-                                children={(field) => <field.Input label='Building number' />}
-                            />
-                        </Column>
-                        <Column>
-                            <form.AppField
-                                name='address.contry'
-                                children={(field) => (
-                                    <field.Autocomplete
-                                        label='Country'
-                                        onSearch={onSearch}
-                                        onFetch={onFetch}
-                                    />
-                                )}
-                            />
-                        </Column>
-                        <Column>
-                            <form.AppField
-                                name='address.zip'
-                                children={(field) => (
-                                    <field.Input
-                                        label='Zip'
-                                        type='number'
-                                    />
-                                )}
-                            />
-                        </Column>
-                    </Grid>
-                </Section>
-                <form.AppField
-                    name='note'
-                    children={(field) => <field.TextArea label='Note' />}
-                />
-                <Flex>
-                    <form.AppForm>
-                        <form.SubscribeButton>Submit</form.SubscribeButton>
-                    </form.AppForm>
-                    <form.AppForm>
-                        <form.ResetButton>Reset</form.ResetButton>
-                    </form.AppForm>
-                </Flex>
-            </Page>
-        </form>
-    );
-};
-
 export const Example: Story = {
-    render: () => (
-        <div className='flex flex-col overflow-hidden'>
-            <Header
-                onLogout={fn()}
-                menu={[
-                    {
-                        label: 'Map',
-                        icon: MapIcon,
-                        onClick: fn()
-                    }
-                ]}
-            />
-            <Content>
-                <ExampleForm />
-            </Content>
-        </div>
-    )
+    render: () => {
+        const form = useAppForm({
+            defaultValues: {
+                titleBefore: '',
+                name: '',
+                surname: '',
+                titleAfter: '',
+                dateOfBirth: '',
+                address: {
+                    street: '',
+                    buildingNumber: '',
+                    country: '',
+                    zip: ''
+                },
+                subscribe: false,
+                email: '',
+                note: '',
+                attachment: null as File | File[] | null
+            },
+            onSubmit: ({ value }) => {
+                alert(JSON.stringify(value, null, 2));
+            }
+        });
+
+        return (
+            <div className='flex flex-col overflow-hidden'>
+                <Header onLogout={fn()} />
+                <Content>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            form.handleSubmit();
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') e.preventDefault();
+                        }}
+                        noValidate
+                    >
+                        <Page title='Example page'>
+                            <Grid maxRows={4}>
+                                <Column>
+                                    <form.AppField
+                                        name='titleBefore'
+                                        children={(field) => (
+                                            <field.Select
+                                                label='Title before'
+                                                allowEmptyOption
+                                                options={titlesBefore}
+                                            />
+                                        )}
+                                    />
+                                </Column>
+                                <Column colspan={2}>
+                                    <Grid maxRows={2}>
+                                        <Column>
+                                            <form.AppField
+                                                name='name'
+                                                children={(field) => <field.Input label='First name' />}
+                                            />
+                                        </Column>
+                                        <Column>
+                                            <form.AppField
+                                                name='surname'
+                                                children={(field) => <field.Input label='Last name' />}
+                                            />
+                                        </Column>
+                                    </Grid>
+                                </Column>
+                                <Column>
+                                    <form.AppField
+                                        name='titleAfter'
+                                        children={(field) => (
+                                            <field.Select
+                                                label='Title after'
+                                                allowEmptyOption
+                                                options={titlesAfter}
+                                            />
+                                        )}
+                                    />
+                                </Column>
+                            </Grid>
+                            <Grid>
+                                <Column>
+                                    <form.AppField
+                                        name='dateOfBirth'
+                                        children={(field) => <field.DateTimeInput label='Date of birth' />}
+                                    />
+                                </Column>
+                            </Grid>
+                            <Section title='Address'>
+                                <Grid maxRows={1}>
+                                    <Column>
+                                        <form.AppField
+                                            name='address.street'
+                                            children={(field) => <field.Input label='Street' />}
+                                        />
+                                    </Column>
+                                    <Column>
+                                        <form.AppField
+                                            name='address.buildingNumber'
+                                            children={(field) => <field.Input label='Building number' />}
+                                        />
+                                    </Column>
+                                    <Column>
+                                        <form.AppField
+                                            name='address.country'
+                                            children={(field) => (
+                                                <field.Autocomplete
+                                                    label='Country'
+                                                    onSearch={onSearch}
+                                                    onFetch={onFetch}
+                                                />
+                                            )}
+                                        />
+                                    </Column>
+                                    <Column>
+                                        <form.AppField
+                                            name='address.zip'
+                                            children={(field) => (
+                                                <field.Input
+                                                    label='Zip'
+                                                    type='number'
+                                                />
+                                            )}
+                                        />
+                                    </Column>
+                                </Grid>
+                            </Section>
+                            <form.AppField
+                                name='subscribe'
+                                children={(field) => <field.Switch label='Subscribe' />}
+                            />
+                            <form.Subscribe selector={(state) => state.values.subscribe}>
+                                {(subscribe) =>
+                                    subscribe ? (
+                                        <Grid>
+                                            <Column>
+                                                <form.AppField
+                                                    name='email'
+                                                    children={(field) => (
+                                                        <field.Input
+                                                            label='Email to subscribe'
+                                                            type='email'
+                                                        />
+                                                    )}
+                                                    listeners={{
+                                                        onUnmount: () => {
+                                                            form.resetField('email');
+                                                        }
+                                                    }}
+                                                />
+                                            </Column>
+                                        </Grid>
+                                    ) : null
+                                }
+                            </form.Subscribe>
+                            <form.AppField
+                                name='note'
+                                children={(field) => <field.TextArea label='Note' />}
+                            />
+                            <form.AppField
+                                name='attachment'
+                                children={(field) => <field.FileInput label='Attachment' />}
+                            />
+                            <Flex>
+                                <form.AppForm>
+                                    <form.SubscribeButton>Submit</form.SubscribeButton>
+                                </form.AppForm>
+                                <form.AppForm>
+                                    <form.ResetButton>Reset</form.ResetButton>
+                                </form.AppForm>
+                            </Flex>
+                        </Page>
+                    </form>
+                </Content>
+            </div>
+        );
+    }
 };

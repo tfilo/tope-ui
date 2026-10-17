@@ -61,7 +61,7 @@
 }
 
 dialog::backdrop {
-    background-color: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background-color: color-mix(in srgb, var(--color-secondary) 25%, transparent);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
 }

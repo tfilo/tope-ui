@@ -42,7 +42,7 @@ const columns = createColumns<DataObject>([
     {
         header: 'Action',
         accessor: 'name',
-        additionalClassName: 'min-w-[100px] border-l text-right sticky right-none bg-white',
+        additionalClassName: 'min-w-[100px] border-l text-right sticky right-none bg-white shadow-lg shadow-secondary-light',
         cell: () => (
             <Button
                 icon={PencilIcon}

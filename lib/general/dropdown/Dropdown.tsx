@@ -8,7 +8,7 @@ const theme = {
     wrapper: 'relative',
     button: 'w-full flex cursor-pointer flex-row gap-sm focus:outline-none disabled:cursor-default',
     icon: 'w-xl fill-inherit',
-    dropdown: 'tope-ui-dropdown absolute rounded-sm border p-sm',
+    dropdown: 'tope-ui-dropdown absolute rounded-sm shadow-sm border p-sm',
     dropdownItems: 'flex max-h-[min(200px,50vh)] w-full flex-col',
     dropdownItem: (isDisabled: boolean = false) =>
         `${isDisabled ? 'text-disabled' : 'has-focus-within:outline-2 has-hover:bg-secondary-extra-light'} rounded-sm px-sm py-md wrap-anywhere outline-primary focus:z-10`

@@ -31,7 +31,7 @@ const theme = {
         rightWrapper: 'relative flex flex-row border-l'
     },
     calendar: {
-        wrapper: 'tope-ui-calendar absolute rounded-sm border',
+        wrapper: 'tope-ui-calendar absolute rounded-sm border shadow-sm',
         base: 'flex size-full flex-col',
         btns: 'flex flex-row gap-xl border-b p-md',
         btnPrev: 'min-w-[50px] min-h-[40px]',

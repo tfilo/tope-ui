@@ -13,7 +13,7 @@ const meta = {
         disabled: { control: 'boolean' }
     },
     render: (args: FileInputProps, { parameters }) => {
-        const defVal = args.multiple === true ? [] : '';
+        const defVal = args.multiple === true ? [] : null;
 
         const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? defVal } });
 
@@ -27,7 +27,9 @@ const meta = {
                 <form.AppField
                     name='basic'
                     listeners={{
-                        onChange: parameters.onChange
+                        onChange: ({ value }) => {
+                            parameters.onChange?.(value);
+                        }
                     }}
                     children={(field) => <field.FileInput {...args} />}
                 />
@@ -49,6 +51,7 @@ export const Basic: Story = {
         await expect(canvas.queryByTitle('Select file')).toBeEnabled();
         await userEvent.click(canvas.getByLabelText('Remove example.txt'));
         await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenCalledWith(null);
     },
     args: {
         label: 'Some basic input'

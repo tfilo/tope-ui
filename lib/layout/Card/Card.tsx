@@ -9,16 +9,18 @@ import { Button } from '../../general';
 import type { CardProps } from './Card.types';
 
 const theme = {
-    base: 'relative',
+    base: (hasOnClick: boolean) =>
+        `relative shadow-md ${hasOnClick ? 'has-[.card-main:active]:translate-y-none! transition-shadow duration-300 ease-out hover:-translate-y-px hover:shadow-xl focus-within:-translate-y-px focus-within:shadow-xl' : ''}`,
     actionBtn: 'right-sm top-sm absolute w-[32px]! h-[32px]! fill-black/20 hover:fill-black/80 focus:fill-black/80 rounded-sm',
     card: (hasOnClick: boolean) =>
-        `rounded-sm border border-default ${hasOnClick ? 'cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`,
+        `rounded-sm border border-default ${hasOnClick ? 'card-main cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`,
     description: 'bg-secondary-light/20 p-lg text-justify text-base',
     descriptionText: 'text-default',
     spacer: 'flex-1'
 } as const;
 
-export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imageUrl = placeholder }) => {
+export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imageUrl }) => {
+    const backgroundUrl = isNotBlank(imageUrl) ? imageUrl : placeholder;
     const hasOnClick = onClick !== undefined;
     const hasOnAction = onAction !== undefined;
     const BaseElement: ElementType = hasOnClick ? 'button' : 'div';
@@ -32,13 +34,14 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
 
     const handleAction = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.stopPropagation();
+        e.preventDefault();
         if (hasOnAction) {
             onAction(e);
         }
     };
 
     return (
-        <div className={theme.base}>
+        <div className={theme.base(hasOnClick)}>
             {hasOnAction && (
                 <Button
                     icon={PencilSquareIcon}
@@ -54,7 +57,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                 className={theme.card(hasOnClick)}
                 onClick={handleClick}
                 style={{
-                    backgroundImage: `url(${imageUrl})`,
+                    backgroundImage: `url("${backgroundUrl}")`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}

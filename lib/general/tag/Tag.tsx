@@ -5,7 +5,7 @@ import type { TagProps } from './Tag.types';
 
 const theme = {
     base: (variant: TagProps['variant']) =>
-        `group inline-flex items-center wrap-anywhere gap-sm border text-md font-medium cursor-default px-sm m-xs ${variant === 'outline' ? '' : 'focus-within:outline-2 outline-offset-2 outline-primary '}disabled:cursor-not-allowed min-h-[26px]`,
+        `group inline-flex items-center wrap-anywhere gap-sm border shadow-sm text-md font-medium cursor-default px-sm m-xs ${variant === 'outline' ? '' : 'focus-within:outline-2 outline-offset-2 outline-primary '}disabled:cursor-not-allowed min-h-[26px]`,
     variant: {
         primary: 'bg-primary border-transparent rounded-sm hover:bg-primary-dark has-disabled:bg-primary-light text-white',
         secondary: 'bg-secondary border-transparent rounded-sm hover:bg-secondary-dark has-disabled:bg-secondary-light text-white',

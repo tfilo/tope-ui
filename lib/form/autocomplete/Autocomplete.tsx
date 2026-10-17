@@ -16,7 +16,7 @@ const theme = {
     inputWrapper: 'flex flex-1',
     button: 'min-w-[30px] min-h-[30px] rounded-sm',
     wrapper: 'w-full flex flex-col relative',
-    optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete',
+    optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
     options: 'flex flex-col',
     option: {
         noninteractive: 'text-disabled py-md px-sm',
@@ -392,7 +392,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             disabled={disabled}
             elementId={autocompleteId}
         >
-            <div className={theme.wrapper}>
+            <div
+                className={theme.wrapper}
+                onBlur={handleBlur}
+            >
                 <div
                     className={theme.inputAndTagWrapper}
                     style={{ anchorName: `--autocomplete_${_id}` }}

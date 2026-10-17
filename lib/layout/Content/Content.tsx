@@ -1,5 +1,5 @@
 const theme = {
-    base: 'mx-auto flex max-w-7xl flex-1 flex-col overflow-x-auto'
+    base: 'mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-x-auto'
 } as const;
 
 /**

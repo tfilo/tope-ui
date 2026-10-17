@@ -6,7 +6,9 @@ import { Autocomplete } from '../form/autocomplete/Autocomplete.tsx';
 import { DateTimeInput } from '../form/date-time-input/DateTimeInput.tsx';
 import { FileInput } from '../form/file-input/FileInput.tsx';
 import { Input } from '../form/input/Input.tsx';
+import { ResetButton } from '../form/reset-button/ResetButton.tsx';
 import { Select } from '../form/select/Select.tsx';
+import { SubscribeButton } from '../form/subscribe-button/SubscribeButton.tsx';
 import { Switch } from '../form/switch/Switch.tsx';
 import { TextArea } from '../form/textarea/TextArea.tsx';
 
@@ -20,7 +22,10 @@ export const { useAppForm, withForm, withFieldGroup } = createFormHook({
         Switch,
         TextArea
     },
-    formComponents: {},
+    formComponents: {
+        ResetButton,
+        SubscribeButton
+    },
     fieldContext,
     formContext
 });

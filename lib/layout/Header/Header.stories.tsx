@@ -65,13 +65,13 @@ export const Default: Story = {
         await userEvent.click(camera);
         await expect(args.menu![2].onClick).toHaveBeenCalled();
 
-        const profile = canvas.getByText('Profile');
+        const profile = canvas.getByText('Profil');
         await expect(profile).toBeVisible();
         await expect(profile.tagName).toBe('BUTTON');
         await userEvent.click(profile);
         await expect(args.onProfile).toHaveBeenCalled();
 
-        const logout = canvas.getByText('Logout');
+        const logout = canvas.getByText('Odhlásiť sa');
         await expect(logout).toBeVisible();
         await expect(logout.tagName).toBe('BUTTON');
         await userEvent.click(logout);

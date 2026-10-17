@@ -199,25 +199,25 @@ export const StaticData: Story = {
         await expect(sortByAgeBtn.tagName).toBe('BUTTON');
         await expect(sortByCityBtn.tagName).toBe('BUTTON');
 
-        await expect(sortByNameBtn.title).toContain('Sorted ascending');
-        await expect(sortByAgeBtn.title).toContain('Not sorted');
-        await expect(sortByCityBtn.title).toContain('Not sorted');
+        await expect(sortByNameBtn.title).toContain('Zoradiť vzostupne');
+        await expect(sortByAgeBtn.title).toContain('Nezoradené');
+        await expect(sortByCityBtn.title).toContain('Nezoradené');
 
         await userEvent.click(sortByNameBtn);
         await new Promise((resolve) => setTimeout(resolve, 200));
-        await expect(sortByNameBtn.title).toContain('Sorted descending');
+        await expect(sortByNameBtn.title).toContain('Zoradiť zostupne');
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Yara');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Alice');
 
         await userEvent.click(sortByNameBtn);
         await new Promise((resolve) => setTimeout(resolve, 200));
-        await expect(sortByNameBtn.title).toContain('Not sorted');
+        await expect(sortByNameBtn.title).toContain('Nezoradené');
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Bob');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Yara');
 
         await userEvent.click(sortByAgeBtn);
         await new Promise((resolve) => setTimeout(resolve, 200));
-        await expect(sortByAgeBtn.title).toContain('Sorted ascending');
+        await expect(sortByAgeBtn.title).toContain('Zoradiť vzostupne');
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Fiona');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Kevin');
         await expect(table.lastElementChild?.childNodes.item(6)?.childNodes.item(2)?.textContent).toBe('Los Angeles');
@@ -226,7 +226,7 @@ export const StaticData: Story = {
         await userEvent.click(sortByCityBtn);
         await userEvent.click(sortByCityBtn);
         await new Promise((resolve) => setTimeout(resolve, 200));
-        await expect(sortByCityBtn.title).toContain('Sorted descending');
+        await expect(sortByCityBtn.title).toContain('Zoradiť zostupne');
 
         await expect(sortByAgeBtn.previousElementSibling?.innerHTML).toContain('1');
         await expect(sortByCityBtn.previousElementSibling?.innerHTML).toContain('2');
@@ -253,9 +253,9 @@ export const FetchedData: Story = {
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Alice');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Fiona');
 
-        const prevBtn = canvas.getByTitle('Previous page');
-        const nextBtn = canvas.getByTitle('Next page');
-        const pageSelect = canvas.getByLabelText('Current page');
+        const prevBtn = canvas.getByTitle('Predchádzajúca strana');
+        const nextBtn = canvas.getByTitle('Nasledujúca strana');
+        const pageSelect = canvas.getByLabelText('Aktuálna strana');
 
         await expect(prevBtn).toBeDisabled();
         await expect(nextBtn).toBeEnabled();

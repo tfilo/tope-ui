@@ -47,9 +47,9 @@ export const Basic: Story = {
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('DIV');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example.txt');
-        await expect(canvas.queryByTitle('Select file')).toBeVisible();
-        await expect(canvas.queryByTitle('Select file')).toBeEnabled();
-        await userEvent.click(canvas.getByLabelText('Remove example.txt'));
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeVisible();
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeEnabled();
+        await userEvent.click(canvas.getByLabelText('Odstrániť example.txt'));
         await expect(parameters.onChange).toHaveBeenCalledTimes(1);
         await expect(parameters.onChange).toHaveBeenCalledWith(null);
     },
@@ -68,9 +68,9 @@ export const Disabled: Story = {
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('DIV');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example.txt');
-        await expect(canvas.queryByLabelText('Remove example.txt')).not.toBeInTheDocument();
-        await expect(canvas.queryByTitle('Select file')).toBeVisible();
-        await expect(canvas.queryByTitle('Select file')).toBeDisabled();
+        await expect(canvas.queryByLabelText('Odstrániť example.txt')).not.toBeInTheDocument();
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeVisible();
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeDisabled();
     },
     args: {
         label: 'Some basic input',
@@ -88,9 +88,9 @@ export const Readonly: Story = {
         await expect(canvas.getByLabelText('Some basic input')).toBeVisible();
         await expect(canvas.getByLabelText('Some basic input').tagName).toBe('DIV');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example.txt');
-        await expect(canvas.queryByLabelText('Remove example.txt')).not.toBeInTheDocument();
-        await expect(canvas.queryByTitle('Select file')).toBeVisible();
-        await expect(canvas.queryByTitle('Select file')).toBeDisabled();
+        await expect(canvas.queryByLabelText('Odstrániť example.txt')).not.toBeInTheDocument();
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeVisible();
+        await expect(canvas.queryByTitle('Vyberte súbor')).toBeDisabled();
     },
     args: {
         label: 'Some basic input',
@@ -131,9 +131,9 @@ export const Multiple: Story = {
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example1.txt');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example2.txt');
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example3.txt');
-        await userEvent.click(canvas.getByLabelText('Remove example2.txt'));
+        await userEvent.click(canvas.getByLabelText('Odstrániť example2.txt'));
         await expect(parameters.onChange).toHaveBeenCalledTimes(1);
-        await userEvent.click(canvas.getByLabelText('Remove example3.txt'));
+        await userEvent.click(canvas.getByLabelText('Odstrániť example3.txt'));
         await expect(parameters.onChange).toHaveBeenCalledTimes(2);
         await expect(canvas.getByLabelText('Some basic input')).toHaveTextContent('example1.txt');
         await expect(canvas.getByLabelText('Some basic input')).not.toHaveTextContent('example2.txt');

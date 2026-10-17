@@ -1,40 +1,40 @@
 export const localization = {
-    loading: 'Loading...',
-    noOptions: 'No options',
-    selectFile: 'Select file',
+    loading: 'Načítava sa...',
+    noOptions: 'Žiadne možnosti',
+    selectFile: 'Vyberte súbor',
     emptyOptionLabel: '',
-    textareaCounter: 'Displays the current character count and the maximum allowed characters.',
-    requiredField: 'This field is required.',
-    remove: (name: string) => `Remove ${name}`,
-    edit: 'Edit',
-    profile: 'Profile',
-    logout: 'Logout',
-    page: 'Page',
-    of: 'of',
-    sortAsc: 'Sorted ascending',
-    sortDsc: 'Sorted descending',
-    sortNotSet: 'Not sorted',
-    nextPage: 'Next page',
-    prevPage: 'Previous page',
-    currentPage: 'Current page',
+    textareaCounter: 'Zobrazuje aktuálny počet znakov a maximálny povolený počet znakov.',
+    requiredField: 'Táto položka je poivnná.',
+    remove: (name: string) => `Odstrániť ${name}`,
+    edit: 'Upraviť',
+    profile: 'Profil',
+    logout: 'Odhlásiť sa',
+    page: 'Strana',
+    of: 'z',
+    sortAsc: 'Zoradiť vzostupne',
+    sortDsc: 'Zoradiť zostupne',
+    sortNotSet: 'Nezoradené',
+    prevPage: 'Predchádzajúca strana',
+    nextPage: 'Nasledujúca strana',
+    currentPage: 'Aktuálna strana',
     dateTimeInput: {
-        previousMonth: 'Previous month',
-        nextMonth: 'Next month',
-        previousYear: 'Previous year',
-        nextYear: 'Next year',
-        days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], // 0 for sunday
-        months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        previousMonth: 'Predchádzajúci mesiac',
+        nextMonth: 'Nasledujúci mesiac',
+        previousYear: 'Predchádzajúci rok',
+        nextYear: 'Nasledujúci rok',
+        days: ['Nedela', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'], // 0 for sunday
+        months: ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'],
         defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
         defaultDateInputPattern: 'dd.MM.yyyy',
         defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
         defaultDateInputPlaceholder: 'DD.MM.YYYY',
-        openCalendar: 'Open calendar',
-        closeCalendar: 'Close calendar'
+        openCalendar: 'Otvoriť kalendár',
+        closeCalendar: 'Zatvoriť kalendár'
     },
-    switch: 'switch',
+    switch: 'Prepínač',
     modal: {
-        cancelLabel: 'Cancel',
-        confirmLabel: 'Confirm'
+        cancelLabel: 'Zrušiť',
+        confirmLabel: 'Potvrdiť'
     }
 };
 

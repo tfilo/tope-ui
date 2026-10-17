@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     play: async ({ args, canvas, userEvent }) => {
-        const edit = canvas.getByTitle('Edit');
+        const edit = canvas.getByTitle('Upraviť');
         await expect(edit.tagName).toBe('BUTTON');
         await userEvent.click(edit);
         await expect(args.onAction).toHaveBeenCalled();
@@ -45,7 +45,7 @@ export const NonInteractiveCard: Story = {
     play: async ({ canvas }) => {
         const card = canvas.getByText('Lorem ipsum dolor sit amet', { exact: false }).parentElement!.parentElement!;
         await expect(card.tagName).toBe('DIV');
-        await expect(canvas.queryByTitle('Edit')).toBeNull();
+        await expect(canvas.queryByTitle('Upraviť')).toBeNull();
     },
     args: {
         description:

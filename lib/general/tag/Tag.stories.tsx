@@ -28,8 +28,8 @@ export const Primary: Story = {
         await expect(canvas.getByText('Primary Tag')).not.toBeDisabled();
         await expect(args.onClick).toHaveBeenCalled();
 
-        await expect(canvas.getByLabelText('Remove Primary Tag').tagName).toBe('BUTTON');
-        await userEvent.click(canvas.getByLabelText('Remove Primary Tag'));
+        await expect(canvas.getByLabelText('Odstrániť Primary Tag').tagName).toBe('BUTTON');
+        await userEvent.click(canvas.getByLabelText('Odstrániť Primary Tag'));
         await expect(args.onRemove).toHaveBeenCalled();
     },
     args: {
@@ -78,7 +78,7 @@ export const Disabled: Story = {
         await userEvent.click(canvas.getByText('Disabled Tag'));
         await expect(canvas.getByText('Disabled Tag')).toBeDisabled();
         await expect(args.onClick).not.toHaveBeenCalled();
-        await expect(canvas.queryByLabelText('Remove Disabled Tag')).toBe(null);
+        await expect(canvas.queryByLabelText('Odstrániť Disabled Tag')).toBe(null);
     },
     args: {
         label: 'Disabled Tag',

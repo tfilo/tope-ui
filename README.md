@@ -60,16 +60,39 @@ npm run test-storybook
 
 ## Components
 
+### Common
+
+- **Icon** - type definition used in Input, Button, Dropdown, Modal, Header
+- **Option** - interface used in Autocomplete, Select and OptionGroup
+- **OptionGroup** - interface used in Select
+
 ### Form
+
+Form elements can be used only using Tanstack Form. See example bellow:
+
+```html
+<form.AppField
+    name="basic"
+    children="{(field)"
+    =""
+>
+    (<field.Input label="Basic example" />)} />
+    <form.AppForm>
+        <form.SubscribeButton>Submit</form.SubscribeButton>
+    </form.AppForm></form.AppField
+>
+```
 
 - **Autocomplete**
 - **DateTimeInput**
 - **FileInput**
 - **Input**
+- **ResetButton**
 - **Select**
+- **SubscribeButton**
 - **Switch**
 - **TextArea**
-- **ElementWrapper**
+- **ElementWrapper** - internal component
 
 ### General
 
@@ -79,6 +102,12 @@ npm run test-storybook
 - **Modal**
 - **Table**
 - **Tag**
+
+### Hooks
+
+- **form-context** - Tanstack form specific context
+- **form** - Tanstack form specific context
+- **useWindowSize** - Hook to detect breakpoint change in code when user resize window
 
 ### Layout
 
@@ -93,7 +122,13 @@ npm run test-storybook
 
 ### Utils
 
+#### Constants
+
+- **setLocalization** - allows to set custom localizations for hardcoded values, default in Slovak language
+- **setConfig** - allows to set custom configuration, currently just locale used in internal compare funcion for sorting table rows
+
 #### String utils
+
 - **isEmpty**
 - **isNotEmpty**
 - **isBlank**

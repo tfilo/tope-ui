@@ -96,7 +96,7 @@ export const Basic: Story = {
         await expect(canvas.getByText('Apple').tagName).toBe('BUTTON');
 
         // find button with aria-label Remove Apple and click it
-        const removeButton = canvas.getByLabelText('Remove Apple');
+        const removeButton = canvas.getByLabelText('Odstrániť Apple');
         await userEvent.click(removeButton);
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
@@ -167,7 +167,7 @@ export const Multiple: Story = {
         await expect(canvas.getByText('Apple').tagName).toBe('BUTTON');
 
         // find button with aria-label Remove Apple and click it
-        await userEvent.click(canvas.getByLabelText('Remove Apple'));
+        await userEvent.click(canvas.getByLabelText('Odstrániť Apple'));
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(parameters.onChange).toHaveBeenCalledTimes(2);
@@ -177,7 +177,7 @@ export const Multiple: Story = {
         await expect(canvas.queryByText('Apple')).toBeNull();
 
         // find button with aria-label Remove Apple and click it
-        await userEvent.click(canvas.getByLabelText('Remove Guava'));
+        await userEvent.click(canvas.getByLabelText('Odstrániť Guava'));
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(parameters.onChange).toHaveBeenCalledTimes(3);

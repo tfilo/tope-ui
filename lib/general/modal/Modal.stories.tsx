@@ -211,7 +211,7 @@ export const WithoutConfirm: Story = {
         const buttons = canvas.getAllByRole('button');
         await expect(buttons).toHaveLength(2);
         await expect(buttons[0]).toHaveTextContent('Open modal');
-        await expect(buttons[1]).toHaveTextContent('Confirm');
+        await expect(buttons[1]).toHaveTextContent('Potvrdiť');
     },
 
     args: {

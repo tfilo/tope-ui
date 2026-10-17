@@ -8,7 +8,7 @@ export type ElementWrapperProps = PropsWithChildren<{
     /** Visible label text for the wrapped element (optional). */
     label?: string;
     /** Error message to display beneath the element (optional). */
-    error?: string;
+    error?: string | string[];
     /** When true, indicates the field is required (visual only). */
     required?: boolean;
     /** When true, disables the wrapped element and related UI (visual only). */

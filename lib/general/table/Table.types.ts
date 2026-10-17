@@ -85,7 +85,7 @@ export type TableProps<TData extends RowObject> = {
 export type TablePaginationProps = {
     onPrevPage: () => void;
     onNextPage: () => void;
-    onPageChange: (e: React.ChangeEvent<HTMLSelectElement, HTMLSelectElement>) => void;
+    onPageChange: (page: number) => void;
     page: number;
     totalPages: number;
 };

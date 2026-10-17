@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="597" height="597" viewBox="0 0 597 597"
+  xmlns:c2pa="http://c2pa.org/manifest">
+  <rect width="597" height="597" fill="#e3e8eb" />
+  <circle cx="299" cy="299" r="94" fill="none" stroke="#7b868c" stroke-width="6" />
+  <rect x="247.500" y="257.500" width="103" height="84" rx="6" fill="none" stroke="#7b868c"
+    stroke-width="5" />
+  <path d="M250 340 L280 289 L300 320 L320 305 L349 340 Z" fill="#7b868c" stroke="#7b868c"
+    stroke-width="3" stroke-linejoin="round" />
+  <g fill="#7b868c">
+    <circle cx="313" cy="279" r="7" />
+    <circle cx="323" cy="276" r="8.500" />
+    <rect x="301" y="279" width="37" height="12" rx="6" />
+  </g>
+</svg>

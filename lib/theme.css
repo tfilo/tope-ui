@@ -29,8 +29,8 @@
 
     --color-primary: #0852ba;
     --color-primary-dark: #083c82;
-    --color-primary-light: #82b0fa;
-    --color-primary-extra-light: #bad4fc;
+    --color-primary-light: #3686f7;
+    --color-primary-extra-light: #8ebbfa;
 
     --color-secondary: #57585c;
     --color-secondary-dark: #444446;
@@ -108,6 +108,8 @@
     --spacing-md: 0.5rem; /* 8px */
     --spacing-lg: 0.75rem; /* 12px */
     --spacing-xl: 1rem; /* 16px */
+    --spacing-2xl: 1.25rem; /* 20px */
+    --spacing-3xl: 1.5rem; /* 24px */
 
     --breakpoint-mobile: 32rem; /* 512px */
     --breakpoint-tablet: 48rem; /* 768px */

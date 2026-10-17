@@ -1,13 +1,16 @@
 import type { ElementType } from 'react';
+
 import { isNotBlank } from '../../utils';
 import type { SectionProps } from './Section.types';
 
 const theme = {
     wrapper: (hasBorder: boolean) => {
-        return hasBorder ? 'border border-default rounded-sm flex flex-col' : 'flex flex-col gap-lg';
+        return hasBorder ? 'overflow-hidden border border-default rounded-sm flex flex-col' : 'flex flex-col gap-lg';
     },
     title: (hasBorder: boolean) => {
-        return hasBorder ? 'text-md font-bold p-lg border-b border-default bg-primary-extra-light' : 'text-md font-bold';
+        return hasBorder
+            ? 'text-md font-bold p-lg bg-primary-extra-light/25 border-b border-default'
+            : 'text-md font-bold py-lg border-b border-default';
     },
     content: (hasBorder: boolean) => {
         return hasBorder ? 'p-lg flex flex-col gap-lg' : 'flex flex-col gap-lg';

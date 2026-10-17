@@ -1,5 +1,8 @@
 import type { InputHTMLAttributes } from 'react';
-import type { WeekDayType } from './DateTimeInput';
+
+import type { WeekDay } from './WeekDay';
+
+export type WeekDayType = (typeof WeekDay)[keyof typeof WeekDay];
 
 /** Represents a single day cell in the calendar grid. */
 export interface Day {
@@ -25,16 +28,7 @@ export interface Slot {
     minute: number;
 }
 
-/** Properties for the DateTimeInput component. */
-export interface DateTimeInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'value' | 'onChange' | 'placeholder'> {
-    /** The currently selected date and time in ISO format (YYYY-MM-DD[THH:mm:ss]). Set to null if no date is selected */
-    value: string | null;
-
-    /** Callback function triggered when the date or time changes.
-     * @param {string | null} value - The new ISO-formatted date string or null or 'UNKNOWN' if date is invalid.
-     */
-    onChange: (value: string | null) => Promise<void> | void;
-
+interface BaseProps {
     /** Optional label for DateTimeInput component */
     label?: string;
 
@@ -86,3 +80,7 @@ export interface DateTimeInputProps extends Omit<InputHTMLAttributes<HTMLInputEl
      */
     closeDateTimePickerIfSelected?: boolean;
 }
+
+/** Properties for the DateTimeInput component. */
+export interface DateTimeInputProps
+    extends Omit<InputHTMLAttributes<HTMLInputElement>, keyof BaseProps | 'type' | 'value' | 'onChange' | 'placeholder'>, BaseProps {}

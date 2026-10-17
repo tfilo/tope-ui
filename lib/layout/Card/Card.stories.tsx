@@ -1,7 +1,7 @@
+import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Card } from './Card';
-import { expect, fn } from 'storybook/test';
 import { Grid } from '../Grid';
 
 const meta = {

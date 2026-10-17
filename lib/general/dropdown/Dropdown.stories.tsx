@@ -1,8 +1,8 @@
+import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { MapIcon, UserIcon } from '@heroicons/react/16/solid';
 
 import { Dropdown } from './Dropdown';
-import { MapIcon, UserIcon } from '@heroicons/react/16/solid';
-import { expect, fn } from 'storybook/test';
 
 const meta = {
     title: 'General/Dropdown',

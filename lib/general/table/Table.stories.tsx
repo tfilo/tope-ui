@@ -1,11 +1,11 @@
+import { expect } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-
-import { Table } from './Table';
-import { Button } from '../button';
 import { PencilIcon } from '@heroicons/react/16/solid';
+
+import { Button } from '../button';
+import { Table } from './Table';
 import { type SortObject } from './Table.types';
 import { createColumns } from './table-utils';
-import { expect } from 'storybook/test';
 
 const meta = {
     title: 'General/Table',
@@ -42,7 +42,7 @@ const columns = createColumns<DataObject>([
     {
         header: 'Action',
         accessor: 'name',
-        additionalClassName: 'min-w-[100px] border-l text-right sticky right-none bg-white',
+        additionalClassName: 'min-w-[100px] border-l text-right sticky right-none bg-white shadow-lg shadow-secondary-light',
         cell: () => (
             <Button
                 icon={PencilIcon}
@@ -259,7 +259,7 @@ export const FetchedData: Story = {
 
         await expect(prevBtn).toBeDisabled();
         await expect(nextBtn).toBeEnabled();
-        await expect(pageSelect).toHaveValue('0');
+        await expect(pageSelect).toHaveTextContent('1');
 
         await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -269,7 +269,7 @@ export const FetchedData: Story = {
 
         await new Promise((resolve) => setTimeout(resolve, 200));
 
-        await expect(pageSelect).toHaveValue('3');
+        await expect(pageSelect).toHaveTextContent('4');
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Paula');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Thomas');
         await expect(prevBtn).toBeEnabled();
@@ -278,7 +278,7 @@ export const FetchedData: Story = {
 
         await userEvent.click(nextBtn);
         await expect(nextBtn).toBeDisabled();
-        await expect(pageSelect).toHaveValue('4');
+        await expect(pageSelect).toHaveTextContent('5');
         await expect(table.lastElementChild?.firstElementChild?.firstElementChild?.innerHTML).toBe('Ursula');
         await expect(table.lastElementChild?.lastElementChild?.firstElementChild?.innerHTML).toBe('Yara');
 
@@ -293,7 +293,7 @@ export const FetchedData: Story = {
 
         await expect(prevBtn).toBeDisabled();
         await expect(nextBtn).toBeEnabled();
-        await expect(pageSelect).toHaveValue('0');
+        await expect(pageSelect).toHaveTextContent('1');
     },
     args: {
         // @ts-expect-error incorrect infering happens only in storybook args

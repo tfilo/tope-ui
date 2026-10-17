@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Column } from './Column';
 import { Grid } from '../Grid';
-import { Input, TextArea } from '../../form';
+import { Column } from './Column';
 
 const meta = {
     title: 'Layout/Column',
@@ -45,19 +44,5 @@ export const ColSpan4: Story = {
     args: {
         children: Default.args?.children,
         colspan: 4
-    }
-};
-
-export const ColumnWithInput: Story = {
-    args: {
-        children: <Input label='Test input' />,
-        colspan: 1
-    }
-};
-
-export const ColumnWithTextarea: Story = {
-    args: {
-        children: <TextArea label='Test input' />,
-        colspan: 1
     }
 };

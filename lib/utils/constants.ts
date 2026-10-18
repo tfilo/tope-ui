@@ -24,8 +24,6 @@ export const localization = {
         nextYear: 'Nasledujúci rok',
         days: ['Nedela', 'Pondelok', 'Utorok', 'Streda', 'Štvrtok', 'Piatok', 'Sobota'], // 0 for sunday
         months: ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December'],
-        defaultDateTimeInputPattern: 'dd.MM.yyyy HH:mm:ss',
-        defaultDateInputPattern: 'dd.MM.yyyy',
         defaultDateTimeInputPlaceholder: 'DD.MM.YYYY HH:mm:ss',
         defaultDateInputPlaceholder: 'DD.MM.YYYY',
         openCalendar: 'Otvoriť kalendár',
@@ -41,8 +39,12 @@ export const localization = {
 export const config: {
     /** Default locale used for sorting in table */
     locale: Intl.LocalesArgument;
+    dateTimeFormat: string[];
+    dateFormat: string[];
 } = {
-    locale: 'sk-SK'
+    locale: 'sk-SK',
+    dateTimeFormat: ['dd.MM.yyyy HH:mm:ss', 'd.M.yyyy H:mm:ss'],
+    dateFormat: ['dd.MM.yyyy', 'd.M.yyyy']
 };
 
 /**

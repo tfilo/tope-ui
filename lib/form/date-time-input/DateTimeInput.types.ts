@@ -56,9 +56,10 @@ interface BaseProps {
      * If not provided, it falls back to a default based on the `type` prop.
      * If type is 'dateTime', default format pattern is 'dd.MM.yyyy HH:mm:ss'
      * If type is 'date', default format pattern is 'dd.MM.yyyy'
-     * @example 'dd.MM.yyyy HH:mm:ss'
+     * It MUST be array of at least one format, first has most priority, other are tried to parse input if first failed
+     * @example ['dd.MM.yyyy HH:mm:ss', 'd.M.yyyy H:mm:ss']
      */
-    inputFormat?: string;
+    inputFormat?: string[];
 
     /**
      * Custom placeholder text for the input field.

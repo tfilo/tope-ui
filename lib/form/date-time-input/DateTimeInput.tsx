@@ -18,12 +18,13 @@ import {
 import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/16/solid';
 import { useSelector } from '@tanstack/react-form';
 
-import { localization } from '../../utils/constants';
+import { config, localization } from '../../utils/constants';
 import { Button } from '../../general';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
 import type { DateTimeInputProps, Day, Month, Slot } from './DateTimeInput.types';
 import { WeekDay } from './WeekDay';
 import { useFieldContext } from '../../hooks/form-context';
+import { isNotBlank } from '../../utils/string-utils';
 
 const theme = {
     action: {
@@ -82,6 +83,28 @@ for (let i = 0; i < 12; i++) {
     allMonths.push({ label: localization.dateTimeInput.months[i], val: i });
 }
 
+/** Tries to parse a date string using multiple date-fns patterns, in the given order. Used in dateTime picker.
+ * The first pattern that produces a valid date wins; the remaining patterns are not tried.
+ * @param {string} rawValue - The raw user input to be parsed (e.g., "1.1.2025 10:11:23").
+ * @param {string[]} patterns - List of date-fns patterns to try (e.g., ["dd.MM.yyyy HH:mm:ss", "d.M.yyyy H:mm:ss"]).
+ * @returns {Date | null} The parsed Date object, or null if none of the patterns match.
+ * @example
+ * // Returns Date for 1 January 2025, 10:11:23 (first pattern fails, second one matches)
+ * parseWithFormats("1.1.2025 10:11:23", ["dd.MM.yyyy HH:mm:ss", "d.M.yyyy H:mm:ss"]);
+ * @example
+ * // Returns null (no pattern matches)
+ * parseWithFormats("invalid", ["dd.MM.yyyy HH:mm:ss", "d.M.yyyy H:mm:ss"]);
+ */
+const parseWithFormats = (rawValue: string, patterns: string[]): Date | null => {
+    for (const pattern of patterns) {
+        const date = parse(rawValue, pattern, new Date());
+        if (isValid(date)) {
+            return date;
+        }
+    }
+    return null;
+};
+
 /** Generate time slots
  * @param {number} interval number in minutes between slots
  * @returns {Slot[]} array with defined slot interval
@@ -121,18 +144,18 @@ const generateTimeSlots = (interval: number): Slot[] => {
  * @returns {string} A string in "yyyy-MM-dd" or "yyyy-MM-dd'T'HH:mm:ss" format, or '' if dateTime is empty string or 'UNKNOWN' if dateTime is invalid.
  * @example
  * // Input: "26.03.2026", Pattern: "dd.MM.yyyy" -> Returns "2026-03-26"
- * formatToISO("26.03.2026", false, defaultDateInputPattern);
+ * formatToISO("26.03.2026", false, dateFormat);
  * @example
  * // Input: "", Pattern: Pattern: "dd.MM.yyyy" -> Returns ""
- * formatToISO("", false, defaultDateInputPattern);
+ * formatToISO("", false, dateFormat);
  * @example
  * // Input: "26.02.300", Pattern: "dd.MM.yyyy" -> Returns "UNKNOWN"
- * formatToISO("26.02.300", false, defaultDateInputPattern);
+ * formatToISO("26.02.300", false, dateFormat);
  */
-const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormatPattern: string): string => {
+const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormatPattern: string[]): string => {
     if (!dateTime?.trim()) return '';
-    const parsedDate = parse(dateTime, inputFormatPattern, new Date()); // convert string into Date object according formatPattern
-    if (!isValid(parsedDate) || getYear(parsedDate) < minYear || getYear(parsedDate) > maxYear) {
+    const parsedDate = parseWithFormats(dateTime, inputFormatPattern); // convert string into Date object according formatPattern
+    if (parsedDate === null || !isValid(parsedDate) || getYear(parsedDate) < minYear || getYear(parsedDate) > maxYear) {
         // 'Invalid format or year out of the range');
         return unknownDate;
     } else {
@@ -154,7 +177,7 @@ const formatToISO = (dateTime: string | undefined, hasTime: boolean, inputFormat
  * // Returns "" (empty string)
  * formatFromISO(null, "dd.MM.yyyy");
  */
-const formatFromISO = (dateTime: string | null, inputFormatPattern: string): string => {
+const formatFromISO = (dateTime: string | null, inputFormatPattern: string[]): string => {
     if (!dateTime || dateTime.trim() === unknownDate) return '';
     try {
         // Convert ISO string to Date object first to ensure compatibility with date-fns format()
@@ -164,7 +187,11 @@ const formatFromISO = (dateTime: string | null, inputFormatPattern: string): str
         if (!isValid(date) || getYear(date) < minYear || getYear(date) > maxYear) {
             return '';
         }
-        return format(date, inputFormatPattern);
+        const formatStr = inputFormatPattern.at(0);
+        if (!isNotBlank(formatStr)) {
+            throw new Error('inputFormatPattern must contain at least single pattern');
+        }
+        return format(date, formatStr);
     } catch {
         return '';
     }
@@ -175,7 +202,7 @@ const formatFromISO = (dateTime: string | null, inputFormatPattern: string): str
  * @param {number | null} month - The selected 0-indexed month (0-11).
  * @param {number | null} date - The salected day of the month (1-31).
  * @param {number | null} minutes - Selected total minutes from midnight.
- * @param {string} inputFormatPattern - The expected date-fns pattern (e.g., "dd.MM.yyyy" or "yyyy-MM-dd").
+ * @param {string} inputFormatPattern - The expected date-fns pattern (e.g., ["dd.MM.yyyy"] or ["yyyy-MM-dd"]). Pics first item from array.
  * @returns {string} The formatted date string.
  */
 const formatDate = (
@@ -184,7 +211,7 @@ const formatDate = (
     date: number | null,
     minutes: number | null,
     seconds: number | null,
-    inputFormatPattern: string
+    inputFormatPattern: string[]
 ): string => {
     if (year !== null && month !== null && date !== null) {
         // if minutes or seconds are null, use 0 as midnight
@@ -198,8 +225,13 @@ const formatDate = (
         if (!isValid(dateObj) || year < minYear || year > maxYear) {
             throw new Error('Invalid date or year out of the range');
         }
+
+        const formatStr = inputFormatPattern.at(0);
+        if (!isNotBlank(formatStr)) {
+            throw new Error('inputFormatPattern must contain at least single pattern');
+        }
         // format date
-        return format(dateObj, inputFormatPattern);
+        return format(dateObj, formatStr);
     } else {
         throw new Error('It is not possible to format date.');
     }
@@ -296,9 +328,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * 1. If a custom `inputFormat` is provided via props, it takes the highest priority.
      * 2. If no custom format exists, it falls back to a predefined default pattern based on whether the component is in "DateTime" or "Date-only" mode (`hasTime`).
      */
-    const inputFormatPattern =
-        inputFormat ??
-        (hasTime ? localization.dateTimeInput.defaultDateTimeInputPattern : localization.dateTimeInput.defaultDateInputPattern);
+    const inputFormatPattern = inputFormat ?? (hasTime ? config.dateTimeFormat : config.dateFormat);
 
     const [inputValue, setInputValue] = useState<string>(formatFromISO(value, inputFormatPattern));
     const [prevValue, setPrevValue] = useState(value);
@@ -306,6 +336,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const activeYearRef = useRef<HTMLLIElement>(null);
     const calendarRef = useRef<HTMLDivElement>(null);
     const calendarBtnRef = useRef<HTMLButtonElement>(null);
+    const [isTyping, setIsTyping] = useState(false);
 
     const _id = useId();
     const baseId = id || _id;
@@ -481,6 +512,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * @param {ChangeEvent<HTMLInputElement>} e - The input change event.
      */
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setIsTyping(true);
         const rawValue = e.target.value;
         setInputValue(rawValue);
 
@@ -492,12 +524,12 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
             setSelectedMinutes(null);
             setSelectedSeconds(null);
             field.handleChange('');
-        } else if (rawValue.trim().length === inputFormatPattern.length) {
+        } else if (rawValue.trim().length >= [...inputFormatPattern].sort((a, b) => a.length - b.length)[0].length) {
             // Attempt to parse the string using the provided pattern. The third argument 'new Date()' acts as a reference for missing parts (e.g., if the pattern only has time, it takes today's date).
-            const parsedDate = parse(rawValue, inputFormatPattern, new Date());
+            const parsedDate = parseWithFormats(rawValue, inputFormatPattern);
 
             // Validate the parsed result
-            if (isValid(parsedDate) && getYear(parsedDate) >= minYear && getYear(parsedDate) <= maxYear) {
+            if (parsedDate !== null && isValid(parsedDate) && getYear(parsedDate) >= minYear && getYear(parsedDate) <= maxYear) {
                 // Extract individual components to sync the calendar picker state
                 setSelectedYear(getYear(parsedDate));
                 setSelectedMonth(getMonth(parsedDate)); // Returns 0-11
@@ -539,6 +571,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * @param {boolean} [closeDateTimePicker=true] - If date-time picker should be closed after selection
      */
     const handleDateSelection = (formattedDate: string, closeDateTimePicker: boolean = true) => {
+        setIsTyping(false);
         setInputValue(formattedDate);
         const res = formatToISO(formattedDate, hasTime, inputFormatPattern);
         field.handleChange(res);
@@ -690,6 +723,16 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         handleDateSelection(formattedDate);
     };
 
+    const handleBlur = () => {
+        setIsTyping(false);
+
+        // po opustení poľa text zjednotíme na hlavný formát (prvý pattern)
+        if (value && value !== unknownDate) {
+            setInputValue(formatFromISO(value, inputFormatPattern));
+        }
+        field.handleBlur();
+    };
+
     /** Close date-time picker if it was clicked outside the picker or pressed escape */
     useEffect(() => {
         const handleClickAway = (e: MouseEvent) => {
@@ -727,7 +770,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     if (value !== prevValue) {
         setPrevValue(value);
-        if (value !== unknownDate) {
+        // update only when not typing
+        if (value !== unknownDate && !isTyping) {
             setInputValue(formatFromISO(value, inputFormatPattern));
         }
     }
@@ -750,7 +794,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     value={inputValue}
                     name={field.name}
                     onChange={handleInputChange}
-                    onBlur={field.handleBlur}
+                    onBlur={handleBlur}
                 />
                 <div className={theme.action.rightWrapper}>
                     <Button

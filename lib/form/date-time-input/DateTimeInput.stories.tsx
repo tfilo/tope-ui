@@ -162,7 +162,7 @@ export const CustomSlots: Story = {
 export const CustomInputFormat: Story = {
     args: {
         type: 'dateTime',
-        inputFormat: 'yyyy/MM/dd HH:mm:ss'
+        inputFormat: ['yyyy/MM/dd HH:mm:ss']
     },
     parameters: {
         onChange: onChange,
@@ -342,7 +342,7 @@ export const MoreCustomOptions: Story = {
         error: 'Input error',
         slots: 180,
         lastDayInWeek: WeekDay.Wednesday,
-        inputFormat: 'yyyy/MM/dd HH:mm:ss',
+        inputFormat: ['yyyy/MM/dd HH:mm:ss'],
         inputIconTitle: 'calendar',
         required: true,
         id: 'calendar'

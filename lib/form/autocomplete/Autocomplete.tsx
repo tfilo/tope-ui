@@ -59,6 +59,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const nextPageAbortController = useRef<AbortController | null>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const optionsRef = useRef<HTMLUListElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
@@ -188,7 +190,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Handle blur event to close dropdown
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         // If target is inside optionsRef, do not close
-        if (optionsRef.current?.contains(e.relatedTarget as Node)) {
+        if (wrapperRef.current?.contains(e.relatedTarget as Node)) {
             return;
         }
         handleOptionsClose();
@@ -218,6 +220,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
         setDisplayValue('');
         setOptions({ hasNextPage: false, page: 0, options: [] });
+        inputRef.current?.focus();
     };
 
     // Handle search for options based on user input
@@ -394,6 +397,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         >
             <div
                 className={theme.wrapper}
+                ref={wrapperRef}
                 onBlur={handleBlur}
             >
                 <div
@@ -418,8 +422,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             disabled={disabled || isFetching}
                             onChange={handleDisplayValueChange}
                             onKeyDown={handleKeyDown}
-                            onBlur={handleBlur}
                             id={autocompleteId}
+                            ref={inputRef}
                         />
                         <Button
                             key={props.title}
@@ -444,6 +448,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
                     }}
                     onScroll={handleScroll}
+                    onMouseDown={(e) => e.preventDefault()}
                 >
                     <ul
                         ref={optionsRef}

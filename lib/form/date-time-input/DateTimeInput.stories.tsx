@@ -287,10 +287,14 @@ export const MoreCustomOptions: Story = {
             throw new Error('Calendar not found');
         }
         const monthButton = within(calendar).getAllByRole('button')[1];
-        await expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
+        await expect(
+            canvasElement.querySelector('ul[class="grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')
+        ).toBeFalsy();
         await userEvent.click(monthButton);
         await waitFor(() => {
-            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeVisible();
+            expect(
+                canvasElement.querySelector('ul[class="grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')
+            ).toBeVisible();
         });
 
         const yearButton = within(calendar).getAllByRole('button')[1];
@@ -299,7 +303,9 @@ export const MoreCustomOptions: Story = {
         ).toBeFalsy();
         await userEvent.click(yearButton);
         await waitFor(() => {
-            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
+            expect(
+                canvasElement.querySelector('ul[class="grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')
+            ).toBeFalsy();
             expect(
                 canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')
             ).toBeVisible();
@@ -308,14 +314,18 @@ export const MoreCustomOptions: Story = {
         const year2000Button = within(calendar).getByText('2000');
         await userEvent.click(year2000Button);
         await waitFor(() => {
-            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeVisible();
+            expect(
+                canvasElement.querySelector('ul[class="grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')
+            ).toBeVisible();
             expect(canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')).toBeFalsy();
         });
 
         const monthJanButton = within(calendar).getByText('Jan');
         await userEvent.click(monthJanButton);
         await waitFor(() => {
-            expect(canvasElement.querySelector('ul[class="grid h-full max-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')).toBeFalsy();
+            expect(
+                canvasElement.querySelector('ul[class="grid h-full max-h-[184px] min-h-[184px] flex-1 grid-cols-4 gap-md p-md"]')
+            ).toBeFalsy();
             expect(canvasElement.querySelector('ul[class="grid max-h-[184px] flex-1 grid-cols-4 gap-md overflow-auto p-md"]')).toBeFalsy();
         });
 

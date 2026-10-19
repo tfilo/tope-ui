@@ -22,15 +22,17 @@
     ],
     "main": "./dist/tope-ui-main.umd.js",
     "module": "./dist/tope-ui-main.es.js",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "types": "./dist/index.d.ts",
             "import": "./dist/tope-ui-main.es.js",
             "require": "./dist/tope-ui-main.umd.js"
         },
         "./style.css": "./dist/tope-ui.css"
     },
     "scripts": {
-        "build": "tsc -b && vite build",
+        "build": "tsc -b && vite build && tsc -p tsconfig.types.json",
         "lint": "eslint './lib/**/*.{js,jsx,ts,tsx}'",
         "lint:fix": "eslint './lib/**/*.{js,jsx,ts,tsx}' --fix",
         "prettier": "prettier './lib/**/*.{js,jsx,ts,tsx,json,md}' --check",

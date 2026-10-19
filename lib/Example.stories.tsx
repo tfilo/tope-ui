@@ -334,7 +334,6 @@ export const Example: Story = {
                                         children={(field) => (
                                             <field.Select
                                                 label='Title before'
-                                                allowEmptyOption
                                                 options={titlesBefore}
                                             />
                                         )}
@@ -362,7 +361,6 @@ export const Example: Story = {
                                         children={(field) => (
                                             <field.Select
                                                 label='Title after'
-                                                allowEmptyOption
                                                 options={titlesAfter}
                                             />
                                         )}

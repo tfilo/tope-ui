@@ -10,8 +10,6 @@ interface BaseProps {
     error?: string;
     /** Options for the select component */
     options: (Option | OptionGroup)[];
-    /** Allow select empty option */
-    allowEmptyOption?: boolean;
 }
 
 export interface SelectProps

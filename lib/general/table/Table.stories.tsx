@@ -576,3 +576,151 @@ export const PaginationBoundaries: Story = {
         await expect(fetch.onFetch.mock.calls.map(([page]) => page)).toEqual([0, 1, 0, 1]);
     }
 };
+
+type NumericRow = { label: string; value: bigint | number | undefined };
+
+const numericColumns = createColumns<NumericRow>([
+    { header: 'Label', accessor: 'label' },
+    { header: 'Value', accessor: 'value', sortable: true, defaultSortDirection: 'asc' }
+]);
+
+const rowLabels = (table: HTMLElement) => Array.from(table.querySelectorAll('tbody tr'), (row) => row.firstElementChild?.textContent);
+
+export const BigintSorting: Story = {
+    args: StaticData.args,
+    play: async ({ mount, userEvent }) => {
+        // Put the larger adjacent value first so rounding both to Number fails this test.
+        const rows: NumericRow[] = [
+            { label: 'Large plus one', value: 9007199254740993n },
+            { label: 'Equal first', value: 7n },
+            { label: 'Negative', value: -9007199254740993n },
+            { label: 'Large', value: 9007199254740992n },
+            { label: 'Equal second', value: 7n },
+            { label: 'Zero', value: 0n }
+        ];
+        const canvas = await mount(
+            <Table
+                columns={numericColumns}
+                data={rows}
+            />
+        );
+        const table = canvas.getByRole('table');
+        await waitFor(() =>
+            expect(rowLabels(table)).toEqual(['Negative', 'Zero', 'Equal first', 'Equal second', 'Large', 'Large plus one'])
+        );
+        await userEvent.click(canvas.getByTitle(/Value/));
+        await waitFor(() =>
+            expect(rowLabels(table)).toEqual(['Large plus one', 'Large', 'Equal first', 'Equal second', 'Zero', 'Negative'])
+        );
+    }
+};
+
+export const MixedBigintNumberSorting: Story = {
+    args: StaticData.args,
+    play: async ({ mount, userEvent }) => {
+        const rows: NumericRow[] = [
+            { label: 'Large bigint', value: 9007199254740993n },
+            { label: 'Positive fraction', value: 1.5 },
+            { label: 'Equal bigint', value: 2n },
+            { label: 'Negative bigint', value: -2n },
+            { label: 'Large number', value: 9007199254740992 },
+            { label: 'Equal number', value: 2 },
+            { label: 'Negative fraction', value: -2.5 },
+            { label: 'Missing', value: undefined },
+            { label: 'Zero bigint', value: 0n },
+            { label: 'Positive infinity', value: Infinity },
+            { label: 'Negative infinity', value: -Infinity }
+        ];
+        const canvas = await mount(
+            <Table
+                columns={numericColumns}
+                data={rows}
+            />
+        );
+        const table = canvas.getByRole('table');
+        await waitFor(() =>
+            expect(rowLabels(table)).toEqual([
+                'Negative infinity',
+                'Negative fraction',
+                'Negative bigint',
+                'Missing',
+                'Zero bigint',
+                'Positive fraction',
+                'Equal bigint',
+                'Equal number',
+                'Large number',
+                'Large bigint',
+                'Positive infinity'
+            ])
+        );
+        await userEvent.click(canvas.getByTitle(/Value/));
+        await waitFor(() =>
+            expect(rowLabels(table)).toEqual([
+                'Positive infinity',
+                'Large bigint',
+                'Large number',
+                'Equal bigint',
+                'Equal number',
+                'Positive fraction',
+                'Missing',
+                'Zero bigint',
+                'Negative bigint',
+                'Negative fraction',
+                'Negative infinity'
+            ])
+        );
+    }
+};
+
+export const NumericAndCustomSorting: Story = {
+    args: StaticData.args,
+    play: async ({ mount, userEvent }) => {
+        const rows: NumericRow[] = [
+            { label: 'Ten', value: 10 },
+            { label: 'Fraction', value: 1.5 },
+            { label: 'Negative', value: -3 },
+            { label: 'Missing', value: undefined },
+            { label: 'Two', value: 2 }
+        ];
+        let canvas = await mount(
+            <Table
+                columns={numericColumns}
+                data={rows}
+            />
+        );
+        await waitFor(() => expect(rowLabels(canvas.getByRole('table'))).toEqual(['Negative', 'Missing', 'Fraction', 'Two', 'Ten']));
+        await userEvent.click(canvas.getByTitle(/Value/));
+        await waitFor(() => expect(rowLabels(canvas.getByRole('table'))).toEqual(['Ten', 'Two', 'Fraction', 'Missing', 'Negative']));
+
+        // Custom ordering by absolute value must override the default bigint comparator.
+        const compare = fn((a: bigint | number | undefined, b: bigint | number | undefined) => {
+            const absolute = (value: bigint | number | undefined) => {
+                const integer = BigInt(value ?? 0);
+                return integer < 0n ? -integer : integer;
+            };
+            const left = absolute(a);
+            const right = absolute(b);
+
+            return left < right ? -1 : left > right ? 1 : 0;
+        });
+        const customColumns = createColumns<NumericRow>([
+            { header: 'Label', accessor: 'label' },
+            { header: 'Value', accessor: 'value', sortable: true, defaultSortDirection: 'asc', compare }
+        ]);
+        canvas = await mount(
+            <Table
+                columns={customColumns}
+                data={[
+                    { label: 'Negative ten', value: -10n },
+                    { label: 'Positive two', value: 2n },
+                    { label: 'Negative one', value: -1n }
+                ]}
+            />
+        );
+        await waitFor(() => expect(rowLabels(canvas.getByRole('table'))).toEqual(['Negative one', 'Positive two', 'Negative ten']));
+        await expect(compare).toHaveBeenCalled();
+        await expect(compare.mock.calls.some(([a, b]) => typeof a === 'bigint' && typeof b === 'bigint')).toBe(true);
+        await userEvent.click(canvas.getByTitle(/Value/));
+        await waitFor(() => expect(rowLabels(canvas.getByRole('table'))).toEqual(['Negative ten', 'Positive two', 'Negative one']));
+    }
+};

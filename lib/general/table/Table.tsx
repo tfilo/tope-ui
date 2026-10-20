@@ -15,14 +15,23 @@ const theme = {
 } as const;
 
 /**
- * Base compare method, compares all values as strings except number or bigint that are compared as numbers
+ * Base compare method, compares all values as localized strings except number or bigint values, which use numeric order.
  *
  * @param a first value
  * @param b second value
  * @returns number
  */
 const baseCompareFn = (a: unknown, b: unknown): number => {
-    if (typeof a === 'bigint' || typeof b === 'bigint' || typeof a === 'number' || typeof b === 'number') {
+    if (typeof a === 'bigint' || typeof b === 'bigint') {
+        // Relational comparisons preserve bigint precision, including against fractional numbers.
+        // Keep the existing numeric coercion for other values (undefined becomes zero).
+        const valueA = typeof a === 'bigint' ? a : +(a ?? 0);
+        const valueB = typeof b === 'bigint' ? b : +(b ?? 0);
+
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    }
+
+    if (typeof a === 'number' || typeof b === 'number') {
         const valueA = +(a ?? 0);
         const valueB = +(b ?? 0);
 

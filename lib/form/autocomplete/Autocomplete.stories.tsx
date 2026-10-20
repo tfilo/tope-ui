@@ -461,11 +461,13 @@ export const InsideForm: Story = {
 // Each lookup stays pending until its explicit resolve button is pressed.
 const deferredOption = () => {
     let resolve!: (option: Option | null) => void;
-    const promise = new Promise<Option | null>((done) => {
+    let reject!: (reason: unknown) => void;
+    const promise = new Promise<Option | null>((done, fail) => {
         resolve = done;
+        reject = fail;
     });
 
-    return { promise, resolve };
+    return { promise, resolve, reject };
 };
 
 const FetchRaceExample = (args: AutocompleteProps) => {
@@ -499,6 +501,12 @@ const FetchRaceExample = (args: AutocompleteProps) => {
                         onClick={() => requests[value].resolve(options.find((option) => option.value === value)!)}
                     >
                         Resolve {value}
+                    </button>
+                    <button
+                        type='button'
+                        onClick={() => requests[value].reject(new globalThis.Error('Lookup failed'))}
+                    >
+                        Reject {value}
                     </button>
                 </span>
             ))}
@@ -599,5 +607,181 @@ export const StaleFetchKeepsLoading: Story = {
         await userEvent.click(canvas.getByRole('button', { name: 'Resolve banana' }));
         await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
         await expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible();
+    }
+};
+
+const controlledRequest = <T,>() => {
+    let resolve!: (value: T) => void;
+    let reject!: (reason: unknown) => void;
+    const promise = new Promise<T>((done, fail) => {
+        resolve = done;
+        reject = fail;
+    });
+
+    return { promise, resolve, reject };
+};
+
+const RequestFailureExample = ({
+    lookup = false,
+    pagination = false,
+    loadingRace = false
+}: {
+    lookup?: boolean;
+    pagination?: boolean;
+    loadingRace?: boolean;
+}) => {
+    const [requests] = useState(() => ({
+        latest: controlledRequest<import('./Autocomplete.types').OnSearchResult>(),
+        initial: controlledRequest<import('./Autocomplete.types').OnSearchResult>(),
+        obsolete: controlledRequest<import('./Autocomplete.types').OnSearchResult>(),
+        lookup: controlledRequest<Option | null>()
+    }));
+    const [fetchCalls, setFetchCalls] = useState(0);
+    const form = useAppForm({ defaultValues: { basic: lookup ? 'apple' : '' } });
+    const result = { options: [options[0]], hasNextPage: pagination, page: 0 };
+
+    return (
+        <>
+            <form.AppField name='basic'>
+                {(field) => (
+                    <field.Autocomplete
+                        label='Requests'
+                        pageSize={1}
+                        onSearch={(query, page, _size, signal) => {
+                            if (pagination) return page === 0 ? Promise.resolve(result) : requests.initial.promise;
+                            if (query === '') return requests.initial.promise;
+                            if (query === 'a') {
+                                return new Promise((_resolve, reject) => {
+                                    signal.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), {
+                                        once: true
+                                    });
+                                });
+                            }
+                            if (query === 'ab') return requests.obsolete.promise;
+
+                            return loadingRace ? requests.latest.promise : Promise.resolve(result);
+                        }}
+                        onFetch={() => {
+                            setFetchCalls((calls) => calls + 1);
+                            return fetchCalls === 0 ? requests.lookup.promise : Promise.resolve(options[0]);
+                        }}
+                    />
+                )}
+            </form.AppField>
+            <div onMouseDown={(event) => event.preventDefault()}>
+                <button
+                    type='button'
+                    onClick={() => requests.latest.resolve(result)}
+                >
+                    Resolve latest
+                </button>
+                <button
+                    type='button'
+                    onClick={() => requests.initial.reject(new globalThis.Error('Offline'))}
+                >
+                    Fail request
+                </button>
+                <button
+                    type='button'
+                    onClick={() => requests.obsolete.reject(new globalThis.Error('Late failure'))}
+                >
+                    Fail obsolete
+                </button>
+                <button
+                    type='button'
+                    onClick={() => requests.lookup.reject(new globalThis.Error('Lookup failed'))}
+                >
+                    Fail lookup
+                </button>
+            </div>
+            <form.Subscribe selector={(state) => state.values.basic}>
+                {(value) => <output aria-label='Stored value'>{value}</output>}
+            </form.Subscribe>
+        </>
+    );
+};
+
+export const RequestFailures: Story = {
+    args: { onSearch: async () => ({ options: [], page: 0, hasNextPage: false }), onFetch: async () => null },
+    render: () => <RequestFailureExample />,
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('textbox');
+        await userEvent.type(input, '{ArrowDown}');
+        await userEvent.click(canvas.getByRole('button', { name: 'Fail request' }));
+        await expect(await canvas.findByRole('alert')).toHaveTextContent('Možnosti sa nepodarilo načítať');
+        // Reject an aborted request, then an obsolete request after a newer success.
+        await userEvent.type(input, 'abc');
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.click(canvas.getByRole('button', { name: 'Fail obsolete' }));
+        await expect(canvas.getByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.click(canvas.getByRole('button', { name: 'Apple' }));
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('apple');
+    }
+};
+
+export const NextPageFailure: Story = {
+    args: { onSearch: async () => ({ options: [], page: 0, hasNextPage: false }), onFetch: async () => null },
+    render: () => <RequestFailureExample pagination />,
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        const apple = await canvas.findByRole('button', { name: 'Apple' });
+        const scroller = apple.closest('ul')!.parentElement!;
+        scroller.scrollTop = scroller.scrollHeight;
+        scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
+        await waitFor(() => expect(canvas.getByText('Načítava sa...')).toBeVisible());
+        await userEvent.click(canvas.getByRole('button', { name: 'Fail request' }));
+        await expect(await canvas.findByRole('alert')).toBeVisible();
+        await expect(apple).toBeVisible();
+        await expect(canvas.queryByText('Načítava sa...')).toBeNull();
+        await userEvent.click(apple);
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('apple');
+    }
+};
+
+export const LookupFailure: Story = {
+    args: { onSearch: async () => ({ options: [], page: 0, hasNextPage: false }), onFetch: async () => null },
+    render: () => <RequestFailureExample lookup />,
+    play: async ({ canvas, userEvent }) => {
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Fail lookup' }));
+        await expect(await canvas.findByRole('alert')).toBeVisible();
+        await expect(canvas.getByRole('textbox')).toBeEnabled();
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('apple');
+        await userEvent.click(canvas.getByRole('button', { name: 'Skúsiť znova' }));
+        await expect(await canvas.findByLabelText('Odstrániť Apple')).toBeVisible();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+    }
+};
+
+export const ObsoleteFailureKeepsLoading: Story = {
+    args: RequestFailures.args,
+    render: () => <RequestFailureExample loadingRace />,
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('textbox');
+        await userEvent.type(input, 'abc');
+        await userEvent.click(canvas.getByRole('button', { name: 'Fail obsolete' }));
+        await expect(canvas.getByText('Načítava sa...')).toBeVisible();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve latest' }));
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.queryByText('Načítava sa...')).toBeNull();
+    }
+};
+
+export const ObsoleteLookupFailure: Story = {
+    ...StaleFetchSingle,
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Set banana' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Reject apple' }));
+        await expect(canvas.getByRole('textbox')).toBeDisabled();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve banana' }));
+        await expect(await canvas.findByLabelText('Odstrániť Banana')).toBeVisible();
+        await expect(canvas.getByRole('textbox')).toBeEnabled();
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"banana"');
     }
 };

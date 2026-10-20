@@ -68,19 +68,38 @@ npm run test-storybook
 
 ### Form
 
-Form elements can be used only using Tanstack Form. See example bellow:
+Form elements integrate with TanStack Form through `useAppForm`:
 
-```html
-<form.AppField
-    name="basic"
-    children="{(field)"
-    =""
->
-    (<field.Input label="Basic example" />)} />
-    <form.AppForm>
-        <form.SubscribeButton>Submit</form.SubscribeButton>
-    </form.AppForm></form.AppField
->
+```tsx
+import { useAppForm } from '@tfilo/tope-ui';
+
+export function ExampleForm() {
+    const form = useAppForm({
+        defaultValues: { basic: '' },
+        onSubmit: ({ value }) => {
+            console.log(value);
+        }
+    });
+
+    return (
+        <form
+            noValidate
+            onSubmit={(event) => {
+                event.preventDefault();
+                void form.handleSubmit();
+            }}
+        >
+            <form.AppField
+                name='basic'
+                children={(field) => <field.Input label='Basic example' />}
+            />
+
+            <form.AppForm>
+                <form.SubscribeButton>Submit</form.SubscribeButton>
+            </form.AppForm>
+        </form>
+    );
+}
 ```
 
 - **Autocomplete**
@@ -139,7 +158,10 @@ Form elements can be used only using Tanstack Form. See example bellow:
 
 The library builds a bundled stylesheet. Consumers can import:
 
-- `tope-ui/style.css`
+```tsx
+import '@tfilo/tope-ui/style.css';
+```
+
 - Tailwind-based theme styles are defined in `lib/main.css` and `lib/theme.css`.
 
 ## Localization

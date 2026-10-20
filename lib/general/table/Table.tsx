@@ -79,8 +79,12 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
 
     const onNextPage = () => {
         setPage((prev) => {
-            return Math.min(totalPages - 1, prev + 1);
+            return Math.max(0, Math.min(totalPages - 1, prev + 1));
         });
+    };
+
+    const onPageChange = (page: number) => {
+        setPage(Math.max(0, Math.min(totalPages - 1, page)));
     };
 
     const onSortChange = (accessor: keyof TData) => {
@@ -219,7 +223,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                 <TablePagination
                     onPrevPage={onPrevPage}
                     onNextPage={onNextPage}
-                    onPageChange={setPage}
+                    onPageChange={onPageChange}
                     page={page}
                     totalPages={totalPages}
                 />

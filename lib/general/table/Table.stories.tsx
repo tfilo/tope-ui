@@ -7,6 +7,7 @@ import { Button } from '../button';
 import { Table } from './Table';
 import { type SortObject } from './Table.types';
 import { createColumns } from './table-utils';
+import { localization } from '../../utils/constants';
 
 const meta = {
     title: 'General/Table',
@@ -483,5 +484,95 @@ export const RequestRejectionAndCleanup: Story = {
         } finally {
             console.error = originalError;
         }
+    }
+};
+
+export const EmptyFetchedData: Story = {
+    args: FetchedData.args,
+    play: async ({ mount, userEvent }) => {
+        const fetch = createFetchRequests();
+        const canvas = await mount(
+            <Table
+                columns={columns}
+                onFetch={fetch.onFetch}
+                pageSize={5}
+            />
+        );
+        await waitFor(() => expect(fetch.requests).toHaveLength(1));
+
+        const prev = canvas.getByTitle(localization.prevPage);
+        const next = canvas.getByTitle(localization.nextPage);
+        const current = canvas.getByLabelText(localization.currentPage);
+        const expectEmptyPagination = async () => {
+            await expect(prev).toBeDisabled();
+            await expect(next).toBeDisabled();
+            await expect(current).toBeDisabled();
+            await expect(current).toHaveTextContent(/^0$/);
+            await expect(current.parentElement?.parentElement).toHaveTextContent(`${localization.page}0 ${localization.of} 0`);
+            await userEvent.click(prev);
+            await userEvent.click(next);
+            await userEvent.click(current);
+            await expect(fetch.onFetch).toHaveBeenCalledTimes(1);
+            await expect(fetch.onFetch).toHaveBeenLastCalledWith(0, 5, [{ accessor: 'name', direction: 'asc' }]);
+        };
+
+        // Totals are unknown until this controlled request resolves.
+        await expectEmptyPagination();
+        await act(async () => {
+            fetch.requests[0].resolve({ data: [], page: 0, pageSize: 5, totalRecords: 0 });
+        });
+        await expect(canvas.getByRole('table').querySelector('tbody')).toBeEmptyDOMElement();
+        await expectEmptyPagination();
+    }
+};
+
+export const PaginationBoundaries: Story = {
+    args: FetchedData.args,
+    play: async ({ mount, userEvent }) => {
+        const fetch = createFetchRequests();
+        const canvas = await mount(
+            <Table
+                columns={columns}
+                onFetch={fetch.onFetch}
+                pageSize={5}
+            />
+        );
+        await waitFor(() => expect(fetch.requests).toHaveLength(1));
+        await fetch.resolve(0, 'First page', 0, 10);
+
+        const prev = canvas.getByTitle(localization.prevPage);
+        const next = canvas.getByTitle(localization.nextPage);
+        const current = canvas.getByLabelText(localization.currentPage);
+        await expect(prev).toBeDisabled();
+        await expect(next).toBeEnabled();
+        await expect(current).toHaveTextContent(/^1$/);
+        await userEvent.click(prev);
+        await expect(fetch.onFetch).toHaveBeenCalledTimes(1);
+
+        await userEvent.click(next);
+        await waitFor(() => expect(fetch.requests).toHaveLength(2));
+        await fetch.resolve(1, 'Last page', 1, 10);
+        await expect(prev).toBeEnabled();
+        await expect(next).toBeDisabled();
+        await expect(current).toHaveTextContent(/^2$/);
+        await userEvent.click(next);
+        await expect(fetch.onFetch).toHaveBeenCalledTimes(2);
+
+        await userEvent.click(prev);
+        await waitFor(() => expect(fetch.requests).toHaveLength(3));
+        await fetch.resolve(2, 'First page', 0, 10);
+        await expect(prev).toBeDisabled();
+        await expect(next).toBeEnabled();
+        await expect(current).toHaveTextContent(/^1$/);
+        await expect(fetch.onFetch.mock.calls.map(([page]) => page)).toEqual([0, 1, 0]);
+
+        // The page dropdown uses the same zero-based indexes as the arrows.
+        await userEvent.click(current);
+        await userEvent.click(canvas.getByRole('button', { name: /^2$/ }));
+        await waitFor(() => expect(fetch.requests).toHaveLength(4));
+        await fetch.resolve(3, 'Last page', 1, 10);
+        await expect(current).toHaveTextContent(/^2$/);
+        await expect(next).toBeDisabled();
+        await expect(fetch.onFetch.mock.calls.map(([page]) => page)).toEqual([0, 1, 0, 1]);
     }
 };

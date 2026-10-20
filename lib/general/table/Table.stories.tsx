@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { act as reactAct } from 'react';
+import { expect, fn, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PencilIcon } from '@heroicons/react/16/solid';
 
@@ -300,5 +301,187 @@ export const FetchedData: Story = {
         columns,
         onFetch: fetchMethod,
         pageSize: 5
+    }
+};
+
+type FetchResult = Awaited<ReturnType<typeof fetchMethod>>;
+
+// Storybook drives user events outside act; enable its environment only while settling requests.
+const act = async (callback: () => Promise<void>) => {
+    const environment = globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean };
+    const previous = environment.IS_REACT_ACT_ENVIRONMENT;
+    environment.IS_REACT_ACT_ENVIRONMENT = true;
+
+    try {
+        await reactAct(callback);
+    } finally {
+        environment.IS_REACT_ACT_ENVIRONMENT = previous;
+    }
+};
+
+const deferred = <T,>() => {
+    let resolve!: (value: T) => void;
+    let reject!: (reason: unknown) => void;
+    const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise;
+        reject = rejectPromise;
+    });
+
+    return { promise, resolve, reject };
+};
+
+const createFetchRequests = () => {
+    const requests: ReturnType<typeof deferred<FetchResult>>[] = [];
+    const onFetch = fn<typeof fetchMethod>(() => {
+        const request = deferred<FetchResult>();
+        requests.push(request);
+
+        return request.promise;
+    });
+
+    const resolve = async (index: number, name: string, page: number, totalRecords = 15) => {
+        await act(async () => {
+            requests[index].resolve({ data: [{ ...data[0], name }], page, pageSize: 5, totalRecords });
+        });
+    };
+
+    const reject = async (index: number, error: Error) => {
+        await act(async () => {
+            requests[index].reject(error);
+        });
+    };
+
+    return { requests, onFetch, resolve, reject };
+};
+
+export const OverlappingPagination: Story = {
+    args: FetchedData.args,
+    render: () => (
+        <Table
+            columns={columns}
+            onFetch={fetchMethod}
+            pageSize={5}
+        />
+    ),
+    play: async ({ mount, userEvent }) => {
+        const fetch = createFetchRequests();
+        const canvas = await mount(
+            <Table
+                columns={columns}
+                onFetch={fetch.onFetch}
+                pageSize={5}
+            />
+        );
+        await waitFor(() => expect(fetch.requests).toHaveLength(1));
+        await fetch.resolve(0, 'Initial rows', 0);
+
+        await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+        await waitFor(() => expect(fetch.requests).toHaveLength(2));
+        await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+        await waitFor(() => expect(fetch.requests).toHaveLength(3));
+
+        await fetch.resolve(2, 'Newest rows', 2);
+        // An obsolete response must not reset the page or shrink the page count.
+        await fetch.resolve(1, 'Obsolete rows', 1, 10);
+
+        await expect(canvas.getByRole('table')).toHaveTextContent('Newest rows');
+        await expect(canvas.queryByText('Obsolete rows')).not.toBeInTheDocument();
+        await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('3');
+        await expect(canvas.getByTitle('Nasledujúca strana')).toBeDisabled();
+        await expect(fetch.onFetch).toHaveBeenCalledTimes(3);
+    }
+};
+
+export const PendingSortChange: Story = {
+    args: FetchedData.args,
+    render: () => (
+        <Table
+            columns={columns}
+            onFetch={fetchMethod}
+            pageSize={5}
+        />
+    ),
+    play: async ({ mount, userEvent }) => {
+        const fetch = createFetchRequests();
+        const canvas = await mount(
+            <Table
+                columns={columns}
+                onFetch={fetch.onFetch}
+                pageSize={5}
+            />
+        );
+        await waitFor(() => expect(fetch.requests).toHaveLength(1));
+        await fetch.resolve(0, 'Initial rows', 0);
+        await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+        await waitFor(() => expect(fetch.requests).toHaveLength(2));
+        await userEvent.click(canvas.getByTitle(/Name/));
+        await waitFor(() => expect(fetch.requests).toHaveLength(3));
+        await expect(fetch.onFetch).toHaveBeenLastCalledWith(0, 5, [{ accessor: 'name', direction: 'desc' }]);
+
+        await fetch.resolve(2, 'Sorted rows', 0, 5);
+        await fetch.resolve(1, 'Old sort rows', 1);
+
+        await expect(canvas.getByRole('table')).toHaveTextContent('Sorted rows');
+        await expect(canvas.queryByText('Old sort rows')).not.toBeInTheDocument();
+        await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('1');
+        await expect(canvas.getByTitle('Nasledujúca strana')).toBeDisabled();
+        await expect(fetch.onFetch).toHaveBeenCalledTimes(3);
+    }
+};
+
+export const RequestRejectionAndCleanup: Story = {
+    args: FetchedData.args,
+    render: () => (
+        <Table
+            columns={columns}
+            onFetch={fetchMethod}
+            pageSize={5}
+        />
+    ),
+    play: async ({ mount, userEvent }) => {
+        const fetch = createFetchRequests();
+        const originalError = console.error;
+        const reportError = fn();
+        console.error = reportError;
+
+        try {
+            const canvas = await mount(
+                <Table
+                    columns={columns}
+                    onFetch={fetch.onFetch}
+                    pageSize={5}
+                />
+            );
+            await waitFor(() => expect(fetch.requests).toHaveLength(1));
+            await fetch.resolve(0, 'Retained rows', 0);
+            await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+            await waitFor(() => expect(fetch.requests).toHaveLength(2));
+            await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+            await waitFor(() => expect(fetch.requests).toHaveLength(3));
+
+            await fetch.reject(1, new Error('Obsolete failure'));
+            await expect(reportError).not.toHaveBeenCalled();
+            const error = new Error('Current failure');
+            await fetch.reject(2, error);
+            await expect(reportError).toHaveBeenCalledTimes(1);
+            await expect(reportError).toHaveBeenCalledWith(error);
+            await expect(canvas.getByRole('table')).toHaveTextContent('Retained rows');
+            await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('3');
+
+            await userEvent.click(canvas.getByTitle('Predchádzajúca strana'));
+            await waitFor(() => expect(fetch.requests).toHaveLength(4));
+            await userEvent.click(canvas.getByTitle('Predchádzajúca strana'));
+            await waitFor(() => expect(fetch.requests).toHaveLength(5));
+            await mount(<div>Table unmounted</div>);
+            // A mismatched page size would throw if the unmounted response were applied.
+            await act(async () => {
+                fetch.requests[4].resolve({ data: [], page: 0, pageSize: 99, totalRecords: 0 });
+            });
+            await fetch.reject(3, new Error('Unmounted failure'));
+            await expect(reportError).toHaveBeenCalledTimes(1);
+            await expect(reportError).toHaveBeenCalledWith(error);
+        } finally {
+            console.error = originalError;
+        }
     }
 };

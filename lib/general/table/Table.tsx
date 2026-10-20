@@ -117,11 +117,27 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     });
 
     useEffect(() => {
+        let active = true;
+
         if (hasFetch) {
-            onFetch(page, pageSize, sort).then((res) => {
-                onSetData(res.data, res.page, res.pageSize, res.totalRecords);
-            });
+            (async () => {
+                try {
+                    const res = await onFetch(page, pageSize, sort);
+
+                    if (active) {
+                        onSetData(res.data, res.page, res.pageSize, res.totalRecords);
+                    }
+                } catch (error) {
+                    if (active) {
+                        console.error(error);
+                    }
+                }
+            })();
         }
+
+        return () => {
+            active = false;
+        };
     }, [onFetch, hasFetch, page, pageSize, sort]);
 
     useEffect(() => {

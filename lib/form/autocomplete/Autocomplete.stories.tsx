@@ -7,6 +7,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useAppForm } from '../../hooks/form';
 import type { AutocompleteProps } from './Autocomplete.types';
 import { Autocomplete } from './Autocomplete';
+import { Button } from '../../general/button';
 
 const meta = {
     title: 'Form/Autocomplete',
@@ -477,7 +478,7 @@ const FetchRaceExample = (args: AutocompleteProps) => {
     const onFetch = (value: string) => requests[value as keyof typeof requests].promise;
 
     return (
-        <>
+        <div className='flex flex-col gap-lg'>
             {mounted && (
                 <form.AppField name='basic'>
                     {(field) => (
@@ -489,43 +490,46 @@ const FetchRaceExample = (args: AutocompleteProps) => {
                 </form.AppField>
             )}
             {(['apple', 'banana', 'apricot'] as const).map((value) => (
-                <span key={value}>
-                    <button
-                        type='button'
+                <div
+                    key={value}
+                    className='flex flex-wrap gap-md'
+                >
+                    <Button
+                        variant='outline'
                         onClick={() => form.setFieldValue('basic', args.multiple ? [value] : value)}
                     >
                         Set {value}
-                    </button>
-                    <button
-                        type='button'
+                    </Button>
+                    <Button
+                        variant='outline'
                         onClick={() => requests[value].resolve(options.find((option) => option.value === value)!)}
                     >
                         Resolve {value}
-                    </button>
-                    <button
-                        type='button'
+                    </Button>
+                    <Button
+                        variant='outline'
                         onClick={() => requests[value].reject(new globalThis.Error('Lookup failed'))}
                     >
                         Reject {value}
-                    </button>
-                </span>
+                    </Button>
+                </div>
             ))}
-            <button
-                type='button'
+            <Button
+                variant='outline'
                 onClick={() => form.reset()}
             >
                 Reset field
-            </button>
-            <button
-                type='button'
+            </Button>
+            <Button
+                variant='outline'
                 onClick={() => setMounted(false)}
             >
                 Unmount field
-            </button>
+            </Button>
             <form.Subscribe selector={(state) => state.values.basic}>
                 {(value) => <output aria-label='Stored value'>{JSON.stringify(value)}</output>}
             </form.Subscribe>
-        </>
+        </div>
     );
 };
 
@@ -641,7 +645,7 @@ const RequestFailureExample = ({
     const result = { options: [options[0]], hasNextPage: pagination, page: 0 };
 
     return (
-        <>
+        <div className='flex flex-col gap-lg'>
             <form.AppField name='basic'>
                 {(field) => (
                     <field.Autocomplete
@@ -668,36 +672,39 @@ const RequestFailureExample = ({
                     />
                 )}
             </form.AppField>
-            <div onMouseDown={(event) => event.preventDefault()}>
-                <button
-                    type='button'
+            <div
+                className='flex flex-wrap gap-md'
+                onMouseDown={(event) => event.preventDefault()}
+            >
+                <Button
+                    variant='outline'
                     onClick={() => requests.latest.resolve(result)}
                 >
                     Resolve latest
-                </button>
-                <button
-                    type='button'
+                </Button>
+                <Button
+                    variant='outline'
                     onClick={() => requests.initial.reject(new globalThis.Error('Offline'))}
                 >
                     Fail request
-                </button>
-                <button
-                    type='button'
+                </Button>
+                <Button
+                    variant='outline'
                     onClick={() => requests.obsolete.reject(new globalThis.Error('Late failure'))}
                 >
                     Fail obsolete
-                </button>
-                <button
-                    type='button'
+                </Button>
+                <Button
+                    variant='outline'
                     onClick={() => requests.lookup.reject(new globalThis.Error('Lookup failed'))}
                 >
                     Fail lookup
-                </button>
+                </Button>
             </div>
             <form.Subscribe selector={(state) => state.values.basic}>
                 {(value) => <output aria-label='Stored value'>{value}</output>}
             </form.Subscribe>
-        </>
+        </div>
     );
 };
 

@@ -122,6 +122,10 @@ const generateTimeSlots = (interval: number): Slot[] => {
         return [];
     }
 
+    if (!Number.isFinite(interval) || !Number.isInteger(interval) || interval < 0) {
+        throw new RangeError('DateTimeInput slots must be 0 or a positive finite whole number of minutes.');
+    }
+
     const slots: Slot[] = [];
     const minutesInDay = 24 * 60; // 1440 minutes a day
     for (let totalMinutes = 0; totalMinutes < minutesInDay; totalMinutes += interval) {

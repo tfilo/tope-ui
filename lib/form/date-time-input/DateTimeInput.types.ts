@@ -45,7 +45,9 @@ interface BaseProps {
      * @default WeekDay.Sunday */
     lastDayInWeek?: WeekDayType;
 
-    /** * The time interval in minutes between each selectable slot in the time picker.
+    /** The time interval in minutes between each selectable slot in the time picker.
+     * Accepts 0 (no generated slots) or positive finite whole-minute intervals.
+     * Other values throw a RangeError during rendering. At most 1440 slots are generated.
      * For example, a value of 15 generates slots like 08:00, 08:15, 08:30, etc.
      * @default 15
      */

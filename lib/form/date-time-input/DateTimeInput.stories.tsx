@@ -35,7 +35,8 @@ const meta = {
             }
         },
         slots: {
-            control: { type: 'number', min: 1, max: 1440 }
+            control: { type: 'number', min: 0, step: 1 },
+            description: '0 disables generated slots. Positive finite whole-minute intervals are supported; other values throw RangeError.'
         }
     },
     render: (args, { parameters }) => {
@@ -351,4 +352,32 @@ export const MoreCustomOptions: Story = {
         onChange: onChange,
         defaultValue: '2026-12-12T12:00:00'
     }
+};
+
+export const GeneratedTimeSlots: Story = {
+    args: { type: 'dateTime', label: 'Time slots' },
+    parameters: { onChange: fn(), expectedCount: 96, expectedLast: '23:45' },
+    play: async ({ canvas, userEvent, parameters }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Otvoriť kalendár' }));
+        const slots = canvas.queryAllByRole('button', { name: /^\d{2}:\d{2}$/ });
+        await expect(slots).toHaveLength(parameters.expectedCount);
+        if (parameters.expectedCount > 0) {
+            await expect(slots[0]).toHaveTextContent('00:00');
+            await expect(slots.at(-1)).toHaveTextContent(parameters.expectedLast);
+            await userEvent.click(slots.at(-1)!);
+            await expect((canvas.getByRole('textbox') as HTMLInputElement).value).toContain(parameters.expectedLast);
+        }
+    }
+};
+
+export const NoGeneratedTimeSlots: Story = {
+    ...GeneratedTimeSlots,
+    args: { ...GeneratedTimeSlots.args, slots: 0 },
+    parameters: { onChange: fn(), expectedCount: 0 }
+};
+
+export const UnevenTimeSlots: Story = {
+    ...GeneratedTimeSlots,
+    args: { ...GeneratedTimeSlots.args, slots: 7 },
+    parameters: { onChange: fn(), expectedCount: 206, expectedLast: '23:55' }
 };

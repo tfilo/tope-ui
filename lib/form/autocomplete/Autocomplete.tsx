@@ -115,8 +115,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     };
 
     // Keep DOM focus in the input; aria-activedescendant tracks keyboard navigation.
-    const handleOptionsOpen = async () => {
-        inputRef.current?.focus();
+    const handleOptionsOpen = async (focusInput = true) => {
+        if (focusInput) {
+            inputRef.current?.focus();
+        }
 
         if (!isOpen) {
             setIsOpen(true);
@@ -130,6 +132,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
 
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (e.key === 'ArrowUp' && !isOpen) {
+                return;
+            }
+
             e.preventDefault();
 
             if (!isOpen) {
@@ -432,18 +438,33 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             variant='transparent'
                             showChildren={false}
                             icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
-                            onClick={() => {
-                                inputRef.current?.focus();
+                            onClick={(e) => {
+                                // Native keyboard activation keeps focus on the toggle for repeated Space presses.
+                                const focusInput = e.detail > 0;
+                                if (focusInput) {
+                                    inputRef.current?.focus();
+                                }
 
                                 if (isOpen) {
                                     handleOptionsClose();
                                 } else {
+                                    void handleOptionsOpen(focusInput);
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    setActiveIndex(0);
                                     void handleOptionsOpen();
+                                } else if (e.key === 'Escape' && isOpen) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleOptionsClose();
+                                    inputRef.current?.focus();
                                 }
                             }}
                             onPointerDown={(e) => e.preventDefault()}
                             onMouseDown={(e) => e.preventDefault()}
-                            tabIndex={-1}
                             aria-label={props.title ?? localization.selectOptions}
                             aria-haspopup='listbox'
                             aria-expanded={isOpen}

@@ -630,7 +630,20 @@ export const AccessibleKeyboardSingle: Story = {
         const input = canvas.getByRole('combobox', { name: 'Fruit' });
         const toggle = canvas.getByRole('button', { name: 'Vybrať možnosti' });
         await expect(input).toHaveAttribute('aria-expanded', 'false');
-        await expect(toggle).toHaveAttribute('tabindex', '-1');
+        await userEvent.click(input);
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(canvas.queryByRole('listbox')).toBeNull();
+        await userEvent.tab();
+        await expect(toggle).toHaveFocus();
+        await userEvent.keyboard(' ');
+        await canvas.findByRole('listbox', { name: 'Fruit' });
+        await expect(toggle).toHaveFocus();
+        await userEvent.keyboard(' ');
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        await expect(toggle).toHaveFocus();
+        await userEvent.tab({ shift: true });
+        await expect(input).toHaveFocus();
         await userEvent.click(toggle);
         await expect(input).toHaveFocus();
         const list = await canvas.findByRole('listbox', { name: 'Fruit' });
@@ -660,6 +673,8 @@ export const AccessibleKeyboardSingle: Story = {
         await expect(input).not.toHaveAttribute('aria-activedescendant');
         await expect(canvas.queryByRole('listbox')).toBeNull();
         await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        await userEvent.keyboard('{ArrowUp}{ArrowUp}');
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
         // Typing continues directly in the input and opens a new search without selecting anything.
         await userEvent.keyboard('Ap');
         await expect(input).toHaveValue('Ap');

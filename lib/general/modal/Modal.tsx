@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { ExclamationTriangleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 
 import { localization } from '../../utils/constants';
@@ -36,6 +36,8 @@ export const Modal: React.FC<ModalProps> = ({
     icon,
     ...props
 }) => {
+    const titleId = useId();
+    const defaultLabelledBy = props['aria-label'] === undefined && props['aria-labelledby'] === undefined ? titleId : undefined;
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const Icon = icon ?? (variant === 'danger' ? ExclamationTriangleIcon : InformationCircleIcon);
@@ -71,6 +73,7 @@ export const Modal: React.FC<ModalProps> = ({
 
     return (
         <dialog
+            aria-labelledby={defaultLabelledBy}
             {...props}
             ref={dialogRef}
             onCancel={handleOnCancel}
@@ -80,7 +83,12 @@ export const Modal: React.FC<ModalProps> = ({
             <div className={theme.wrapper}>
                 <Icon className={`${theme.icon.base} ${theme.icon.color[variant]}`} />
                 <div>
-                    <div className={theme.title}>{title}</div>
+                    <div
+                        id={titleId}
+                        className={theme.title}
+                    >
+                        {title}
+                    </div>
                     <div className={theme.body}>{body}</div>
                 </div>
             </div>

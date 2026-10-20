@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { renderToString } from 'react-dom/server';
+import { hydrateRoot } from 'react-dom/client';
+import { Modal } from '../../general/modal';
 import type { Option } from '../../common/Option';
 
 import { expect, fn, waitFor } from 'storybook/test';
@@ -77,18 +80,18 @@ const options = [
 
 export const Basic: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        await expect(canvas.getByRole('textbox')).toBeVisible();
-        await expect(canvas.getByLabelText('Autocomplete')).toBeVisible();
-        await expect(canvas.getByLabelText('Autocomplete').tagName).toBe('INPUT');
+        await expect(canvas.getByRole('combobox')).toBeVisible();
+        await expect(canvas.getByLabelText('Autocomplete', { selector: 'input' })).toBeVisible();
+        await expect(canvas.getByLabelText('Autocomplete', { selector: 'input' }).tagName).toBe('INPUT');
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryByText('Guava')).toBeVisible();
         await expect(canvas.getByText('Guava').tagName).toBe('BUTTON');
-        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}Apple');
+        await userEvent.type(canvas.getByRole('combobox'), '{ArrowDown}Apple');
         // wait for fetch to finish
         await new Promise((resolve) => setTimeout(resolve, 1700));
         canvas
-            .queryAllByRole('button')
+            .queryAllByRole('option')
             .find((item) => item.textContent === 'Apple')
             ?.click();
         // wait for 800ms here to allow useEffects to settle
@@ -143,20 +146,20 @@ export const Basic: Story = {
 
 export const Multiple: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        await expect(canvas.getByRole('textbox')).toBeVisible();
-        await expect(canvas.getByLabelText('MultiAutocomplete')).toBeVisible();
-        await expect(canvas.getByLabelText('MultiAutocomplete').tagName).toBe('INPUT');
+        await expect(canvas.getByRole('combobox')).toBeVisible();
+        await expect(canvas.getByLabelText('MultiAutocomplete', { selector: 'input' })).toBeVisible();
+        await expect(canvas.getByLabelText('MultiAutocomplete', { selector: 'input' }).tagName).toBe('INPUT');
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryByText('Guava')).toBeVisible();
         await expect(canvas.getByText('Guava').tagName).toBe('BUTTON');
         await expect(canvas.queryByText('Kiwi')).toBeVisible();
         await expect(canvas.getByText('Kiwi').tagName).toBe('BUTTON');
-        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}Apple');
+        await userEvent.type(canvas.getByRole('combobox'), '{ArrowDown}Apple');
         // wait for fetch to finish
         await new Promise((resolve) => setTimeout(resolve, 1700));
         canvas
-            .queryAllByRole('button')
+            .queryAllByRole('option')
             .find((item) => item.textContent === 'Apple')
             ?.click();
         // wait for 800ms here to allow useEffects to settle
@@ -228,16 +231,16 @@ export const Multiple: Story = {
 
 export const Disabled: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        await expect(canvas.getByRole('textbox')).toBeVisible();
-        await expect(canvas.getByLabelText('Autocomplete')).toBeVisible();
-        await expect(canvas.getByLabelText('Autocomplete').tagName).toBe('INPUT');
-        await expect(canvas.getByLabelText('Autocomplete')).toBeDisabled();
+        await expect(canvas.getByRole('combobox')).toBeVisible();
+        await expect(canvas.getByLabelText('Autocomplete', { selector: 'input' })).toBeVisible();
+        await expect(canvas.getByLabelText('Autocomplete', { selector: 'input' }).tagName).toBe('INPUT');
+        await expect(canvas.getByLabelText('Autocomplete', { selector: 'input' })).toBeDisabled();
         // wait for 800ms here to allow useEffects to settle
         await new Promise((resolve) => setTimeout(resolve, 800));
         await expect(canvas.queryByText('Guava')).toBeVisible();
         await expect(canvas.getByText('Guava').tagName).toBe('BUTTON');
         await expect(canvas.queryByText('Remove Guava')).toBeNull();
-        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}Apple');
+        await userEvent.type(canvas.getByRole('combobox'), '{ArrowDown}Apple');
         // wait for fetch to finish
         await new Promise((resolve) => setTimeout(resolve, 1700));
         canvas
@@ -291,6 +294,7 @@ export const Required: Story = {
     play: async ({ canvas }) => {
         await expect(
             canvas.getByLabelText('This is required autocomplete', {
+                selector: 'input',
                 exact: false
             })
         ).toBeRequired();
@@ -338,9 +342,9 @@ export const Required: Story = {
 
 export const Error: Story = {
     play: async ({ canvas }) => {
-        const byLabel = canvas.getByLabelText('Label', { exact: false });
+        const byLabel = canvas.getByLabelText('Label', { exact: false, selector: 'input' });
         const byError = canvas.getByLabelText('This field is required!');
-        await expect(canvas.getByRole('textbox')).toBeVisible();
+        await expect(canvas.getByRole('combobox')).toBeVisible();
         await expect(byLabel).toBeVisible();
         await expect(byError).toBeVisible();
         // Element retrieved by its label should be same as element retrieved by error label
@@ -348,11 +352,11 @@ export const Error: Story = {
 
         // Check that label is before and error after element
         await expect(
-            canvas.getByRole('textbox').parentElement?.parentElement?.parentElement?.parentElement?.previousSibling
+            canvas.getByRole('combobox').parentElement?.parentElement?.parentElement?.parentElement?.previousSibling
         ).toHaveTextContent('Label');
-        await expect(canvas.getByRole('textbox').parentElement?.parentElement?.parentElement?.parentElement?.nextSibling).toHaveTextContent(
-            'This field is required!'
-        );
+        await expect(
+            canvas.getByRole('combobox').parentElement?.parentElement?.parentElement?.parentElement?.nextSibling
+        ).toHaveTextContent('This field is required!');
     },
     args: {
         label: 'Label',
@@ -389,7 +393,7 @@ export const Error: Story = {
 
 export const AutocompleteOnly: Story = {
     play: async ({ canvas }) => {
-        await expect(canvas.getByRole('textbox')).toHaveAttribute('aria-label', 'Labelless autocomplete');
+        await expect(canvas.getByRole('combobox')).toHaveAttribute('aria-label', 'Labelless autocomplete');
     },
     args: {
         'aria-label': 'Labelless autocomplete',
@@ -427,13 +431,13 @@ export const AutocompleteOnly: Story = {
 
 export const InsideForm: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        const input = canvas.getByRole('textbox');
+        const input = canvas.getByRole('combobox');
         const form = input.closest('form');
 
         if (!form) throw new globalThis.Error('Autocomplete must be rendered inside a form');
 
         await userEvent.type(input, 'Apple');
-        await userEvent.click(await canvas.findByRole('button', { name: 'Apple' }));
+        await userEvent.click(await canvas.findByRole('option', { name: 'Apple' }));
 
         await waitFor(() => expect(parameters.onChange).toHaveBeenCalledTimes(1));
         await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();
@@ -534,11 +538,11 @@ export const StaleFetchSingle: Story = {
         const click = async (name: string) => userEvent.click(canvas.getByRole('button', { name }));
 
         await click('Set apple');
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeDisabled());
         await click('Set banana');
         await click('Resolve banana');
         await waitFor(() => expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible());
-        await expect(canvas.getByRole('textbox')).toBeEnabled();
+        await expect(canvas.getByRole('combobox')).toBeEnabled();
         await click('Resolve apple');
         await expect(stored).toHaveTextContent(expected('banana'));
         await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
@@ -546,9 +550,9 @@ export const StaleFetchSingle: Story = {
 
         // Reset after initialization too: an older displayed selection must not write back.
         await click('Set apricot');
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeDisabled());
         await click('Reset field');
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeEnabled());
         await click('Resolve apricot');
         await expect(stored).toHaveTextContent(expected(''));
         await expect(canvas.queryByLabelText('Odstrániť Apricot')).toBeNull();
@@ -565,9 +569,9 @@ export const ResetDuringInitialFetch: Story = {
     ...StaleFetchSingle,
     play: async ({ canvas, userEvent }) => {
         await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeDisabled());
         await userEvent.click(canvas.getByRole('button', { name: 'Reset field' }));
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeEnabled());
         await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
         await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('""');
         await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
@@ -578,10 +582,10 @@ export const UnmountDuringFetch: Story = {
     ...StaleFetchSingle,
     play: async ({ canvas, userEvent }) => {
         await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeDisabled());
         await userEvent.click(canvas.getByRole('button', { name: 'Unmount field' }));
         await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
-        await expect(canvas.queryByRole('textbox')).toBeNull();
+        await expect(canvas.queryByRole('combobox')).toBeNull();
         await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"apple"');
     }
 };
@@ -590,14 +594,176 @@ export const StaleFetchKeepsLoading: Story = {
     ...StaleFetchSingle,
     play: async ({ canvas, userEvent }) => {
         await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeDisabled());
         await userEvent.click(canvas.getByRole('button', { name: 'Set banana' }));
         await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
-        await expect(canvas.getByRole('textbox')).toBeDisabled();
+        await expect(canvas.getByRole('combobox')).toBeDisabled();
         await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"banana"');
         await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
         await userEvent.click(canvas.getByRole('button', { name: 'Resolve banana' }));
-        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await waitFor(() => expect(canvas.getByRole('combobox')).toBeEnabled());
         await expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible();
+    }
+};
+
+export const AccessibleKeyboardSingle: Story = {
+    args: {
+        label: 'Fruit',
+        onSearch: async () => ({ options: [options[0], options[4], options[3]], page: 0, hasNextPage: false }),
+        onFetch: async (value) => options.find((option) => option.value === value) ?? null
+    },
+    parameters: { a11y: { test: 'error' }, onChange: fn() },
+    play: async ({ canvas, userEvent, args }) => {
+        const input = canvas.getByRole('combobox', { name: 'Fruit' });
+        const toggle = canvas.getByRole('button', { name: 'Vybrať možnosti' });
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(toggle).toHaveAttribute('tabindex', '-1');
+        await userEvent.click(toggle);
+        await expect(input).toHaveFocus();
+        const list = await canvas.findByRole('listbox', { name: 'Fruit' });
+        await expect(input).toHaveAttribute('aria-controls', list.id);
+        await expect(toggle).toHaveAttribute('aria-controls', list.id);
+        await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+        await expect(list).toHaveAttribute('aria-multiselectable', String(!!args.multiple));
+        const apple = await canvas.findByRole('option', { name: 'Apple' });
+        const banana = canvas.getByRole('option', { name: 'Banana' });
+        const disabled = canvas.getByRole('option', { name: 'Blackberry' });
+        await expect(disabled).toBeDisabled();
+        await expect(disabled).toHaveAttribute('aria-disabled', 'true');
+        await expect(apple).toHaveAttribute('aria-selected', 'false');
+        await userEvent.click(disabled);
+        await expect(input).toHaveAttribute('aria-expanded', 'true');
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(input).toHaveAttribute('aria-activedescendant', apple.id);
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(input).toHaveAttribute('aria-activedescendant', banana.id);
+        await expect(input).toHaveFocus();
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(input).toHaveAttribute('aria-activedescendant', apple.id);
+        await userEvent.keyboard('{Enter}');
+        await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();
+        await expect(input).toHaveFocus();
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(input).not.toHaveAttribute('aria-activedescendant');
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(await canvas.findByRole('option', { name: 'Apple' })).toHaveAttribute('aria-selected', 'true');
+        await userEvent.keyboard('{ArrowDown}{Enter}');
+        await expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible();
+        if (args.multiple) {
+            await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();
+        } else {
+            await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
+        }
+        await userEvent.keyboard('{ArrowDown}{Escape}');
+        await expect(input).toHaveFocus();
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(input).not.toHaveAttribute('aria-activedescendant');
+        // Leave the list open so automated axe checks also cover popup semantics.
+        await userEvent.click(toggle);
+        await canvas.findByRole('option', { name: 'Banana' });
+    }
+};
+
+export const AccessibleKeyboardMultiple: Story = {
+    ...AccessibleKeyboardSingle,
+    args: { ...AccessibleKeyboardSingle.args, multiple: true }
+};
+
+const AccessibleInstances = () => {
+    const form = useAppForm({ defaultValues: { first: '', second: '' } });
+    const props = {
+        onSearch: async () => ({ options: [options[0]], page: 0, hasNextPage: false }),
+        onFetch: async () => null
+    };
+
+    return (
+        <>
+            <form.AppField name='first'>
+                {(field) => (
+                    <field.Autocomplete
+                        {...props}
+                        label='First fruit'
+                    />
+                )}
+            </form.AppField>
+            <form.AppField name='second'>
+                {(field) => (
+                    <field.Autocomplete
+                        {...props}
+                        label='Second fruit'
+                    />
+                )}
+            </form.AppField>
+        </>
+    );
+};
+
+export const IndependentRelationships: Story = {
+    args: AccessibleKeyboardSingle.args,
+    render: () => <AccessibleInstances />,
+    parameters: { a11y: { test: 'error' } },
+    play: async ({ canvas, canvasElement, userEvent }) => {
+        const inputs = canvas.getAllByRole('combobox');
+        await expect(inputs[0].id).not.toBe(inputs[1].id);
+        for (const input of inputs) {
+            await userEvent.click(input);
+            await userEvent.keyboard('{ArrowDown}');
+            const list = await canvas.findByRole('listbox');
+            await expect(input).toHaveAttribute('aria-controls', list.id);
+            const option = await canvas.findByRole('option');
+            await expect(input).toHaveAttribute('aria-activedescendant', option.id);
+            await userEvent.keyboard('{Escape}');
+        }
+        const ids = Array.from(canvasElement.querySelectorAll('[id]'), (element) => element.id);
+        await expect(new Set(ids).size).toBe(ids.length);
+    }
+};
+
+const HydrationExample = ({ onHydrated }: { onHydrated: () => void }) => {
+    useEffect(onHydrated, [onHydrated]);
+
+    return (
+        <>
+            <AccessibleInstances />
+            <Modal
+                title='Hydrated first'
+                body='Body'
+                openModal={false}
+            />
+            <Modal
+                title='Hydrated second'
+                body='Body'
+                openModal={false}
+            />
+        </>
+    );
+};
+
+export const StableHydrationIds: Story = {
+    args: AccessibleKeyboardSingle.args,
+    render: () => <div>Server-rendered controls are hydrated during this interaction test.</div>,
+    play: async ({ canvasElement }) => {
+        const onHydrated = fn();
+        const onRecoverableError = fn();
+        const example = <HydrationExample onHydrated={onHydrated} />;
+        const host = document.createElement('div');
+        host.innerHTML = renderToString(example, { identifierPrefix: 'hydration-' });
+        canvasElement.append(host);
+        const ids = () => Array.from(host.querySelectorAll('[id]'), (element) => element.id);
+        const serverIds = ids();
+        const root = hydrateRoot(host, example, { identifierPrefix: 'hydration-', onRecoverableError });
+        try {
+            await waitFor(() => expect(onHydrated).toHaveBeenCalledOnce());
+            await expect(ids()).toEqual(serverIds);
+            await expect(new Set(ids()).size).toBe(ids().length);
+            await expect(onRecoverableError).not.toHaveBeenCalled();
+            for (const element of host.querySelectorAll('[aria-controls], [aria-labelledby]')) {
+                const target = element.getAttribute('aria-controls') ?? element.getAttribute('aria-labelledby');
+                await expect(serverIds).toContain(target);
+            }
+        } finally {
+            root.unmount();
+            host.remove();
+        }
     }
 };

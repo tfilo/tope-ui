@@ -299,3 +299,73 @@ export const MoreCustomOptions: Story = {
         icon: TrashIcon
     }
 };
+
+export const AccessibleTitle: Story = {
+    parameters: { a11y: { test: 'error' } },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Open modal' }));
+        const dialog = canvas.getByRole('dialog', { name: 'This is modal title' });
+        await expect(dialog).toHaveAccessibleName('This is modal title');
+        await expect(dialog).not.toHaveAttribute('aria-describedby');
+        const titleId = dialog.getAttribute('aria-labelledby')!;
+        await expect(dialog.querySelector(`[id="${titleId}"]`)).toHaveTextContent('This is modal title');
+    }
+};
+
+export const AccessibleLabelOverride: Story = {
+    ...AccessibleTitle,
+    args: { 'aria-label': 'Custom dialog name' },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Open modal' }));
+        const dialog = canvas.getByRole('dialog', { name: 'Custom dialog name' });
+        await expect(dialog).not.toHaveAttribute('aria-labelledby');
+    }
+};
+
+export const AccessibleReferenceOverride: Story = {
+    ...AccessibleTitle,
+    render: ({ title, body }) => (
+        <>
+            <span id='consumer-dialog-name'>Consumer name</span>
+            <p id='consumer-dialog-description'>Short description</p>
+            <Modal
+                title={title}
+                body={body}
+                openModal
+                aria-labelledby='consumer-dialog-name'
+                aria-describedby='consumer-dialog-description'
+            />
+        </>
+    ),
+    play: async ({ canvas }) => {
+        const dialog = canvas.getByRole('dialog', { name: 'Consumer name' });
+        await expect(dialog).toHaveAccessibleDescription('Short description');
+        await expect(dialog).toHaveAttribute('aria-labelledby', 'consumer-dialog-name');
+    }
+};
+
+export const IndependentTitleIds: Story = {
+    render: ({ body }) => (
+        <>
+            <Modal
+                body={body}
+                openModal={false}
+                title='First title'
+            />
+            <Modal
+                body={body}
+                openModal={false}
+                title='Second title'
+            />
+        </>
+    ),
+    play: async ({ canvas }) => {
+        const dialogs = canvas.getAllByRole('dialog', { hidden: true });
+        const titleIds = dialogs.map((dialog) => dialog.getAttribute('aria-labelledby'));
+        await expect(titleIds[0]).toBeTruthy();
+        await expect(titleIds[0]).not.toBe(titleIds[1]);
+        for (const [index, dialog] of dialogs.entries()) {
+            await expect(dialog.querySelector(`[id="${titleIds[index]}"]`)).toHaveTextContent(index === 0 ? 'First title' : 'Second title');
+        }
+    }
+};

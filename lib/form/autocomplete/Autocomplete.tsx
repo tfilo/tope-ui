@@ -58,7 +58,6 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const searchAbortController = useRef<AbortController | null>(null);
     const nextPageAbortController = useRef<AbortController | null>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
-    const optionsRef = useRef<HTMLUListElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
@@ -66,10 +65,15 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
 
     const [selectedOption, setSelectedOption] = useState<Option[]>([]);
     const [displayValue, setDisplayValue] = useState<string>('');
+
+    const enabledOptions = options.options.filter((option) => !option.disabled);
+    const activeOption = isOpen ? enabledOptions[activeIndex] : undefined;
+    const optionId = (option: Option) => `${autocompleteId}-option-${options.options.indexOf(option)}`;
 
     // Only user actions write selections back to the form. Lookups update display state only.
     const updateSelection = (options: Option[]) => {
@@ -80,6 +84,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Handle input value changes by user
     const handleDisplayValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsOpen(true);
+        setActiveIndex(-1);
         setDisplayValue(e.currentTarget.value);
     };
 
@@ -93,108 +98,61 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Close dropdown and clear current option list
     const handleOptionsClose = () => {
         setIsOpen(false);
+        setActiveIndex(-1);
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
-    // Open dropdown, fetch the initial options if needed, and focus the first available item
+    // Keep DOM focus in the input; aria-activedescendant tracks keyboard navigation.
     const handleOptionsOpen = async () => {
-        if (isOpen === false) {
+        inputRef.current?.focus();
+
+        if (!isOpen) {
             setIsOpen(true);
             await handleSearch(displayValue, true);
         }
-        // Focus first option if exists
-        if (optionsRef.current) {
-            const firstOption = optionsRef.current.querySelector('button:not(:disabled)');
-            if (firstOption) {
-                (firstOption as HTMLElement).focus();
-            }
-        }
     };
 
-    // Handle key down events for navigation
     const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'ArrowDown') {
+        if (e.nativeEvent.isComposing) {
+            return;
+        }
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             e.preventDefault();
-            await handleOptionsOpen();
-        } else if (e.key === 'Enter') {
-            e.preventDefault();
-            if (options.options.length > 0 && isNotBlank(displayValue)) {
-                handleSelect(options.options[0]);
+
+            if (!isOpen) {
+                setActiveIndex(0);
+                await handleOptionsOpen();
             } else {
-                handleSelect(null);
+                setActiveIndex((index) => {
+                    if (e.key === 'ArrowDown') {
+                        return Math.min(index + 1, enabledOptions.length - 1);
+                    }
+
+                    return index <= 0 ? -1 : index - 1;
+                });
             }
-        } else if (e.key === 'Escape') {
+        } else if (e.key === 'Enter' && isOpen) {
             e.preventDefault();
+            handleSelect(activeOption ?? (isNotBlank(displayValue) ? enabledOptions[0] : null) ?? null);
+        } else if (e.key === 'Escape' && isOpen) {
+            e.preventDefault();
+            e.stopPropagation();
             handleOptionsClose();
         }
     };
 
-    // Handle key down events for open button, allows to navigate by arrows to options
-    const handleKeyDownOnOpenButton = async (e: React.KeyboardEvent<HTMLButtonElement>) => {
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            await handleOptionsOpen();
+    useEffect(() => {
+        if (activeOption) {
+            document
+                .getElementById(`${autocompleteId}-option-${options.options.indexOf(activeOption)}`)
+                ?.scrollIntoView({ block: 'nearest' });
         }
-    };
-
-    // Handle key down on options for navigation
-    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, option: Option) => {
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            let nextSibling: HTMLElement = e.currentTarget;
-            do {
-                const next = (nextSibling.parentElement?.nextElementSibling as HTMLElement | null | undefined) ?? null;
-                if (next && next.firstElementChild?.tagName === 'BUTTON') {
-                    nextSibling = next.firstElementChild as HTMLElement;
-                } else {
-                    break;
-                }
-            } while (nextSibling?.hasAttribute('disabled'));
-
-            nextSibling.focus();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            let previousSibling: HTMLElement | null = e.currentTarget;
-            do {
-                const prev = (previousSibling.parentElement?.previousElementSibling as HTMLElement | null | undefined) ?? null;
-                if (prev && prev.firstElementChild?.tagName === 'BUTTON') {
-                    previousSibling = prev.firstElementChild as HTMLElement;
-                } else {
-                    previousSibling = null;
-                    break;
-                }
-            } while (previousSibling?.hasAttribute('disabled'));
-
-            if (previousSibling) {
-                previousSibling.focus();
-            } else {
-                // Focus input
-                const inputElement = document.getElementById(autocompleteId);
-                if (inputElement) {
-                    inputElement.focus();
-                }
-                handleOptionsClose();
-            }
-        } else if (e.key === 'Enter') {
-            if (option.disabled) {
-                return;
-            }
-            e.preventDefault();
-            handleSelect(option);
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            handleOptionsClose();
-            // Focus input
-            const inputElement = document.getElementById(autocompleteId);
-            if (inputElement) {
-                inputElement.focus();
-            }
-        }
-    };
+    }, [activeOption, autocompleteId, options.options]);
 
     // Handle blur event to close dropdown
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        // If target is inside optionsRef, do not close
+        // Keep the list open when focus moves within the control.
         if (wrapperRef.current?.contains(e.relatedTarget as Node)) {
             return;
         }
@@ -404,14 +362,34 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             onKeyDown={handleKeyDown}
                             id={autocompleteId}
                             ref={inputRef}
+                            role='combobox'
+                            aria-autocomplete='list'
+                            aria-haspopup='listbox'
+                            aria-expanded={isOpen}
+                            aria-controls={`${autocompleteId}-options`}
+                            aria-activedescendant={activeOption ? optionId(activeOption) : undefined}
                         />
                         <Button
                             key={props.title}
                             variant='transparent'
                             showChildren={false}
                             icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
-                            onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
-                            onKeyDown={handleKeyDownOnOpenButton}
+                            onClick={() => {
+                                inputRef.current?.focus();
+
+                                if (isOpen) {
+                                    handleOptionsClose();
+                                } else {
+                                    void handleOptionsOpen();
+                                }
+                            }}
+                            onPointerDown={(e) => e.preventDefault()}
+                            onMouseDown={(e) => e.preventDefault()}
+                            tabIndex={-1}
+                            aria-label={props.title ?? localization.selectOptions}
+                            aria-haspopup='listbox'
+                            aria-expanded={isOpen}
+                            aria-controls={`${autocompleteId}-options`}
                             disabled={disabled || isFetching}
                             additionalClassName={theme.button}
                         >
@@ -428,30 +406,31 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
                     }}
                     onScroll={handleScroll}
+                    onPointerDown={(e) => e.preventDefault()}
                     onMouseDown={(e) => e.preventDefault()}
                 >
                     <ul
-                        ref={optionsRef}
                         id={`${autocompleteId}-options`}
                         className={theme.options}
+                        role='listbox'
+                        aria-label={label ?? props['aria-label'] ?? props.title ?? localization.selectOptions}
+                        aria-multiselectable={multiple}
+                        aria-busy={isSearching || isLoadingNextPage}
                     >
-                        {!isSearching && !hasOptions && (
-                            <li
-                                key='___no_options___'
-                                className={theme.option.noninteractive}
-                            >
-                                {localization.noOptions}
-                            </li>
-                        )}
                         {options.options.map((o) => (
                             <li
                                 key={o.value}
-                                className={theme.option.interactive(o.disabled)}
+                                className={`${theme.option.interactive(o.disabled)} ${activeOption === o ? 'outline-2 outline-primary' : ''}`}
+                                role='presentation'
                             >
                                 <button
                                     type='button'
                                     onClick={() => handleSelect(o)}
-                                    onKeyDown={(e) => handleOptionKeyDown(e, o)}
+                                    id={optionId(o)}
+                                    role='option'
+                                    tabIndex={-1}
+                                    aria-selected={selectedOption.some((so) => so.value === o.value)}
+                                    aria-disabled={o.disabled || undefined}
                                     className={theme.option.button}
                                     disabled={o.disabled}
                                 >
@@ -460,15 +439,23 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 </button>
                             </li>
                         ))}
-                        {(isSearching || isLoadingNextPage) && (
-                            <li
-                                key='___loading___'
-                                className={theme.option.noninteractive}
-                            >
-                                {localization.loading}
-                            </li>
-                        )}
                     </ul>
+                    {!isSearching && !hasOptions && (
+                        <div
+                            role='status'
+                            className={theme.option.noninteractive}
+                        >
+                            {localization.noOptions}
+                        </div>
+                    )}
+                    {(isSearching || isLoadingNextPage) && (
+                        <div
+                            role='status'
+                            className={theme.option.noninteractive}
+                        >
+                            {localization.loading}
+                        </div>
+                    )}
                 </div>
             </div>
         </ElementWrapper>

@@ -9,9 +9,9 @@ import type { Icon } from '../../common/Icon';
 export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>, 'onClose'> {
     /** Controls whether the modal is visible or hidden */
     openModal: boolean;
-    /** The title of the modal displayed at the top*/
+    /** Visible title and default accessible name. Native aria-label or aria-labelledby can override the name. */
     title: string;
-    /** The main content of the modal (text, components, or HTML) */
+    /** Main content. For a short accessible description, provide aria-describedby pointing to consumer content. */
     body: ReactNode;
     /** Defines the maximum width of the modal
      * - 'normal': max-width 768px

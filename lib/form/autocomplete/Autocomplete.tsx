@@ -158,10 +158,26 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     };
 
     useEffect(() => {
-        if (activeOption) {
-            document
-                .getElementById(`${autocompleteId}-option-${options.options.indexOf(activeOption)}`)
-                ?.scrollIntoView({ block: 'nearest' });
+        const popover = popoverRef.current;
+        const row = activeOption
+            ? document.getElementById(`${autocompleteId}-option-${options.options.indexOf(activeOption)}`)?.parentElement
+            : null;
+
+        if (!popover || !row) {
+            return;
+        }
+
+        // Scroll only the popup, keeping the whole row and its outline inside the padded viewport.
+        const rowBounds = row.getBoundingClientRect();
+        const popoverBounds = popover.getBoundingClientRect();
+        const style = getComputedStyle(popover);
+        const visibleTop = popoverBounds.top + popover.clientTop + parseFloat(style.paddingTop);
+        const visibleBottom = popoverBounds.top + popover.clientTop + popover.clientHeight - parseFloat(style.paddingBottom);
+
+        if (rowBounds.top < visibleTop) {
+            popover.scrollTop += rowBounds.top - visibleTop;
+        } else if (rowBounds.bottom > visibleBottom) {
+            popover.scrollTop += rowBounds.bottom - visibleBottom;
         }
     }, [activeOption, autocompleteId, options.options]);
 

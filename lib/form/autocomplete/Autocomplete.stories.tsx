@@ -1099,3 +1099,49 @@ export const KeyboardPagination: Story = {
         await expect(canvas.getByLabelText('Stored fruit')).toHaveTextContent('apricot');
     }
 };
+
+export const KeyboardScrollAlignment: Story = {
+    args: {
+        label: 'Scrollable options',
+        autoComplete: 'off',
+        onSearch: async () => ({ options, page: 0, hasNextPage: false }),
+        onFetch: async (value) => options.find((option) => option.value === value) ?? null
+    },
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('combobox', { name: 'Scrollable options' });
+        const inputTop = input.getBoundingClientRect().top;
+        await userEvent.click(input);
+        await userEvent.keyboard('{ArrowDown}');
+        await canvas.findByRole('option', { name: 'Pear' });
+        const enabled = canvas.getAllByRole('option').filter((option) => !option.hasAttribute('disabled'));
+        const popup = canvas.getByRole('listbox').parentElement!;
+        const expectActiveRowVisible = async (option: HTMLElement) => {
+            await expect(input).toHaveAttribute('aria-activedescendant', option.id);
+            await waitFor(() => {
+                const row = option.parentElement!;
+                const bounds = row.getBoundingClientRect();
+                const outline = parseFloat(getComputedStyle(row).outlineWidth);
+                const viewportTop = popup.getBoundingClientRect().top + popup.clientTop;
+                expect(bounds.top - outline).toBeGreaterThanOrEqual(viewportTop);
+                expect(bounds.bottom + outline).toBeLessThanOrEqual(viewportTop + popup.clientHeight);
+            });
+            await expect(input).toHaveFocus();
+            await expect(input.getBoundingClientRect().top).toBe(inputTop);
+        };
+
+        await expectActiveRowVisible(enabled[0]);
+        for (const option of enabled.slice(1)) {
+            await userEvent.keyboard('{ArrowDown}');
+            await expectActiveRowVisible(option);
+        }
+        await expect(popup.scrollTop).toBeGreaterThan(0);
+        for (const option of enabled.slice(0, -1).reverse()) {
+            await userEvent.keyboard('{ArrowUp}');
+            await expectActiveRowVisible(option);
+        }
+        await expect(popup.scrollTop).toBe(0);
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(input).toHaveFocus();
+    }
+};

@@ -23,7 +23,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
                 showChildren={false}
                 variant='outline'
                 onClick={onPrevPage}
-                disabled={page === 0}
+                disabled={totalPages === 0 || page <= 0}
             >
                 {localization.prevPage}
             </Button>
@@ -31,12 +31,12 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
                 {localization.page}
                 <Dropdown
                     options={paginationOptions}
-
                     buttonProps={{
-                        'aria-label': localization.currentPage
+                        'aria-label': localization.currentPage,
+                        disabled: totalPages === 0
                     }}
                 >
-                    {page + 1}
+                    {totalPages === 0 ? 0 : page + 1}
                 </Dropdown>
                 {localization.of} {totalPages}
             </div>
@@ -45,7 +45,7 @@ export const TablePagination: React.FC<TablePaginationProps> = ({ onNextPage, on
                 showChildren={false}
                 variant='outline'
                 onClick={onNextPage}
-                disabled={page === totalPages - 1}
+                disabled={totalPages === 0 || page >= totalPages - 1}
             >
                 {localization.nextPage}
             </Button>

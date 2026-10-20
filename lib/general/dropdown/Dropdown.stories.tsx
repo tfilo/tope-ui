@@ -111,3 +111,34 @@ export const Disabled: Story = {
         }
     }
 };
+
+export const InsideForm: Story = {
+    render: (args, { parameters }) => (
+        <form
+            onSubmit={(event) => {
+                event.preventDefault();
+                parameters.onSubmit();
+            }}
+        >
+            <Dropdown {...args} />
+            <button type='submit'>Submit</button>
+        </form>
+    ),
+    play: async ({ args, parameters, canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Button' }));
+        await userEvent.click(await canvas.findByRole('button', { name: 'Option 1' }));
+
+        await expect(args.options[0].onClick).toHaveBeenCalledTimes(1);
+        await expect(parameters.onSubmit).not.toHaveBeenCalled();
+
+        await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+        await expect(parameters.onSubmit).toHaveBeenCalledTimes(1);
+    },
+    args: {
+        children: 'Button',
+        options: [{ label: 'Option 1', onClick: fn() }]
+    },
+    parameters: {
+        onSubmit: fn()
+    }
+};

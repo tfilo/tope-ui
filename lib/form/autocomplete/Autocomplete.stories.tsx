@@ -1,4 +1,4 @@
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
@@ -22,6 +22,7 @@ const meta = {
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
+                    parameters.onSubmit?.();
                     form.handleSubmit();
                 }}
             >
@@ -417,6 +418,39 @@ export const AutocompleteOnly: Story = {
     },
     parameters: {
         onChange: fn(),
+        defaultValue: ''
+    }
+};
+
+export const InsideForm: Story = {
+    play: async ({ parameters, canvas, userEvent }) => {
+        const input = canvas.getByRole('textbox');
+        const form = input.closest('form');
+
+        if (!form) throw new globalThis.Error('Autocomplete must be rendered inside a form');
+
+        await userEvent.type(input, 'Apple');
+        await userEvent.click(await canvas.findByRole('button', { name: 'Apple' }));
+
+        await waitFor(() => expect(parameters.onChange).toHaveBeenCalledTimes(1));
+        await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();
+        await expect(parameters.onSubmit).not.toHaveBeenCalled();
+
+        form.requestSubmit();
+        await expect(parameters.onSubmit).toHaveBeenCalledTimes(1);
+    },
+    args: {
+        label: 'Autocomplete',
+        onSearch: async () => ({
+            options: [{ label: 'Apple', value: 'apple' }],
+            hasNextPage: false,
+            page: 0
+        }),
+        onFetch: async (value) => (value === 'apple' ? { label: 'Apple', value: 'apple' } : null)
+    },
+    parameters: {
+        onChange: fn(),
+        onSubmit: fn(),
         defaultValue: ''
     }
 };

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { hydrateRoot } from 'react-dom/client';
-import { Modal } from '../../general/modal';
 import type { Option } from '../../common/Option';
 
 import { expect, fn, waitFor } from 'storybook/test';
@@ -762,21 +761,7 @@ export const IndependentRelationships: Story = {
 const HydrationExample = ({ onHydrated }: { onHydrated: () => void }) => {
     useEffect(onHydrated, [onHydrated]);
 
-    return (
-        <>
-            <AccessibleInstances />
-            <Modal
-                title='Hydrated first'
-                body='Body'
-                openModal={false}
-            />
-            <Modal
-                title='Hydrated second'
-                body='Body'
-                openModal={false}
-            />
-        </>
-    );
+    return <AccessibleInstances />;
 };
 
 export const StableHydrationIds: Story = {
@@ -787,11 +772,11 @@ export const StableHydrationIds: Story = {
         const onRecoverableError = fn();
         const example = <HydrationExample onHydrated={onHydrated} />;
         const host = document.createElement('div');
-        host.innerHTML = renderToString(example, { identifierPrefix: 'hydration-' });
+        host.innerHTML = renderToString(example, { identifierPrefix: 'autocomplete-hydration-' });
         canvasElement.append(host);
         const ids = () => Array.from(host.querySelectorAll('[id]'), (element) => element.id);
         const serverIds = ids();
-        const root = hydrateRoot(host, example, { identifierPrefix: 'hydration-', onRecoverableError });
+        const root = hydrateRoot(host, example, { identifierPrefix: 'autocomplete-hydration-', onRecoverableError });
         try {
             await waitFor(() => expect(onHydrated).toHaveBeenCalledOnce());
             await expect(ids()).toEqual(serverIds);

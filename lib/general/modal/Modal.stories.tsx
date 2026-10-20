@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
+import { renderToString } from 'react-dom/server';
+import { hydrateRoot } from 'react-dom/client';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CheckIcon, FaceSmileIcon, HeartIcon, TrashIcon } from '@heroicons/react/24/outline';
 
@@ -366,6 +368,54 @@ export const IndependentTitleIds: Story = {
         await expect(titleIds[0]).not.toBe(titleIds[1]);
         for (const [index, dialog] of dialogs.entries()) {
             await expect(dialog.querySelector(`[id="${titleIds[index]}"]`)).toHaveTextContent(index === 0 ? 'First title' : 'Second title');
+        }
+    }
+};
+
+const HydrationExample = ({ onHydrated }: { onHydrated: () => void }) => {
+    useEffect(onHydrated, [onHydrated]);
+
+    return (
+        <>
+            <Modal
+                title='Hydrated first'
+                body='First body'
+                openModal={false}
+            />
+            <Modal
+                title='Hydrated second'
+                body='Second body'
+                openModal={false}
+            />
+        </>
+    );
+};
+
+export const StableHydrationIds: Story = {
+    render: () => <div>Server-rendered dialogs are hydrated during this interaction test.</div>,
+    play: async ({ canvasElement }) => {
+        const onHydrated = fn();
+        const onRecoverableError = fn();
+        const example = <HydrationExample onHydrated={onHydrated} />;
+        const host = document.createElement('div');
+        host.innerHTML = renderToString(example, { identifierPrefix: 'modal-hydration-' });
+        canvasElement.append(host);
+        const ids = () => Array.from(host.querySelectorAll('[id]'), (element) => element.id);
+        const serverIds = ids();
+        const root = hydrateRoot(host, example, { identifierPrefix: 'modal-hydration-', onRecoverableError });
+        try {
+            await waitFor(() => expect(onHydrated).toHaveBeenCalledOnce());
+            await expect(ids()).toEqual(serverIds);
+            await expect(new Set(ids()).size).toBe(ids().length);
+            await expect(onRecoverableError).not.toHaveBeenCalled();
+            const dialogs = host.querySelectorAll('dialog');
+            await expect(dialogs).toHaveLength(2);
+            for (const dialog of dialogs) {
+                await expect(serverIds).toContain(dialog.getAttribute('aria-labelledby'));
+            }
+        } finally {
+            root.unmount();
+            host.remove();
         }
     }
 };

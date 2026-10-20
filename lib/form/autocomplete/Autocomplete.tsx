@@ -10,6 +10,8 @@ import type { AutocompleteProps, OnSearchResult } from './Autocomplete.types';
 import { useFieldContext } from '../../hooks/form-context';
 import { useSelector } from '@tanstack/react-form';
 
+const isCancellation = (error: unknown) => error instanceof Error && error.name === 'AbortError';
+
 const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px] w-full min-w-[100px]',
     inputAndTagWrapper: 'flex-1 flex flex-wrap',
@@ -20,6 +22,7 @@ const theme = {
     options: 'flex flex-col',
     option: {
         noninteractive: 'text-disabled py-md px-sm',
+        requestError: 'text-danger py-md px-sm',
         interactive: (disabled: boolean = false) =>
             `${disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`,
         button: 'focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between',
@@ -61,6 +64,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
+    const [searchError, setSearchError] = useState(false);
+    const [fetchError, setFetchError] = useState(false);
+    const [fetchAttempt, setFetchAttempt] = useState(0);
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
@@ -99,6 +105,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const handleOptionsClose = () => {
         setIsOpen(false);
         setActiveIndex(-1);
+        searchAbortController.current?.abort();
+        nextPageAbortController.current?.abort();
+        setIsSearching(false);
+        setIsLoadingNextPage(false);
+        setSearchError(false);
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
@@ -204,12 +215,17 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         try {
             setIsSearching(true);
+            setSearchError(false);
             const options = await onSearch(query, 0, pageSize, controller.signal);
-            if (!controller.signal.aborted) {
+            if (!controller.signal.aborted && searchAbortController.current === controller) {
                 setOptions(options);
             }
+        } catch (error) {
+            if (!controller.signal.aborted && searchAbortController.current === controller && !isCancellation(error)) {
+                setSearchError(true);
+            }
         } finally {
-            if (!controller.signal.aborted) {
+            if (!controller.signal.aborted && searchAbortController.current === controller) {
                 setIsSearching(false);
             }
         }
@@ -223,6 +239,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
         try {
             setIsFetching(newValues.length > 0);
+            setFetchError(false);
             const allSelected =
                 newValues.every((v) => selectedOption.some((o) => o.value === v)) && newValues.length === selectedOption.length;
 
@@ -240,6 +257,10 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 setOptions({ hasNextPage: false, page: 0, options: [] });
                 setDisplayValue('');
             }
+        } catch (error) {
+            if (isCurrent() && !isCancellation(error)) {
+                setFetchError(true);
+            }
         } finally {
             if (isCurrent()) {
                 setIsFetching(false);
@@ -254,6 +275,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
         if (atBottom && !isSearching && !isLoadingNextPage && options.hasNextPage) {
             setIsLoadingNextPage(true);
+            setSearchError(false);
             const controller = new AbortController();
             if (nextPageAbortController.current) {
                 nextPageAbortController.current.abort();
@@ -261,7 +283,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             nextPageAbortController.current = controller;
             try {
                 const nextOptions = await onSearch(displayValue, options.page + 1, pageSize, controller.signal);
-                if (!controller.signal.aborted) {
+                if (!controller.signal.aborted && nextPageAbortController.current === controller) {
                     setOptions((oldOptions) => {
                         return {
                             hasNextPage: nextOptions.hasNextPage,
@@ -270,8 +292,12 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         };
                     });
                 }
+            } catch (error) {
+                if (!controller.signal.aborted && nextPageAbortController.current === controller && !isCancellation(error)) {
+                    setSearchError(true);
+                }
             } finally {
-                if (!controller.signal.aborted) {
+                if (!controller.signal.aborted && nextPageAbortController.current === controller) {
                     setIsLoadingNextPage(false);
                 }
             }
@@ -298,7 +324,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         return () => {
             abortController.abort();
         };
-    }, [value, field.state.value]);
+    }, [value, field.state.value, fetchAttempt]);
+
+    useEffect(() => {
+        return () => {
+            searchAbortController.current?.abort();
+            nextPageAbortController.current?.abort();
+        };
+    }, []);
 
     // Trigger search when display value changes
     useEffect(() => {
@@ -397,18 +430,43 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         </Button>
                     </div>
                 </div>
+                {fetchError && (
+                    <div>
+                        <span
+                            role='alert'
+                            className='text-danger'
+                        >
+                            {localization.autocompleteRequestError}
+                        </span>
+                        <Button
+                            onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                            disabled={disabled}
+                        >
+                            {localization.retry}
+                        </Button>
+                    </div>
+                )}
                 <div
                     popover='manual'
                     ref={popoverRef}
                     className={theme.optionsWrapper}
                     style={{
                         positionAnchor: `--autocomplete_${_id}`,
-                        maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
+                        // Reserve room for a result and request status, including one-item pages.
+                        maxHeight: `${Math.max(2, Math.min(pageSize - 1, 5)) * 36 + 10}px`
                     }}
                     onScroll={handleScroll}
                     onPointerDown={(e) => e.preventDefault()}
                     onMouseDown={(e) => e.preventDefault()}
                 >
+                    {searchError && (
+                        <div
+                            role='alert'
+                            className={theme.option.requestError}
+                        >
+                            {localization.autocompleteRequestError}
+                        </div>
+                    )}
                     <ul
                         id={`${autocompleteId}-options`}
                         className={theme.options}
@@ -440,7 +498,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             </li>
                         ))}
                     </ul>
-                    {!isSearching && !hasOptions && (
+                    {!isSearching && !searchError && !hasOptions && (
                         <div
                             role='status'
                             className={theme.option.noninteractive}

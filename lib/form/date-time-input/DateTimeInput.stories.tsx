@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { localization, setLocalization } from '../../utils/constants';
+
 import { expect, fn, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -350,5 +353,112 @@ export const MoreCustomOptions: Story = {
     parameters: {
         onChange: onChange,
         defaultValue: '2026-12-12T12:00:00'
+    }
+};
+
+const defaultDateLocalization = localization.dateTimeInput;
+const englishMonths = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+];
+const updatedMonths = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel', 'India', 'Juliet', 'Kilo', 'Lima'];
+
+const LocalizationExample = () => {
+    const [revision, setRevision] = useState(0);
+    const form = useAppForm({ defaultValues: { date: '2026-01-10' } });
+
+    return (
+        <>
+            <form.AppField name='date'>
+                {(field) => (
+                    <field.DateTimeInput
+                        label='Localized date'
+                        data-localization-revision={revision}
+                        closeDateTimePickerIfSelected={false}
+                    />
+                )}
+            </form.AppField>
+            <button
+                type='button'
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={() => {
+                    setLocalization({ dateTimeInput: { ...localization.dateTimeInput, months: updatedMonths } });
+                    setRevision((value) => value + 1);
+                }}
+            >
+                Update localization and rerender
+            </button>
+            <form.Subscribe selector={(state) => state.values.date}>
+                {(value) => <output aria-label='Stored date'>{value}</output>}
+            </form.Subscribe>
+        </>
+    );
+};
+
+export const MonthLocalizationAfterImport: Story = {
+    // Story modules (including DateTimeInput) are imported before this hook runs.
+    beforeEach: () => {
+        const previous = localization.dateTimeInput;
+        setLocalization({ dateTimeInput: { ...defaultDateLocalization, months: englishMonths } });
+
+        return () => setLocalization({ dateTimeInput: previous });
+    },
+    render: () => <LocalizationExample />,
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('textbox', { name: 'Localized date' });
+        const inputId = input.id;
+        await userEvent.click(canvas.getByRole('button', { name: 'Otvoriť kalendár' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'January 2026' }));
+        for (const month of englishMonths) {
+            await expect(canvas.getByRole('button', { name: month.substring(0, 3) })).toBeVisible();
+        }
+        await userEvent.click(canvas.getByRole('button', { name: 'May' }));
+        await expect(canvas.getByLabelText('Stored date')).toHaveTextContent('2026-05-10');
+        await expect(input).toHaveValue('10.05.2026');
+        await userEvent.click(canvas.getByRole('button', { name: 'May 2026' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Update localization and rerender' }));
+        // The same mounted picker keeps its month view and numeric selection through a normal rerender.
+        await expect(input.id).toBe(inputId);
+        await expect(input).toHaveAttribute('data-localization-revision', '1');
+        for (const month of updatedMonths) {
+            await expect(canvas.getByRole('button', { name: month.substring(0, 3) })).toBeVisible();
+        }
+        await expect(canvas.queryByRole('button', { name: 'May' })).toBeNull();
+        await expect(canvas.getByRole('button', { name: 'Ech' })).toHaveClass('bg-primary-light!');
+        await userEvent.click(canvas.getByRole('button', { name: 'Kil' }));
+        await expect(canvas.getByLabelText('Stored date')).toHaveTextContent('2026-11-10');
+        await expect(input).toHaveValue('10.11.2026');
+        await expect(canvas.getByRole('button', { name: 'Kilo 2026' })).toBeVisible();
+    }
+};
+
+export const DefaultSlovakMonths: Story = {
+    beforeEach: () => {
+        const previous = localization.dateTimeInput;
+        setLocalization({ dateTimeInput: defaultDateLocalization });
+
+        return () => setLocalization({ dateTimeInput: previous });
+    },
+    args: { type: 'date', label: 'Default months' },
+    parameters: { defaultValue: '2026-01-10', onChange: fn() },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Otvoriť kalendár' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Január 2026' }));
+        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'];
+        for (const label of labels) {
+            await expect(canvas.getByRole('button', { name: label })).toBeVisible();
+        }
+        await userEvent.click(canvas.getByRole('button', { name: 'Feb' }));
+        await expect(canvas.getByRole('textbox')).toHaveValue('10.02.2026');
     }
 };

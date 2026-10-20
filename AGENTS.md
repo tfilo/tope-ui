@@ -54,8 +54,8 @@ Run checks appropriate to the change. For component behavior changes, run the bu
 
 ## Consumer integration
 
-Consumers import components and hooks from `@tfilo/tope-ui`, and bundled styles from `@tfilo/tope-ui/style.css`. Verify package exports when updating consumer documentation; the README currently uses an unscoped stylesheet example.
+Consumers import components and hooks from `@tfilo/tope-ui`, and bundled styles from `@tfilo/tope-ui/style.css`. Verify package exports when updating consumer documentation.
 
-TanStack Start server rendering is an intended integration concern. When changing relevant code, check browser globals during render and hydration behavior. The current `useWindowSize` hook reads `window.innerWidth` during render and is used by Header; do not assume Header is server-rendering safe.
+TanStack Start server rendering is an intended integration concern. When changing relevant code, check browser globals during render and hydration behavior. Header uses `useWindowSize`, which relies on `useSyncExternalStore` with a consistent desktop fallback during server rendering and hydration, then updates to the actual browser width.
 
 The build generates TypeScript declarations from `lib/index.ts` using `tsconfig.types.json` after Vite builds the JavaScript and CSS. Package type exports point to `dist/index.d.ts`. Keep declaration generation after Vite, which clears `dist/`.

@@ -725,10 +725,13 @@ export const RequestFailures: Story = {
     play: async ({ canvas, userEvent }) => {
         const input = canvas.getByRole('textbox');
         await userEvent.type(input, '{ArrowDown}');
-        await expectInsidePopover(await canvas.findByText('Načítava sa...'));
+        const loading = await canvas.findByText('Načítava sa...');
+        await expectInsidePopover(loading);
+        const loadingHeight = loading.getBoundingClientRect().height;
         await userEvent.click(canvas.getByRole('button', { name: 'Fail request' }));
         const alert = await canvas.findByRole('alert');
         await expect(alert).toHaveTextContent('Možnosti sa nepodarilo načítať');
+        await expect(alert.getBoundingClientRect().height).toBe(loadingHeight);
         await expectInsidePopover(alert);
         // Reject an aborted request, then an obsolete request after a newer success.
         await userEvent.type(input, 'abc');

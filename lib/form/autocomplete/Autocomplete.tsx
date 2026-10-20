@@ -22,6 +22,7 @@ const theme = {
     options: 'flex flex-col',
     option: {
         noninteractive: 'text-disabled py-md px-sm',
+        requestError: 'text-warning py-md px-sm',
         interactive: (disabled: boolean = false) =>
             `${disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`,
         button: 'focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between',
@@ -453,7 +454,12 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 </div>
                 {fetchError && (
                     <div>
-                        <span role='alert'>{localization.autocompleteRequestError}</span>
+                        <span
+                            role='alert'
+                            className='text-warning'
+                        >
+                            {localization.autocompleteRequestError}
+                        </span>
                         <Button
                             onClick={() => setFetchAttempt((attempt) => attempt + 1)}
                             disabled={disabled}
@@ -469,12 +475,19 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     style={{
                         positionAnchor: `--autocomplete_${_id}`,
                         // Reserve room for a result and request status, including one-item pages.
-                        maxHeight: `${Math.max(2, Math.min(pageSize - 1, 5)) * 36 + 8}px`
+                        maxHeight: `${Math.max(2, Math.min(pageSize - 1, 5)) * 36 + 10}px`
                     }}
                     onScroll={handleScroll}
                     onMouseDown={(e) => e.preventDefault()}
                 >
-                    {searchError && <div role='alert'>{localization.autocompleteRequestError}</div>}
+                    {searchError && (
+                        <div
+                            role='alert'
+                            className={theme.option.requestError}
+                        >
+                            {localization.autocompleteRequestError}
+                        </div>
+                    )}
                     <ul
                         ref={optionsRef}
                         id={`${autocompleteId}-options`}

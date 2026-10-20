@@ -427,10 +427,10 @@ export const InsideForm: Story = {
         const input = canvas.getByRole('textbox');
         const form = input.closest('form');
 
-        if (!form) throw new Error('Autocomplete must be rendered inside a form');
+        if (!form) throw new globalThis.Error('Autocomplete must be rendered inside a form');
 
         await userEvent.type(input, 'Apple');
-        await userEvent.click(await canvas.findByRole('button', { name: 'Apple', exact: true }));
+        await userEvent.click(await canvas.findByRole('button', { name: 'Apple' }));
 
         await waitFor(() => expect(parameters.onChange).toHaveBeenCalledTimes(1));
         await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();

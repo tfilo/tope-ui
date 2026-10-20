@@ -22,7 +22,7 @@ const theme = {
     options: 'flex flex-col',
     option: {
         noninteractive: 'text-disabled py-md px-sm',
-        requestError: 'text-warning py-md px-sm',
+        requestError: 'text-danger py-md px-sm',
         interactive: (disabled: boolean = false) =>
             `${disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`,
         button: 'focus:outline-none cursor-pointer disabled:cursor-default w-full text-left flex flex-row justify-between',
@@ -456,7 +456,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     <div>
                         <span
                             role='alert'
-                            className='text-warning'
+                            className='text-danger'
                         >
                             {localization.autocompleteRequestError}
                         </span>

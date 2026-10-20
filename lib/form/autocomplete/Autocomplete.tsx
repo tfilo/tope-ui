@@ -107,6 +107,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         setActiveIndex(-1);
         searchAbortController.current?.abort();
         nextPageAbortController.current?.abort();
+        nextPageAbortController.current = null;
         setIsSearching(false);
         setIsLoadingNextPage(false);
         setSearchError(false);
@@ -135,13 +136,13 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 setActiveIndex(0);
                 await handleOptionsOpen();
             } else {
-                setActiveIndex((index) => {
-                    if (e.key === 'ArrowDown') {
-                        return Math.min(index + 1, enabledOptions.length - 1);
-                    }
+                const nextIndex =
+                    e.key === 'ArrowDown' ? Math.min(activeIndex + 1, enabledOptions.length - 1) : activeIndex <= 0 ? -1 : activeIndex - 1;
+                setActiveIndex(nextIndex);
 
-                    return index <= 0 ? -1 : index - 1;
-                });
+                if (e.key === 'ArrowDown' && nextIndex === enabledOptions.length - 1) {
+                    await handleNextPage();
+                }
             }
         } else if (e.key === 'Enter' && isOpen) {
             e.preventDefault();
@@ -268,39 +269,44 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     });
 
-    // Handle scroll event to load next page of options
+    // Share pagination between pointer scrolling and keyboard navigation.
+    const handleNextPage = async () => {
+        if (isSearching || isLoadingNextPage || !options.hasNextPage || nextPageAbortController.current) {
+            return;
+        }
+
+        const controller = new AbortController();
+        nextPageAbortController.current = controller;
+        setIsLoadingNextPage(true);
+        setSearchError(false);
+
+        try {
+            const nextOptions = await onSearch(displayValue, options.page + 1, pageSize, controller.signal);
+            if (!controller.signal.aborted && nextPageAbortController.current === controller) {
+                setOptions((oldOptions) => ({
+                    hasNextPage: nextOptions.hasNextPage,
+                    page: nextOptions.page,
+                    options: [...oldOptions.options, ...nextOptions.options]
+                }));
+            }
+        } catch (error) {
+            if (!controller.signal.aborted && nextPageAbortController.current === controller && !isCancellation(error)) {
+                setSearchError(true);
+            }
+        } finally {
+            if (!controller.signal.aborted && nextPageAbortController.current === controller) {
+                nextPageAbortController.current = null;
+                setIsLoadingNextPage(false);
+            }
+        }
+    };
+
     const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
         const atBottom = scrollTop + clientHeight >= scrollHeight - 8;
 
-        if (atBottom && !isSearching && !isLoadingNextPage && options.hasNextPage) {
-            setIsLoadingNextPage(true);
-            setSearchError(false);
-            const controller = new AbortController();
-            if (nextPageAbortController.current) {
-                nextPageAbortController.current.abort();
-            }
-            nextPageAbortController.current = controller;
-            try {
-                const nextOptions = await onSearch(displayValue, options.page + 1, pageSize, controller.signal);
-                if (!controller.signal.aborted && nextPageAbortController.current === controller) {
-                    setOptions((oldOptions) => {
-                        return {
-                            hasNextPage: nextOptions.hasNextPage,
-                            page: nextOptions.page,
-                            options: [...oldOptions.options, ...nextOptions.options]
-                        };
-                    });
-                }
-            } catch (error) {
-                if (!controller.signal.aborted && nextPageAbortController.current === controller && !isCancellation(error)) {
-                    setSearchError(true);
-                }
-            } finally {
-                if (!controller.signal.aborted && nextPageAbortController.current === controller) {
-                    setIsLoadingNextPage(false);
-                }
-            }
+        if (atBottom) {
+            await handleNextPage();
         }
     };
 

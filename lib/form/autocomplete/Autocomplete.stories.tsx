@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { hydrateRoot } from 'react-dom/client';
 import { Modal } from '../../general/modal';
@@ -995,5 +995,95 @@ export const SearchFailure: Story = {
         const alert = await canvas.findByRole('alert');
         await expect(alert).toHaveTextContent('Možnosti sa nepodarilo načítať');
         await expectInsidePopover(alert);
+    }
+};
+
+const KeyboardPaginationExample = () => {
+    const [requests] = useState(() => ({
+        first: controlledRequest<import('./Autocomplete.types').OnSearchResult>(),
+        retry: controlledRequest<import('./Autocomplete.types').OnSearchResult>()
+    }));
+    const attempts = useRef(0);
+    const [pages, setPages] = useState<number[]>([]);
+    const form = useAppForm({ defaultValues: { fruit: '' } });
+
+    return (
+        <div className='flex flex-col gap-lg'>
+            <form.AppField name='fruit'>
+                {(field) => (
+                    <field.Autocomplete
+                        label='Keyboard pagination'
+                        autoComplete='off'
+                        pageSize={2}
+                        onSearch={(_query, page) => {
+                            setPages((previous) => [...previous, page]);
+                            if (page === 0) {
+                                return Promise.resolve({ options: [options[0], options[3]], page: 0, hasNextPage: true });
+                            }
+
+                            attempts.current += 1;
+                            return attempts.current === 1 ? requests.first.promise : requests.retry.promise;
+                        }}
+                        onFetch={async () => null}
+                    />
+                )}
+            </form.AppField>
+            <div
+                className='flex flex-wrap gap-md'
+                onMouseDown={(event) => event.preventDefault()}
+            >
+                <Button
+                    variant='outline'
+                    onClick={() => requests.first.reject(new globalThis.Error('Next page failed'))}
+                >
+                    Reject next page
+                </Button>
+                <Button
+                    variant='outline'
+                    onClick={() => requests.retry.resolve({ options: [options[4], options[1]], page: 1, hasNextPage: false })}
+                >
+                    Resolve next page
+                </Button>
+            </div>
+            <output aria-label='Requested pages'>{JSON.stringify(pages)}</output>
+            <form.Subscribe selector={(state) => state.values.fruit}>
+                {(value) => <output aria-label='Stored fruit'>{value}</output>}
+            </form.Subscribe>
+        </div>
+    );
+};
+
+export const KeyboardPagination: Story = {
+    args: AccessibleKeyboardSingle.args,
+    render: () => <KeyboardPaginationExample />,
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('combobox', { name: 'Keyboard pagination' });
+        const pages = canvas.getByLabelText('Requested pages');
+        await userEvent.click(input);
+        await userEvent.keyboard('{ArrowDown}');
+        await canvas.findByRole('option', { name: 'Banana' });
+        await expect(pages).toHaveTextContent('[0]');
+        // Both loaded rows fit without scrolling. Reaching the last row must still fetch.
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(await canvas.findByText('Načítava sa...')).toBeVisible();
+        await expect(pages).toHaveTextContent('[0,1]');
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}');
+        await expect(pages).toHaveTextContent('[0,1]');
+        await userEvent.click(canvas.getByRole('button', { name: 'Reject next page' }));
+        await expect(await canvas.findByRole('alert')).toBeVisible();
+        await expect(canvas.getByRole('option', { name: 'Banana' })).toBeVisible();
+        await expect(input).toHaveFocus();
+        // Another Down retries the failed page without dropping the earlier options.
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(pages).toHaveTextContent('[0,1,1]');
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve next page' }));
+        const apricot = await canvas.findByRole('option', { name: 'Apricot' });
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+        await expect(input).toHaveAttribute('aria-activedescendant', apricot.id);
+        await expect(input).toHaveFocus();
+        await expect(pages).toHaveTextContent('[0,1,1]');
+        await userEvent.keyboard('{Enter}');
+        await expect(canvas.getByLabelText('Stored fruit')).toHaveTextContent('apricot');
     }
 };

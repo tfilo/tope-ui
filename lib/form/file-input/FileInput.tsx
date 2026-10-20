@@ -45,13 +45,11 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, 
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.currentTarget.files) {
-            if (multiple) {
-                const files = Array.from(event.currentTarget.files);
-                field.handleChange(files);
-            } else {
-                const files = Array.from(event.currentTarget.files);
-                field.handleChange(files.find(() => true) ?? null);
-            }
+            const files = Array.from(event.currentTarget.files);
+
+            // Keep the selection in form state so the same files can be selected again.
+            event.currentTarget.value = '';
+            field.handleChange(multiple ? files : (files[0] ?? null));
         }
     };
 

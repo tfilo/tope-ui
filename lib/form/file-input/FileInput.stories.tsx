@@ -15,10 +15,14 @@ const meta = {
     render: (args: FileInputProps, { parameters }) => {
         const defVal = args.multiple === true ? [] : null;
 
-        const form = useAppForm({ defaultValues: { basic: parameters.defaultValue ?? defVal } });
+        const form = useAppForm({
+            defaultValues: { basic: parameters.defaultValue ?? defVal },
+            onSubmit: ({ value }) => parameters.onSubmit?.(value)
+        });
 
         return (
             <form
+                noValidate
                 onSubmit={(e) => {
                     e.preventDefault();
                     form.handleSubmit();
@@ -33,6 +37,17 @@ const meta = {
                     }}
                     children={(field) => <field.FileInput {...args} />}
                 />
+                {parameters.testControls && (
+                    <>
+                        <button
+                            type='button'
+                            onClick={() => form.reset()}
+                        >
+                            Reset
+                        </button>
+                        <button type='submit'>Submit</button>
+                    </>
+                )}
             </form>
         );
     }
@@ -170,5 +185,77 @@ export const Error: Story = {
     parameters: {
         onChange: fn(),
         defaultValue: new File([], 'example.txt')
+    }
+};
+
+export const ReselectSingle: Story = {
+    args: { label: 'Select a file' },
+    parameters: { testControls: true, onChange: fn(), onSubmit: fn() },
+    play: async ({ canvasElement, canvas, parameters, userEvent }) => {
+        const uploadUserEvent = import.meta.env.VITEST ? (await import('vitest/browser')).userEvent : userEvent;
+        const input = canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;
+        const file = new File(['same file contents'], 'repeat.txt', { type: 'text/plain' });
+
+        await uploadUserEvent.upload(input, file);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenLastCalledWith(file);
+        await expect(input.value).toBe('');
+        await userEvent.click(canvas.getByLabelText('Odstrániť repeat.txt'));
+        await expect(parameters.onChange).toHaveBeenLastCalledWith(null);
+        await expect(canvas.getByRole('textbox')).toBeEmptyDOMElement();
+
+        await uploadUserEvent.upload(input, file);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(3);
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('repeat.txt');
+        await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+        await expect(parameters.onSubmit).toHaveBeenLastCalledWith({ basic: file });
+
+        await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+        await expect(canvas.getByRole('textbox')).toBeEmptyDOMElement();
+        await uploadUserEvent.upload(input, file);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(4);
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('repeat.txt');
+        await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+        await expect(parameters.onSubmit).toHaveBeenCalledTimes(2);
+        await expect(parameters.onSubmit).toHaveBeenLastCalledWith({ basic: file });
+        await expect(parameters.onSubmit.mock.lastCall[0].basic.text()).resolves.toBe('same file contents');
+    }
+};
+
+export const ReselectMultiple: Story = {
+    args: { label: 'Select files', multiple: true },
+    parameters: { testControls: true, onChange: fn(), onSubmit: fn() },
+    play: async ({ canvasElement, canvas, parameters, userEvent }) => {
+        const uploadUserEvent = import.meta.env.VITEST ? (await import('vitest/browser')).userEvent : userEvent;
+        const input = canvasElement.querySelector<HTMLInputElement>('input[type="file"]')!;
+        const files = [new File(['first'], 'first.txt'), new File(['second'], 'second.txt')];
+
+        await uploadUserEvent.upload(input, files);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await expect(parameters.onChange).toHaveBeenLastCalledWith(files);
+        await expect(input.value).toBe('');
+        await userEvent.click(canvas.getByLabelText('Odstrániť first.txt'));
+        await expect(parameters.onChange).toHaveBeenLastCalledWith([files[1]]);
+        await expect(canvas.getByRole('textbox')).not.toHaveTextContent('first.txt');
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('second.txt');
+
+        await uploadUserEvent.upload(input, files);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(3);
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('first.txt');
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('second.txt');
+        await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+        await expect(parameters.onSubmit).toHaveBeenLastCalledWith({ basic: files });
+
+        await userEvent.click(canvas.getByRole('button', { name: 'Reset' }));
+        await expect(canvas.getByRole('textbox')).toBeEmptyDOMElement();
+        await uploadUserEvent.upload(input, files);
+        await expect(parameters.onChange).toHaveBeenCalledTimes(4);
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('first.txt');
+        await expect(canvas.getByRole('textbox')).toHaveTextContent('second.txt');
+        await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
+        await expect(parameters.onSubmit).toHaveBeenCalledTimes(2);
+        await expect(parameters.onSubmit).toHaveBeenLastCalledWith({ basic: files });
+        const submittedFiles: File[] = parameters.onSubmit.mock.lastCall[0].basic;
+        await expect(Promise.all(submittedFiles.map((file) => file.text()))).resolves.toEqual(['first', 'second']);
     }
 };

@@ -701,14 +701,26 @@ const RequestFailureExample = ({
     );
 };
 
+// toBeVisible alone does not detect content clipped by a scroll container.
+const expectInsidePopover = async (element: HTMLElement) => {
+    const popover = element.closest('[popover]')!;
+    const bounds = popover.getBoundingClientRect();
+    const content = element.getBoundingClientRect();
+    await expect(content.top).toBeGreaterThanOrEqual(bounds.top);
+    await expect(content.bottom).toBeLessThanOrEqual(bounds.bottom);
+};
+
 export const RequestFailures: Story = {
     args: { onSearch: async () => ({ options: [], page: 0, hasNextPage: false }), onFetch: async () => null },
     render: () => <RequestFailureExample />,
     play: async ({ canvas, userEvent }) => {
         const input = canvas.getByRole('textbox');
         await userEvent.type(input, '{ArrowDown}');
+        await expectInsidePopover(await canvas.findByText('Načítava sa...'));
         await userEvent.click(canvas.getByRole('button', { name: 'Fail request' }));
-        await expect(await canvas.findByRole('alert')).toHaveTextContent('Možnosti sa nepodarilo načítať');
+        const alert = await canvas.findByRole('alert');
+        await expect(alert).toHaveTextContent('Možnosti sa nepodarilo načítať');
+        await expectInsidePopover(alert);
         // Reject an aborted request, then an obsolete request after a newer success.
         await userEvent.type(input, 'abc');
         await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
@@ -732,8 +744,11 @@ export const NextPageFailure: Story = {
         scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
         await waitFor(() => expect(canvas.getByText('Načítava sa...')).toBeVisible());
         await userEvent.click(canvas.getByRole('button', { name: 'Fail request' }));
-        await expect(await canvas.findByRole('alert')).toBeVisible();
+        const alert = await canvas.findByRole('alert');
+        await expect(alert).toBeVisible();
+        await expectInsidePopover(alert);
         await expect(apple).toBeVisible();
+        await expectInsidePopover(apple);
         await expect(canvas.queryByText('Načítava sa...')).toBeNull();
         await userEvent.click(apple);
         await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('apple');
@@ -783,5 +798,23 @@ export const ObsoleteLookupFailure: Story = {
         await expect(await canvas.findByLabelText('Odstrániť Banana')).toBeVisible();
         await expect(canvas.getByRole('textbox')).toBeEnabled();
         await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"banana"');
+    }
+};
+
+// Leave the failure visible after play finishes so it can be inspected in Storybook.
+export const SearchFailure: Story = {
+    args: {
+        label: 'Search request failure',
+        pageSize: 1,
+        onSearch: async () => {
+            throw new globalThis.Error('Simulated network failure');
+        },
+        onFetch: async () => null
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        const alert = await canvas.findByRole('alert');
+        await expect(alert).toHaveTextContent('Možnosti sa nepodarilo načítať');
+        await expectInsidePopover(alert);
     }
 };

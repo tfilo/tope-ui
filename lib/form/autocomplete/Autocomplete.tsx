@@ -468,7 +468,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     className={theme.optionsWrapper}
                     style={{
                         positionAnchor: `--autocomplete_${_id}`,
-                        maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
+                        // Reserve room for a result and request status, including one-item pages.
+                        maxHeight: `${Math.max(2, Math.min(pageSize - 1, 5)) * 36 + 8}px`
                     }}
                     onScroll={handleScroll}
                     onMouseDown={(e) => e.preventDefault()}

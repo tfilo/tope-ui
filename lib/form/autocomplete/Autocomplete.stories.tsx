@@ -484,6 +484,7 @@ const FetchRaceExample = (args: AutocompleteProps) => {
                     {(field) => (
                         <field.Autocomplete
                             {...args}
+                            autoComplete='off'
                             onFetch={onFetch}
                         />
                     )}
@@ -650,6 +651,7 @@ const RequestFailureExample = ({
                 {(field) => (
                     <field.Autocomplete
                         label='Requests'
+                        autoComplete='off'
                         pageSize={1}
                         onSearch={(query, page, _size, signal) => {
                             if (pagination) return page === 0 ? Promise.resolve(result) : requests.initial.promise;
@@ -812,6 +814,7 @@ export const ObsoleteLookupFailure: Story = {
 export const SearchFailure: Story = {
     args: {
         label: 'Search request failure',
+        autoComplete: 'off',
         pageSize: 1,
         onSearch: async () => {
             throw new globalThis.Error('Simulated network failure');

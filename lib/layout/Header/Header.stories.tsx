@@ -1,6 +1,9 @@
-import { expect, fn } from 'storybook/test';
+import { expect, fn, waitFor, within } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Bars3Icon, CameraIcon, MapIcon, UserIcon, UsersIcon } from '@heroicons/react/16/solid';
+
+import { hydrateRoot } from 'react-dom/client';
+import { renderToString } from 'react-dom/server';
 
 import { Content } from '../Content';
 import { Page } from '../Page/Page';
@@ -124,5 +127,51 @@ export const WithTooMuchMenuItems: Story = {
             onClick: fn()
         })),
         onLogout: fn()
+    }
+};
+
+export const ServerRenderingAndHydration: Story = {
+    args: {
+        menu: [{ label: 'Map', icon: MapIcon, onClick: fn() }]
+    },
+    play: async ({ args, canvasElement }) => {
+        const host = document.createElement('div');
+        const originalWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+        const onRecoverableError = fn();
+        let root: ReturnType<typeof hydrateRoot> | undefined;
+
+        const resize = (width: number) => {
+            Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
+            window.dispatchEvent(new Event('resize'));
+        };
+
+        try {
+            resize(767);
+            host.innerHTML = renderToString(<Header {...args} />);
+            canvasElement.appendChild(host);
+
+            const serverHeader = host.firstElementChild;
+            await expect(within(host).getByRole('button', { name: 'Map' })).toHaveTextContent('Map');
+
+            root = hydrateRoot(host, <Header {...args} />, { onRecoverableError });
+
+            await waitFor(() => expect(within(host).getByRole('button', { name: 'Map' }).textContent).toBe(''));
+            await expect(host.firstElementChild).toBe(serverHeader);
+
+            for (const width of [768, 1279, 1280]) {
+                resize(width);
+                await waitFor(() => expect(within(host).getByRole('button', { name: 'Map' })).toHaveTextContent('Map'));
+            }
+
+            resize(767);
+            await waitFor(() => expect(within(host).getByRole('button', { name: 'Map' }).textContent).toBe(''));
+            await expect(onRecoverableError).not.toHaveBeenCalled();
+        } finally {
+            root?.unmount();
+            host.remove();
+
+            if (originalWidth) Object.defineProperty(window, 'innerWidth', originalWidth);
+            window.dispatchEvent(new Event('resize'));
+        }
     }
 };

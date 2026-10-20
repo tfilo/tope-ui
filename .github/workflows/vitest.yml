@@ -22,6 +22,7 @@ jobs:
           npm run lint
           npm run prettier
           npm run build
+          npm run test:ssr
           npm run build-storybook
   tests:
     needs: build

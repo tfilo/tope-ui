@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import type { Option } from '../../common/Option';
+
 import { expect, fn, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -452,5 +455,149 @@ export const InsideForm: Story = {
         onChange: fn(),
         onSubmit: fn(),
         defaultValue: ''
+    }
+};
+
+// Each lookup stays pending until its explicit resolve button is pressed.
+const deferredOption = () => {
+    let resolve!: (option: Option | null) => void;
+    const promise = new Promise<Option | null>((done) => {
+        resolve = done;
+    });
+
+    return { promise, resolve };
+};
+
+const FetchRaceExample = (args: AutocompleteProps) => {
+    const [requests] = useState(() => ({ apple: deferredOption(), banana: deferredOption(), apricot: deferredOption() }));
+    const [mounted, setMounted] = useState(true);
+    const form = useAppForm({ defaultValues: { basic: args.multiple ? ([] as string[]) : '' } });
+    const onFetch = (value: string) => requests[value as keyof typeof requests].promise;
+
+    return (
+        <>
+            {mounted && (
+                <form.AppField name='basic'>
+                    {(field) => (
+                        <field.Autocomplete
+                            {...args}
+                            onFetch={onFetch}
+                        />
+                    )}
+                </form.AppField>
+            )}
+            {(['apple', 'banana', 'apricot'] as const).map((value) => (
+                <span key={value}>
+                    <button
+                        type='button'
+                        onClick={() => form.setFieldValue('basic', args.multiple ? [value] : value)}
+                    >
+                        Set {value}
+                    </button>
+                    <button
+                        type='button'
+                        onClick={() => requests[value].resolve(options.find((option) => option.value === value)!)}
+                    >
+                        Resolve {value}
+                    </button>
+                </span>
+            ))}
+            <button
+                type='button'
+                onClick={() => form.reset()}
+            >
+                Reset field
+            </button>
+            <button
+                type='button'
+                onClick={() => setMounted(false)}
+            >
+                Unmount field
+            </button>
+            <form.Subscribe selector={(state) => state.values.basic}>
+                {(value) => <output aria-label='Stored value'>{JSON.stringify(value)}</output>}
+            </form.Subscribe>
+        </>
+    );
+};
+
+export const StaleFetchSingle: Story = {
+    render: (args) => <FetchRaceExample {...args} />,
+    args: {
+        label: 'Fetch race',
+        onSearch: async () => ({ options: [], page: 0, hasNextPage: false }),
+        onFetch: async () => null
+    },
+    play: async ({ canvas, userEvent, args }) => {
+        const stored = canvas.getByLabelText('Stored value');
+        const expected = (value: string) => JSON.stringify(args.multiple ? (value ? [value] : []) : value);
+        const click = async (name: string) => userEvent.click(canvas.getByRole('button', { name }));
+
+        await click('Set apple');
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await click('Set banana');
+        await click('Resolve banana');
+        await waitFor(() => expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible());
+        await expect(canvas.getByRole('textbox')).toBeEnabled();
+        await click('Resolve apple');
+        await expect(stored).toHaveTextContent(expected('banana'));
+        await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
+        await expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible();
+
+        // Reset after initialization too: an older displayed selection must not write back.
+        await click('Set apricot');
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await click('Reset field');
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await click('Resolve apricot');
+        await expect(stored).toHaveTextContent(expected(''));
+        await expect(canvas.queryByLabelText('Odstrániť Apricot')).toBeNull();
+        await expect(canvas.queryByLabelText('Odstrániť Banana')).toBeNull();
+    }
+};
+
+export const StaleFetchMultiple: Story = {
+    ...StaleFetchSingle,
+    args: { ...StaleFetchSingle.args, multiple: true }
+};
+
+export const ResetDuringInitialFetch: Story = {
+    ...StaleFetchSingle,
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Reset field' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('""');
+        await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
+    }
+};
+
+export const UnmountDuringFetch: Story = {
+    ...StaleFetchSingle,
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Unmount field' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
+        await expect(canvas.queryByRole('textbox')).toBeNull();
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"apple"');
+    }
+};
+
+export const StaleFetchKeepsLoading: Story = {
+    ...StaleFetchSingle,
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Set apple' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeDisabled());
+        await userEvent.click(canvas.getByRole('button', { name: 'Set banana' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve apple' }));
+        await expect(canvas.getByRole('textbox')).toBeDisabled();
+        await expect(canvas.getByLabelText('Stored value')).toHaveTextContent('"banana"');
+        await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
+        await userEvent.click(canvas.getByRole('button', { name: 'Resolve banana' }));
+        await waitFor(() => expect(canvas.getByRole('textbox')).toBeEnabled());
+        await expect(canvas.getByLabelText('Odstrániť Banana')).toBeVisible();
     }
 };

@@ -67,10 +67,15 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const [isFetching, setIsFetching] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
-    const [isInitialized, setIsInitialized] = useState(false);
 
     const [selectedOption, setSelectedOption] = useState<Option[]>([]);
     const [displayValue, setDisplayValue] = useState<string>('');
+
+    // Only user actions write selections back to the form. Lookups update display state only.
+    const updateSelection = (options: Option[]) => {
+        setSelectedOption(options);
+        field.handleChange(multiple ? options.map((option) => option.value) : (options[0]?.value ?? ''));
+    };
 
     // Handle input value changes by user
     const handleDisplayValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +85,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Remove selected option and reset search state
     const handleRemoveOption = (option: Option) => {
-        setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
+        updateSelection(selectedOption.filter((o) => o.value !== option.value));
         setDisplayValue('');
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
@@ -207,15 +212,15 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         if (multiple) {
             if (option && selectedOption.some((o) => o.value === option.value)) {
                 // unselect option
-                setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
+                updateSelection(selectedOption.filter((o) => o.value !== option.value));
             } else if (option) {
-                setSelectedOption([...selectedOption, option]);
+                updateSelection([...selectedOption, option]);
             }
         } else if (option && selectedOption.some((o) => o.value === option.value)) {
             // unselect option
-            setSelectedOption([]);
+            updateSelection([]);
         } else if (option) {
-            setSelectedOption(option ? [option] : []);
+            updateSelection(option ? [option] : []);
         }
 
         setDisplayValue('');
@@ -254,52 +259,32 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     const handleSearchEffectEvent = useEffectEvent(handleSearch);
 
-    // Handle external value changes and fetch corresponding options
-    const onValueChange = useEffectEvent(async (newValues: string[]) => {
-        if (newValues.length === 0) {
-            if (selectedOption.length > 0) {
-                setSelectedOption([]);
-            }
-        } else {
-            try {
-                setIsFetching(true);
-                // Check if all newValues are already selected
-                const allSelected =
-                    newValues.every((v) => selectedOption.some((o) => o.value === v)) && newValues.length === selectedOption.length;
-                if (!allSelected) {
-                    const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v)));
-                    setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+    // The public onFetch API has no signal; invalidate its completion locally instead.
+    const onValueChange = useEffectEvent(async (newValues: string[], signal: AbortSignal, externalValue: string | string[]) => {
+        const isCurrent = () => !signal.aborted && field.state.value === externalValue;
+
+        try {
+            setIsFetching(newValues.length > 0);
+            const allSelected =
+                newValues.every((v) => selectedOption.some((o) => o.value === v)) && newValues.length === selectedOption.length;
+
+            if (!allSelected) {
+                const fetchedOptions = await Promise.all(newValues.map((v) => onFetch(v)));
+
+                if (!isCurrent()) {
+                    return;
                 }
-            } finally {
+
+                setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+            }
+
+            if (isCurrent()) {
+                setOptions({ hasNextPage: false, page: 0, options: [] });
+                setDisplayValue('');
+            }
+        } finally {
+            if (isCurrent()) {
                 setIsFetching(false);
-            }
-        }
-
-        setOptions({ hasNextPage: false, page: 0, options: [] });
-        setDisplayValue('');
-        setIsInitialized(true);
-    });
-
-    // Trigger onChange when selectedOption changes
-    const handleChange = useEffectEvent((selectedOption: Option[], multiple: boolean) => {
-        if (isInitialized === true) {
-            if (multiple === false) {
-                if (selectedOption.length === 0) {
-                    if (value !== null) {
-                        field.handleChange('');
-                    }
-                } else if (value !== selectedOption[0].value) {
-                    field.handleChange(selectedOption[0].value);
-                }
-            } else {
-                const allSelected =
-                    Array.isArray(value) &&
-                    value.every((v) => selectedOption.some((o) => o.value === v)) &&
-                    value.length === selectedOption.length;
-
-                if (!allSelected) {
-                    field.handleChange(selectedOption.map((o) => o.value));
-                }
             }
         }
     });
@@ -348,24 +333,19 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 newValue.push(value.trim());
             }
             if (!abortController.signal.aborted) {
-                onValueChange(newValue);
+                onValueChange(newValue, abortController.signal, field.state.value);
             }
         })();
 
         return () => {
             abortController.abort();
         };
-    }, [value]);
+    }, [value, field.state.value]);
 
     // Trigger search when display value changes
     useEffect(() => {
         handleSearchEffectEvent(displayValue);
     }, [displayValue]);
-
-    // Trigger onChange when selectedOption changes
-    useEffect(() => {
-        handleChange(selectedOption, multiple);
-    }, [selectedOption, multiple]);
 
     // Toggle popover open/close
     useEffect(() => {

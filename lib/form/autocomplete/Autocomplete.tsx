@@ -135,6 +135,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             if (!isOpen) {
                 setActiveIndex(0);
                 await handleOptionsOpen();
+            } else if (e.key === 'ArrowUp' && activeIndex === 0) {
+                handleOptionsClose();
+                inputRef.current?.focus();
             } else {
                 const nextIndex =
                     e.key === 'ArrowDown' ? Math.min(activeIndex + 1, enabledOptions.length - 1) : activeIndex <= 0 ? -1 : activeIndex - 1;

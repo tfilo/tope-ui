@@ -653,7 +653,19 @@ export const AccessibleKeyboardSingle: Story = {
         await expect(input).toHaveFocus();
         await userEvent.keyboard('{ArrowUp}');
         await expect(input).toHaveAttribute('aria-activedescendant', apple.id);
-        await userEvent.keyboard('{Enter}');
+        // Up beyond the first enabled option restores the original close-to-input behavior.
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(input).toHaveFocus();
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(input).not.toHaveAttribute('aria-activedescendant');
+        await expect(canvas.queryByRole('listbox')).toBeNull();
+        await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+        // Typing continues directly in the input and opens a new search without selecting anything.
+        await userEvent.keyboard('Ap');
+        await expect(input).toHaveValue('Ap');
+        await expect(canvas.queryByLabelText('Odstrániť Apple')).toBeNull();
+        await canvas.findByRole('option', { name: 'Apple' });
+        await userEvent.keyboard('{ArrowDown}{Enter}');
         await expect(canvas.getByLabelText('Odstrániť Apple')).toBeVisible();
         await expect(input).toHaveFocus();
         await expect(input).toHaveAttribute('aria-expanded', 'false');

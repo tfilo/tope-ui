@@ -38,7 +38,8 @@ type TableFetch<TData extends RowObject> = {
     onFetch: (
         page: number,
         pageSize: number,
-        sort: SortObject<TData>[]
+        sort: SortObject<TData>[],
+        abortSignal?: AbortSignal
     ) => Promise<{
         data: Readonly<TData[]>;
         page: number;

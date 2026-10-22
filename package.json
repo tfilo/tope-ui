@@ -39,6 +39,7 @@
         "prettier:fix": "prettier './lib/**/*.{js,jsx,ts,tsx,json,md}' --write",
         "storybook": "storybook dev -p 6006",
         "build-storybook": "storybook build",
+        "test:ssr": "vitest run --project=ssr",
         "test-storybook": "vitest --project=storybook",
         "prepare": "husky"
     },

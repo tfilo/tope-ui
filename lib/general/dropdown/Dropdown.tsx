@@ -50,6 +50,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                                 className={theme.dropdownItem(o.disabled)}
                             >
                                 <button
+                                    type='button'
                                     onClick={(e) => {
                                         popoverRef.current?.hidePopover();
                                         o.onClick(e);

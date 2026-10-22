@@ -35,6 +35,7 @@ export const Tag: React.FC<TagProps> = ({
             {...props}
         >
             <button
+                type='button'
                 className={theme.mainButton(isClickable)}
                 onClick={onClick}
                 disabled={disabled}

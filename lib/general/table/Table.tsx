@@ -22,7 +22,16 @@ const theme = {
  * @returns number
  */
 const baseCompareFn = (a: unknown, b: unknown): number => {
-    if (typeof a === 'bigint' || typeof b === 'bigint' || typeof a === 'number' || typeof b === 'number') {
+    if (typeof a === 'bigint' || typeof b === 'bigint') {
+        // Relational comparisons preserve bigint precision, including against fractional numbers.
+        // Keep the existing numeric coercion for other values (undefined becomes zero).
+        const valueA = typeof a === 'bigint' ? a : +(a ?? 0);
+        const valueB = typeof b === 'bigint' ? b : +(b ?? 0);
+
+        return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
+    }
+
+    if (typeof a === 'number' || typeof b === 'number') {
         const valueA = +(a ?? 0);
         const valueB = +(b ?? 0);
 
@@ -79,8 +88,12 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
 
     const onNextPage = () => {
         setPage((prev) => {
-            return Math.min(totalPages - 1, prev + 1);
+            return Math.max(0, Math.min(totalPages - 1, prev + 1));
         });
+    };
+
+    const onPageChange = (page: number) => {
+        setPage(Math.max(0, Math.min(totalPages - 1, page)));
     };
 
     const onSortChange = (accessor: keyof TData) => {
@@ -117,11 +130,25 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     });
 
     useEffect(() => {
+        const abortController = new AbortController();
         if (hasFetch) {
-            onFetch(page, pageSize, sort).then((res) => {
-                onSetData(res.data, res.page, res.pageSize, res.totalRecords);
-            });
+            (async (signal: AbortSignal) => {
+                try {
+                    const res = await onFetch(page, pageSize, sort, signal);
+                    if (!signal.aborted) {
+                        onSetData(res.data, res.page, res.pageSize, res.totalRecords);
+                    }
+                } catch (error) {
+                    if (!signal.aborted) {
+                        console.error(error);
+                    }
+                }
+            })(abortController.signal);
         }
+
+        return () => {
+            abortController.abort();
+        };
     }, [onFetch, hasFetch, page, pageSize, sort]);
 
     useEffect(() => {
@@ -203,7 +230,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                 <TablePagination
                     onPrevPage={onPrevPage}
                     onNextPage={onNextPage}
-                    onPageChange={setPage}
+                    onPageChange={onPageChange}
                     page={page}
                     totalPages={totalPages}
                 />

@@ -43,5 +43,7 @@ jobs:
           cache-dependency-path: "./package-lock.json"
       - name: Install dependencies
         run: npm ci
-      - name: Run tests
+      - name: Run ssr tests
+        run: npm run test:ssr
+      - name: Run tests in storybook
         run: npm run test-storybook

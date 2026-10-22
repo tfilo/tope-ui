@@ -166,4 +166,6 @@ import '@tfilo/tope-ui/style.css';
 
 ## Localization
 
-Library provides default localization with hardcoded values. You can provide your own by calling setLocalization methods that will update original object holding locales.
+Defaults are Slovak. Call `setLocalization` after importing the library and before rendering components to configure localized text. The calendar month chooser reads the current month labels during rendering, with the 12 labels ordered from January to December.
+
+`setLocalization` updates the shared configuration without scheduling React renders. If you change localization after mounting, the calendar reflects the updated month labels on its next render. Supplied top-level localization properties are replaced, so provide the complete nested configuration when updating `dateTimeInput`.

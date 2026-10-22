@@ -78,11 +78,6 @@ for (let i = minYear; i <= maxYear; i++) {
     yearsRange.push(i);
 }
 
-const allMonths: Month[] = [];
-for (let i = 0; i < 12; i++) {
-    allMonths.push({ label: localization.dateTimeInput.months[i], val: i });
-}
-
 /** Tries to parse a date string using multiple date-fns patterns, in the given order. Used in dateTime picker.
  * The first pattern that produces a valid date wins; the remaining patterns are not tried.
  * @param {string} rawValue - The raw user input to be parsed (e.g., "1.1.2025 10:11:23").
@@ -273,6 +268,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const value = field.state.value;
 
     const hasTime = type === 'dateTime';
+    const allMonths: Month[] = Array.from({ length: 12 }, (_, val) => ({
+        label: localization.dateTimeInput.months[val],
+        val
+    }));
 
     const [isOpen, setIsOpen] = useState(false);
     const [pickerType, setPickerType] = useState<'day' | 'month' | 'year'>('day');
@@ -959,7 +958,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                 }
                                 return (
                                     <li
-                                        key={`${month.label}`}
+                                        key={month.val}
                                         className={theme.flex}
                                     >
                                         <Button

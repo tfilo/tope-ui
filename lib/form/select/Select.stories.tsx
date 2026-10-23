@@ -1,4 +1,4 @@
-import { expect, fn, type Mock } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
@@ -31,6 +31,14 @@ const meta = {
                     }}
                     children={(field) => <field.Select {...args} />}
                 />
+                {parameters.showReset && (
+                    <button
+                        type='button'
+                        onClick={() => form.reset()}
+                    >
+                        Reset form
+                    </button>
+                )}
             </form>
         );
     }
@@ -41,14 +49,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Basic: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        await expect(canvas.getByRole('combobox')).toBeVisible();
-        await expect(canvas.getByLabelText('Some basic select')).toBeVisible();
-        await expect(canvas.getByLabelText('Some basic select').tagName).toBe('SELECT');
-        await userEvent.selectOptions(canvas.getByRole('combobox'), 'option3');
+        const trigger = canvas.getByRole('combobox');
+        await expect(trigger.tagName).toBe('BUTTON');
+        await expect(canvas.queryByRole('textbox')).toBeNull();
+        await userEvent.click(trigger);
+        await expect(canvas.getByRole('option', { name: 'Option 2' })).toBeDisabled();
+        await expect(canvas.getAllByRole('option')).toHaveLength(5);
+        await userEvent.click(canvas.getByRole('option', { name: 'Option 3' }));
         await expect(parameters.onChange).toHaveBeenCalledTimes(1);
-        (parameters.onChange as Mock).mockClear();
-        await userEvent.selectOptions(canvas.getByRole('combobox'), 'option2');
-        await expect(parameters.onChange).not.toHaveBeenCalled();
+        await expect(trigger).toHaveFocus();
+        await userEvent.click(canvas.getByLabelText('Odstrániť Option 3'));
+        await expect(parameters.onChange).toHaveBeenCalledTimes(2);
+        await expect(canvas.queryByText('Option 3', { selector: 'span button' })).toBeNull();
+        await userEvent.click(trigger);
+        await userEvent.click(canvas.getByRole('option', { name: 'Group 1 - Option 1' }));
+        await expect(canvas.getByLabelText('Odstrániť Group 1 - Option 1')).toBeVisible();
     },
     args: {
         label: 'Some basic select',
@@ -73,7 +88,9 @@ export const Basic: Story = {
 
 export const Disabled: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        await userEvent.selectOptions(canvas.getByRole('combobox'), 'option3');
+        await expect(canvas.getByRole('combobox')).toBeDisabled();
+        await userEvent.click(canvas.getByRole('combobox'));
+        await expect(canvas.queryByRole('listbox')).toBeNull();
         await expect(parameters.onChange).not.toHaveBeenCalled();
     },
     args: {
@@ -94,9 +111,10 @@ export const Required: Story = {
     play: async ({ canvas }) => {
         await expect(
             canvas.getByLabelText('This is required select', {
-                exact: false
+                exact: false,
+                selector: 'button'
             })
-        ).toBeRequired();
+        ).toHaveAttribute('aria-required', 'true');
         await expect(
             canvas.getByText('This is required select', {
                 exact: false
@@ -120,7 +138,7 @@ export const Required: Story = {
 
 export const Error: Story = {
     play: async ({ canvas }) => {
-        const byLabel = canvas.getByLabelText('Label', { exact: false });
+        const byLabel = canvas.getByLabelText('Label', { exact: false, selector: 'button' });
         const byError = canvas.getByLabelText('This field is required!');
         await expect(canvas.getByRole('combobox')).toBeVisible();
         await expect(byLabel).toBeVisible();
@@ -129,8 +147,10 @@ export const Error: Story = {
         await expect(byLabel).toStrictEqual(byError);
 
         // Check that label is before and error after element
-        await expect(canvas.getByRole('combobox').parentElement?.previousSibling).toHaveTextContent('Label');
-        await expect(canvas.getByRole('combobox').parentElement?.nextSibling).toHaveTextContent('This field is required!');
+        await expect(canvas.getByRole('combobox').parentElement?.parentElement?.parentElement?.previousSibling).toHaveTextContent('Label');
+        await expect(canvas.getByRole('combobox').parentElement?.parentElement?.parentElement?.nextSibling).toHaveTextContent(
+            'This field is required!'
+        );
     },
     args: {
         label: 'Label',
@@ -158,10 +178,19 @@ export const SelectOnly: Story = {
 
 export const MultiSelect: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
-        const select = canvas.getByRole('listbox');
-        await expect(select).toBeVisible();
-        await userEvent.selectOptions(select, ['option1', 'option3']);
+        const trigger = canvas.getByRole('combobox');
+        await userEvent.click(trigger);
+        await userEvent.click(canvas.getByRole('option', { name: 'Option 1' }));
+        await expect(canvas.queryByLabelText('Odstrániť Option 1')).toBeNull();
+        await userEvent.click(trigger);
+        await userEvent.click(canvas.getByRole('option', { name: 'Option 1' }));
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await userEvent.click(trigger);
+        await userEvent.click(canvas.getByRole('option', { name: 'Option 3' }));
         await expect(parameters.onChange).toHaveBeenCalledTimes(2);
+        await userEvent.click(canvas.getByLabelText('Odstrániť Option 1'));
+        await expect(canvas.queryByLabelText('Odstrániť Option 3')).toBeNull();
+        await expect(parameters.onChange).toHaveBeenCalledTimes(3);
     },
     args: {
         label: 'Some multi select',
@@ -175,5 +204,48 @@ export const MultiSelect: Story = {
     parameters: {
         onChange: fn(),
         defaultValue: []
+    }
+};
+
+export const SingleSelectionCannotBeCleared: Story = {
+    args: { ...Basic.args, allowEmptyOption: false },
+    parameters: { defaultValue: 'option1', onChange: fn() },
+    play: async ({ canvas, userEvent, parameters }) => {
+        await expect(canvas.queryByLabelText('Odstrániť Option 1')).toBeNull();
+        const trigger = canvas.getByRole('combobox');
+        trigger.focus();
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(canvas.getByRole('option', { name: 'Option 1' })).toHaveFocus();
+        await userEvent.keyboard('{Enter}');
+        await expect(parameters.onChange).not.toHaveBeenCalled();
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+        await expect(canvas.getByRole('option', { name: 'Option 3' })).toHaveFocus();
+        await userEvent.keyboard('{Escape}');
+        await expect(trigger).toHaveFocus();
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    }
+};
+
+export const MultipleCanBeCleared: Story = {
+    args: { ...MultiSelect.args, allowEmptyOption: true },
+    parameters: { defaultValue: ['option1'], onChange: fn() },
+    play: async ({ canvas, userEvent, parameters }) => {
+        await userEvent.click(canvas.getByLabelText('Odstrániť Option 1'));
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+        await expect(canvas.queryByLabelText('Odstrániť Option 1')).toBeNull();
+    }
+};
+
+export const ResetSelection: Story = {
+    args: { ...Basic.args },
+    parameters: { defaultValue: 'option1', showReset: true },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('combobox'));
+        await userEvent.click(canvas.getByRole('option', { name: 'Option 3' }));
+        await expect(canvas.getByLabelText('Odstrániť Option 3')).toBeVisible();
+        await userEvent.click(canvas.getByRole('button', { name: 'Reset form' }));
+        await expect(canvas.getByLabelText('Odstrániť Option 1')).toBeVisible();
+        await expect(canvas.queryByLabelText('Odstrániť Option 3')).toBeNull();
+        await expect(canvas.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
     }
 };

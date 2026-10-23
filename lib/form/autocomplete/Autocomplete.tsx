@@ -255,29 +255,39 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const handleSearchEffectEvent = useEffectEvent(handleSearch);
 
     // Handle external value changes and fetch corresponding options
-    const onValueChange = useEffectEvent(async (newValues: string[]) => {
-        if (newValues.length === 0) {
-            if (selectedOption.length > 0) {
-                setSelectedOption([]);
-            }
-        } else {
-            try {
-                setIsFetching(true);
+    const onValueChange = useEffectEvent(async (newValues: string[], signal: AbortSignal) => {
+        try {
+            setIsFetching(true);
+            if (newValues.length === 0) {
+                if (selectedOption.length > 0) {
+                    setSelectedOption([]);
+                }
+            } else {
                 // Check if all newValues are already selected
                 const allSelected =
                     newValues.every((v) => selectedOption.some((o) => o.value === v)) && newValues.length === selectedOption.length;
                 if (!allSelected) {
-                    const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v)));
-                    setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+                    const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v, signal)));
+                    if (!signal.aborted) {
+                        setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+                    }
                 }
-            } finally {
+            }
+
+            if (!signal.aborted) {
+                setOptions({ hasNextPage: false, page: 0, options: [] });
+                setDisplayValue('');
+                setIsInitialized(true);
+            }
+        } catch (error) {
+            if (!signal.aborted) {
+                console.error(error);
+            }
+        } finally {
+            if (!signal.aborted) {
                 setIsFetching(false);
             }
         }
-
-        setOptions({ hasNextPage: false, page: 0, options: [] });
-        setDisplayValue('');
-        setIsInitialized(true);
     });
 
     // Trigger onChange when selectedOption changes
@@ -348,7 +358,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 newValue.push(value.trim());
             }
             if (!abortController.signal.aborted) {
-                onValueChange(newValue);
+                await onValueChange(newValue, abortController.signal);
             }
         })();
 

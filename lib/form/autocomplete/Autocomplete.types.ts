@@ -16,7 +16,7 @@ interface BaseProps {
     /** onSearch callback to handle autocomplete input */
     onSearch: (query: string, page: number, pageSize: number, abortSignal: AbortSignal) => Promise<OnSearchResult>;
     /** onFetch to fetch single option by value */
-    onFetch: (value: string) => Promise<Option | null>;
+    onFetch: (value: string, abortSignal?: AbortSignal) => Promise<Option | null>;
     /** pageSize specify how many options to fetch per page, default is 10 */
     pageSize?: number;
 }

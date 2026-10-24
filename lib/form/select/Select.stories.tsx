@@ -249,3 +249,51 @@ export const ResetSelection: Story = {
         await expect(canvas.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
     }
 };
+
+export const KeyboardNavigation: Story = {
+    args: {
+        label: 'Keyboard navigation',
+        options: [
+            { value: 'disabled-first', label: 'Disabled first', disabled: true },
+            { value: 'first', label: 'First option' },
+            { value: 'disabled-middle', label: 'Disabled middle', disabled: true },
+            { label: 'Group', options: [{ value: 'last', label: 'Last option' }] }
+        ]
+    },
+    parameters: { onChange: fn() },
+    play: async ({ canvas, userEvent, parameters }) => {
+        const trigger = canvas.getByRole('combobox');
+        trigger.focus();
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+        await userEvent.keyboard('{ArrowDown}');
+        await expect(canvas.getByRole('option', { name: 'First option' })).toHaveFocus();
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(trigger).toHaveFocus();
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+        await userEvent.keyboard('{Enter}');
+        await expect(canvas.getByRole('option', { name: 'First option' })).toHaveFocus();
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+        await expect(canvas.getByRole('option', { name: 'Last option' })).toHaveFocus();
+        await userEvent.keyboard('{ArrowUp}');
+        await expect(canvas.getByRole('option', { name: 'First option' })).toHaveFocus();
+        await userEvent.keyboard('{Escape}');
+        await expect(trigger).toHaveFocus();
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+        await expect(parameters.onChange).not.toHaveBeenCalled();
+
+        await userEvent.keyboard(' ');
+        await expect(canvas.getByRole('option', { name: 'First option' })).toHaveFocus();
+        await userEvent.keyboard('{ArrowDown}{Enter}');
+        await expect(trigger).toHaveFocus();
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+        await expect(parameters.onChange).toHaveBeenCalledTimes(1);
+
+        await userEvent.click(trigger);
+        await expect(canvas.getByRole('option', { name: 'First option' })).toHaveFocus();
+        await userEvent.keyboard('{Tab}');
+        await userEvent.keyboard('{Tab}');
+        await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    }
+};

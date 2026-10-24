@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useId, useRef, useState } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
 import { useSelector } from '@tanstack/react-form';
 
@@ -41,64 +41,125 @@ export const Select: React.FC<SelectProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     // Reset the popup when disabled so re-enabling starts with a closed control.
     if (disabled && isOpen) setIsOpen(false);
-    const open = isOpen && !disabled;
     const wrapperRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const optionsRef = useRef<HTMLUListElement>(null);
-    const focusOnOpen = useRef<'first' | 'last' | null>(null);
 
-    const close = () => setIsOpen(false);
-    const focusTrigger = () => triggerRef.current?.focus();
-    const remove = (option: Option) => {
+    // Options are local, so the popover can be shown and focused immediately.
+    const handleOptionsOpen = () => {
+        if (disabled) return;
+        setIsOpen(true);
+        popoverRef.current?.showPopover();
+        optionsRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+    };
+
+    const handleOptionsClose = () => {
+        setIsOpen(false);
+        popoverRef.current?.hidePopover();
+    };
+
+    const handleOptionsToggle = () => {
+        if (isOpen) {
+            handleOptionsClose();
+        } else {
+            handleOptionsOpen();
+        }
+    };
+
+    const handleRemoveOption = (option: Option) => {
         if (disabled || !canRemove) return;
         field.handleChange(multiple ? values.filter((v) => v !== option.value) : '');
-        close();
-        focusTrigger();
+        triggerRef.current?.focus();
+        handleOptionsClose();
     };
-    const select = (option: Option) => {
+
+    const handleSelect = (option: Option) => {
         if (disabled || option.disabled) return;
         if (values.includes(option.value)) {
             if (canRemove) field.handleChange(multiple ? values.filter((v) => v !== option.value) : '');
         } else {
             field.handleChange(multiple ? [...values, option.value] : option.value);
         }
-        close();
-        focusTrigger();
+        triggerRef.current?.focus();
+        handleOptionsClose();
     };
 
-    useEffect(() => {
-        if (open) {
-            popoverRef.current?.showPopover();
-            if (focusOnOpen.current) {
-                const buttons = optionsRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
-                const target = focusOnOpen.current === 'last' ? buttons?.[buttons.length - 1] : buttons?.[0];
-                target?.focus();
-                focusOnOpen.current = null;
-            }
-        } else {
-            popoverRef.current?.hidePopover();
+    const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+        if (wrapperRef.current?.contains(e.relatedTarget)) return;
+        handleOptionsClose();
+        field.handleBlur();
+    };
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        onClick?.(e);
+        if (!e.defaultPrevented) handleOptionsToggle();
+    };
+
+    const handleTagClick = () => {
+        triggerRef.current?.focus();
+        handleOptionsToggle();
+    };
+
+    const handleControlClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (disabled || (e.target as HTMLElement).closest('button')) return;
+        handleTagClick();
+    };
+
+    // Match Autocomplete's open button: ArrowDown opens and focuses the first option.
+    const handleKeyDownOnOpenButton = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+        onKeyDown?.(e);
+        if (e.defaultPrevented) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            handleOptionsOpen();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            handleOptionsClose();
         }
-    }, [open]);
+    };
+
+    // Traverse enabled options across groups; ArrowUp from the first closes the list.
+    const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, option: Option) => {
+        const buttons = Array.from(optionsRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []);
+        const index = buttons.indexOf(e.currentTarget);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            buttons[Math.min(buttons.length - 1, index + 1)]?.focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (index > 0) {
+                buttons[index - 1].focus();
+            } else {
+                triggerRef.current?.focus();
+                handleOptionsClose();
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSelect(option);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            triggerRef.current?.focus();
+            handleOptionsClose();
+        }
+    };
+
+    const handlePopoverMouseDown = (e: React.MouseEvent<HTMLDivElement>) => e.preventDefault();
 
     useEffect(() => {
-        if (!open) return;
-        const handlePointerDown = (event: PointerEvent) => {
-            if (!wrapperRef.current?.contains(event.target as Node)) close();
-        };
+        if (disabled) popoverRef.current?.hidePopover();
+    }, [disabled]);
+
+    const handlePointerDown = useEffectEvent((e: PointerEvent) => {
+        if (!wrapperRef.current?.contains(e.target as Node)) handleOptionsClose();
+    });
+
+    useEffect(() => {
+        if (!isOpen) return;
         document.addEventListener('pointerdown', handlePointerDown);
         return () => document.removeEventListener('pointerdown', handlePointerDown);
-    }, [open]);
+    }, [isOpen]);
 
-    const handleOptionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-        const buttons = Array.from(optionsRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []);
-        const index = buttons.indexOf(event.currentTarget);
-        if (event.key === 'ArrowDown' || event.key === 'ArrowUp' || event.key === 'Home' || event.key === 'End') {
-            event.preventDefault();
-            const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : index + (event.key === 'ArrowDown' ? 1 : -1);
-            buttons[Math.max(0, Math.min(buttons.length - 1, next))]?.focus();
-        }
-    };
     const renderOption = (option: Option) => (
         <li
             key={option.value}
@@ -111,15 +172,15 @@ export const Select: React.FC<SelectProps> = ({
                 aria-selected={values.includes(option.value)}
                 disabled={disabled || option.disabled}
                 className={theme.option.button}
-                onClick={() => select(option)}
-                onKeyDown={handleOptionKeyDown}
+                onClick={() => handleSelect(option)}
+                onKeyDown={(e) => handleOptionKeyDown(e, option)}
             >
                 {option.label}
                 {values.includes(option.value) && <CheckIcon className={theme.option.buttonIcon} />}
             </button>
         </li>
     );
-    const Chevron = open ? ChevronUpIcon : ChevronDownIcon;
+    const Chevron = isOpen ? ChevronUpIcon : ChevronDownIcon;
 
     return (
         <ElementWrapper
@@ -132,28 +193,12 @@ export const Select: React.FC<SelectProps> = ({
             <div
                 className={theme.wrapper}
                 ref={wrapperRef}
-                onBlur={(event) => {
-                    if (!event.currentTarget.contains(event.relatedTarget)) {
-                        close();
-                        field.handleBlur();
-                    }
-                }}
-                onKeyDown={(event) => {
-                    if (event.key === 'Escape') {
-                        event.preventDefault();
-                        close();
-                        focusTrigger();
-                    }
-                }}
+                onBlur={handleBlur}
             >
                 <div
                     className={`${theme.inputAndTagWrapper} ${disabled ? '' : 'cursor-pointer'}`}
                     style={{ anchorName: `--select_${generatedId}` }}
-                    onClick={(event) => {
-                        if (disabled || (event.target as HTMLElement).closest('button')) return;
-                        focusTrigger();
-                        setIsOpen(!open);
-                    }}
+                    onClick={handleControlClick}
                 >
                     {selectedOptions.map((option) => (
                         <Tag
@@ -161,11 +206,8 @@ export const Select: React.FC<SelectProps> = ({
                             label={option.label}
                             disabled={disabled}
                             variant='outline'
-                            onClick={() => {
-                                focusTrigger();
-                                setIsOpen(!open);
-                            }}
-                            onRemove={canRemove ? () => remove(option) : undefined}
+                            onClick={handleTagClick}
+                            onRemove={canRemove ? () => handleRemoveOption(option) : undefined}
                         />
                     ))}
                     <button
@@ -176,28 +218,13 @@ export const Select: React.FC<SelectProps> = ({
                         ref={triggerRef}
                         name={field.name}
                         disabled={disabled}
-                        aria-expanded={open}
+                        aria-expanded={isOpen}
                         aria-controls={`${selectId}-options`}
                         aria-haspopup='listbox'
                         aria-required={required}
                         className={`${theme.inputWrapper} min-h-[30px] cursor-pointer items-center justify-end focus:outline-none disabled:cursor-default ${className ?? ''}`}
-                        onClick={(event) => {
-                            onClick?.(event);
-                            if (!event.defaultPrevented) setIsOpen(!open);
-                        }}
-                        onKeyDown={(event) => {
-                            onKeyDown?.(event);
-                            if (event.defaultPrevented) return;
-                            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-                                event.preventDefault();
-                                focusOnOpen.current = event.key === 'ArrowUp' ? 'last' : 'first';
-                                if (open) {
-                                    const buttons = optionsRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
-                                    (event.key === 'ArrowUp' ? buttons?.[buttons.length - 1] : buttons?.[0])?.focus();
-                                    focusOnOpen.current = null;
-                                } else setIsOpen(true);
-                            }
-                        }}
+                        onClick={handleClick}
+                        onKeyDown={handleKeyDownOnOpenButton}
                     >
                         <span className={`${theme.button} inline-flex items-center justify-center`}>
                             <Chevron className='size-xl' />
@@ -209,7 +236,7 @@ export const Select: React.FC<SelectProps> = ({
                     ref={popoverRef}
                     className={theme.optionsWrapper}
                     style={{ positionAnchor: `--select_${generatedId}`, maxHeight: '188px', overflowY: 'auto' }}
-                    onMouseDown={(event) => event.preventDefault()}
+                    onMouseDown={handlePopoverMouseDown}
                 >
                     <ul
                         ref={optionsRef}

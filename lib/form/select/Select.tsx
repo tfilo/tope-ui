@@ -3,7 +3,7 @@ import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/s
 import { useSelector } from '@tanstack/react-form';
 
 import type { Option } from '../../common/Option';
-import { Tag } from '../../general';
+import { Button, Tag } from '../../general';
 import { useFieldContext } from '../../hooks/form-context';
 import { localization } from '../../utils/constants';
 import { ElementWrapper } from '../wrapper/ElementWrapper';
@@ -180,7 +180,6 @@ export const Select: React.FC<SelectProps> = ({
             </button>
         </li>
     );
-    const Chevron = isOpen ? ChevronUpIcon : ChevronDownIcon;
 
     return (
         <ElementWrapper
@@ -210,9 +209,11 @@ export const Select: React.FC<SelectProps> = ({
                             onRemove={canRemove ? () => handleRemoveOption(option) : undefined}
                         />
                     ))}
-                    <button
+                    <Button
                         {...props}
-                        type='button'
+                        variant='transparent'
+                        showChildren={false}
+                        icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
                         role='combobox'
                         id={selectId}
                         ref={triggerRef}
@@ -222,14 +223,12 @@ export const Select: React.FC<SelectProps> = ({
                         aria-controls={`${selectId}-options`}
                         aria-haspopup='listbox'
                         aria-required={required}
-                        className={`${theme.inputWrapper} min-h-[30px] cursor-pointer items-center justify-end focus:outline-none disabled:cursor-default ${className ?? ''}`}
+                        additionalClassName={`${theme.button} flex-1 justify-end ${className ?? ''}`}
                         onClick={handleClick}
                         onKeyDown={handleKeyDownOnOpenButton}
                     >
-                        <span className={`${theme.button} inline-flex items-center justify-center`}>
-                            <Chevron className='size-xl' />
-                        </span>
-                    </button>
+                        {props.title}
+                    </Button>
                 </div>
                 <div
                     popover='manual'

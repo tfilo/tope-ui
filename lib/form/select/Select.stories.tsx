@@ -89,6 +89,7 @@ export const Basic: Story = {
 export const Disabled: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
         await expect(canvas.getByRole('combobox')).toBeDisabled();
+        await expect(canvas.getByRole('combobox').querySelector('svg')).toHaveStyle({ fill: 'rgb(153, 153, 153)' });
         await userEvent.click(canvas.getByRole('combobox'));
         await expect(canvas.queryByRole('listbox')).toBeNull();
         await expect(parameters.onChange).not.toHaveBeenCalled();

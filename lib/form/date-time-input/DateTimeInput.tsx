@@ -626,8 +626,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         setSelectedYear(year);
         setSelectedMonth(month.val);
         // If a day is already picked, we must sync the text input with the new view
-        if (selectedDate) {
-            const formattedDate = formatDate(year, month.val, selectedDate, selectedMinutes ?? 0, selectedSeconds ?? 0, inputFormatPattern);
+        if (selectedDate !== null) {
+            const day = Math.min(selectedDate, getDaysInMonth(new Date(year, month.val, 1)));
+            setSelectedDate(day);
+            const formattedDate = formatDate(year, month.val, day, selectedMinutes ?? 0, selectedSeconds ?? 0, inputFormatPattern);
             handleDateSelection(formattedDate, false);
         }
         setPickerType('day');
@@ -641,15 +643,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
         setSelectedYear(_year);
         // If a day and month is already picked, we must sync the text input with the new year
-        if (selectedMonth && selectedDate) {
-            const formattedDate = formatDate(
-                _year,
-                selectedMonth,
-                selectedDate,
-                selectedMinutes ?? 0,
-                selectedSeconds ?? 0,
-                inputFormatPattern
-            );
+        if (selectedMonth !== null && selectedDate !== null) {
+            const day = Math.min(selectedDate, getDaysInMonth(new Date(_year, selectedMonth, 1)));
+            setSelectedDate(day);
+            const formattedDate = formatDate(_year, selectedMonth, day, selectedMinutes ?? 0, selectedSeconds ?? 0, inputFormatPattern);
             handleDateSelection(formattedDate, false);
         }
         setPickerType('month');

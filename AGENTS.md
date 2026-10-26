@@ -16,12 +16,22 @@ These priorities apply to every agent working on this repository, including revi
 - Components should be accessible, and existing accessible behavior should be preserved. Accessibility improvements are welcome when straightforward, but accessibility is a secondary priority after functionality and maintainability. Avoid broad accessibility work unless requested.
 - Keep effort proportional to personal use. Avoid speculative features, elaborate infrastructure, and support for scenarios the owner's applications do not need.
 
+## Keep changes simple
+
+- Prefer native HTML features when they meet the requirement. For example, use `title` for a simple tooltip unless a custom tooltip is explicitly needed.
+- Do not add custom UI, state, effects, or abstractions just to make automated tests or screenshots easier.
+- For a focused bug fix, change the smallest relevant part of the existing implementation. Avoid adjacent refactoring.
+- When asked to explain or propose a fix, provide the proposal without editing files. Implement after the user approves or explicitly requests implementation.
+
 ## Storybook and tests
 
 - Storybook primarily serves as a demo and visual preview of components and their intended usage. Keep stories useful to a human exploring the library.
 - Storybook tests should cover basic behavior and important interactions. Extensive coverage and exhaustive edge-case matrices are not required.
 - Keep tests short, explicit, and easy to understand. Prefer a few direct interactions and assertions over complex test helpers, abstractions, or elaborate fixtures.
 - When fixing a meaningful bug, add a small, readable regression test where useful. Do not expand the test suite just to maximize coverage or test implementation details.
+- Prefer one short Storybook regression test that reproduces the reported bug. For form value bugs, check the resulting form value.
+- Verify user-visible behavior using direct assertions. For a native tooltip, check its `title` attribute.
+- When practical, confirm the regression test fails before the fix and passes afterward.
 - Keep uncommon setup or integration checks separate from demo stories when they would make the examples difficult to follow.
 
 ## Repository map
@@ -63,10 +73,15 @@ Run checks appropriate to the change. For component behavior changes, run the bu
 - Use strict TypeScript and preserve useful type inference, especially for TanStack Form fields and polymorphic component props.
 - Use existing Tailwind utilities, theme tokens, and component-local theme objects. Check the custom spacing, color, typography, and breakpoint tokens before selecting classes.
 - Keep form elements integrated with the shared TanStack Form contexts and registered `useAppForm` components. Follow existing stories for field validation and submission patterns.
-- Reuse shared types and utilities. Place user-facing default text in the existing localization system; defaults are currently Slovak.
+- Reuse shared types and utilities.
 - Preserve accessible labels, keyboard behavior, focus handling, and native element semantics in line with the priorities above. For behavior changes, add or update only the simple, relevant tests needed to cover basic functionality or a meaningful regression.
 - Preserve existing public APIs and defaults unless the requested task calls for changing them. Explain breaking changes and consumer migration needs.
 - Keep changes focused. Avoid unrelated refactors, dependency changes, or generated output edits.
+
+## Localization
+
+- Put new user-facing messages in the global localization object.
+- Write default localized messages in Slovak.
 
 ## Consumer integration
 

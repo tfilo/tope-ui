@@ -165,6 +165,72 @@ export const PreserveTypedTimeWhenSelectingDay: Story = {
     }
 };
 
+export const ClampSelectedMonth: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ['yyyy-MM-dd HH:mm:ss'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-01-31T17:45:50'
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Január 2026' }));
+        await userEvent.click(canvas.getByRole('button', { name: 'Feb' }));
+
+        await expect(canvas.getByRole('textbox')).toHaveValue('2026-02-28 17:45:50');
+        await expect(canvas.getByText('VALUE: "2026-02-28T17:45:50"')).toBeVisible();
+        await expect(canvas.getByRole('button', { name: 'Február 2026' })).toBeVisible();
+
+        await userEvent.click(canvas.getByRole('button', { name: '12:00' }));
+        await expect(canvas.getByText('VALUE: "2026-02-28T12:00:00"')).toBeVisible();
+    }
+};
+
+export const ClampLeapDayOnYearChange: Story = {
+    args: {
+        type: 'date',
+        inputFormat: ['yyyy-MM-dd'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2024-02-29'
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Február 2024' }));
+        await userEvent.click(canvas.getByRole('button', { name: '2024' }));
+        await userEvent.click(canvas.getByRole('button', { name: '2025' }));
+
+        await expect(canvas.getByRole('textbox')).toHaveValue('2025-02-28');
+        await expect(canvas.getByText('VALUE: "2025-02-28"')).toBeVisible();
+    }
+};
+
+export const ChangeYearInJanuary: Story = {
+    args: {
+        type: 'date',
+        inputFormat: ['yyyy-MM-dd'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-01-31'
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Január 2026' }));
+        await userEvent.click(canvas.getByRole('button', { name: '2026' }));
+        await userEvent.click(canvas.getByRole('button', { name: '2027' }));
+
+        await expect(canvas.getByRole('textbox')).toHaveValue('2027-01-31');
+        await expect(canvas.getByText('VALUE: "2027-01-31"')).toBeVisible();
+    }
+};
+
 export const WithLabel: Story = {
     args: {
         type: 'dateTime',

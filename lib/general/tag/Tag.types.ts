@@ -1,6 +1,8 @@
 export interface TagProps {
     /** Label to display inside the tag */
     label: string;
+    /** Native tooltip text */
+    title?: string;
     /** onRemove callback, if provided a remove button will be shown */
     onRemove?: () => void | Promise<void>;
     /** onClick callback */

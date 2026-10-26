@@ -100,8 +100,7 @@ export const UnavailableSelection: Story = {
         await expect(unavailable.parentElement).toHaveClass('bg-danger');
         await expect(canvas.getByRole('status')).toHaveTextContent('["apple","missing-id"]');
 
-        await userEvent.click(unavailable);
-        await expect(canvas.getByRole('tooltip')).toHaveTextContent(localization.unavailableOption);
+        await expect(unavailable.parentElement).toHaveAttribute('title', localization.unavailableOption);
         await userEvent.click(canvas.getByRole('button', { name: localization.remove('missing-id') }));
         await expect(canvas.getByRole('status')).toHaveTextContent('["apple"]');
     }

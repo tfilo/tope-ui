@@ -403,28 +403,15 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     className={theme.inputAndTagWrapper}
                     style={{ anchorName: `--autocomplete_${_id}` }}
                 >
-                    {selectedOption.map((option, index) => (
-                        <span
+                    {selectedOption.map((option) => (
+                        <Tag
                             key={option.value}
-                            className='group/unavailable relative inline-flex'
-                            aria-describedby={option.unavailable ? `${autocompleteId}-unavailable-${index}` : undefined}
-                        >
-                            <Tag
-                                label={option.label}
-                                disabled={disabled}
-                                onRemove={() => handleRemoveOption(option)}
-                                variant={option.unavailable ? 'danger' : 'outline'}
-                            />
-                            {option.unavailable && (
-                                <span
-                                    id={`${autocompleteId}-unavailable-${index}`}
-                                    role='tooltip'
-                                    className='absolute top-full left-none z-10 hidden w-max max-w-[280px] rounded-sm border bg-white p-sm text-sm text-black shadow-sm group-focus-within/unavailable:block group-hover/unavailable:block'
-                                >
-                                    {localization.unavailableOption}
-                                </span>
-                            )}
-                        </span>
+                            label={option.label}
+                            disabled={disabled}
+                            onRemove={() => handleRemoveOption(option)}
+                            variant={option.unavailable ? 'danger' : 'outline'}
+                            title={option.unavailable ? localization.unavailableOption : undefined}
+                        />
                     ))}
                     <div className={theme.inputWrapper}>
                         <input

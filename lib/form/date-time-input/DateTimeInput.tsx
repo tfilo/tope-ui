@@ -537,14 +537,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 setSelectedYear(getYear(parsedDate));
                 setSelectedMonth(getMonth(parsedDate)); // Returns 0-11
                 setSelectedDate(getDate(parsedDate));
-                if (inputFormatPattern.includes('HH') && inputFormatPattern.includes('mm')) {
-                    // Calculate total minutes from midnight for the time-slot logic
-                    const totalMinutes = getHours(parsedDate) * 60 + getMinutes(parsedDate);
-                    setSelectedMinutes(totalMinutes);
-                }
-
-                // Sync seconds if the current pattern includes them
-                if (inputFormatPattern.includes('ss')) {
+                if (hasTime) {
+                    setSelectedMinutes(getHours(parsedDate) * 60 + getMinutes(parsedDate));
                     setSelectedSeconds(getSeconds(parsedDate));
                 }
 

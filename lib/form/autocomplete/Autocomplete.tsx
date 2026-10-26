@@ -54,7 +54,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
     const [isInitialized, setIsInitialized] = useState(false);
 
-    const [selectedOption, setSelectedOption] = useState<Option[]>([]);
+    const [selectedOption, setSelectedOption] = useState<(Option & { unavailable?: boolean })[]>([]);
     const [displayValue, setDisplayValue] = useState<string>('');
 
     // Handle input value changes by user
@@ -254,7 +254,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 if (!allSelected) {
                     const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v, signal)));
                     if (!signal.aborted) {
-                        setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+                        setSelectedOption(
+                            fetchedOptions.map(
+                                (option, index) => option ?? { value: newValues[index], label: newValues[index], unavailable: true }
+                            )
+                        );
                     }
                 }
             }
@@ -399,14 +403,28 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     className={theme.inputAndTagWrapper}
                     style={{ anchorName: `--autocomplete_${_id}` }}
                 >
-                    {selectedOption.map((option) => (
-                        <Tag
+                    {selectedOption.map((option, index) => (
+                        <span
                             key={option.value}
-                            label={option.label}
-                            disabled={disabled}
-                            onRemove={() => handleRemoveOption(option)}
-                            variant='outline'
-                        />
+                            className='group/unavailable relative inline-flex'
+                            aria-describedby={option.unavailable ? `${autocompleteId}-unavailable-${index}` : undefined}
+                        >
+                            <Tag
+                                label={option.label}
+                                disabled={disabled}
+                                onRemove={() => handleRemoveOption(option)}
+                                variant={option.unavailable ? 'danger' : 'outline'}
+                            />
+                            {option.unavailable && (
+                                <span
+                                    id={`${autocompleteId}-unavailable-${index}`}
+                                    role='tooltip'
+                                    className='absolute top-full left-none z-10 hidden w-max max-w-[280px] rounded-sm border bg-white p-sm text-sm text-black shadow-sm group-focus-within/unavailable:block group-hover/unavailable:block'
+                                >
+                                    {localization.unavailableOption}
+                                </span>
+                            )}
+                        </span>
                     ))}
                     <div className={theme.inputWrapper}>
                         <input

@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useAppForm } from '../../hooks/form';
 import type { AutocompleteProps } from './Autocomplete.types';
 import { Autocomplete } from './Autocomplete';
+import { localization } from '../../utils/constants';
 
 const meta = {
     title: 'Form/Autocomplete',
@@ -70,6 +71,41 @@ const options = [
     { label: 'Peach', value: 'peach' },
     { label: 'Pear', value: 'pear' }
 ];
+
+export const UnavailableSelection: Story = {
+    args: {
+        label: 'Ovocie',
+        multiple: true,
+        onSearch: async () => ({ options, page: 0, hasNextPage: false }),
+        onFetch: async (value) => options.find((option) => option.value === value) ?? null
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: ['apple', 'missing-id'] } });
+
+        return (
+            <>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.Autocomplete {...args} />}
+                />
+                <form.Subscribe selector={(state) => state.values.basic}>
+                    {(basic) => <output>{JSON.stringify(basic)}</output>}
+                </form.Subscribe>
+            </>
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        const unavailable = await canvas.findByRole('button', { name: 'missing-id' });
+        await expect(unavailable.parentElement).toHaveClass('bg-danger');
+        await expect(canvas.getByRole('status')).toHaveTextContent('["apple","missing-id"]');
+
+        await userEvent.click(unavailable);
+        await expect(canvas.getByRole('tooltip')).toHaveTextContent(localization.unavailableOption);
+        await userEvent.click(canvas.getByRole('button', { name: localization.remove('missing-id') }));
+        await expect(canvas.getByRole('status')).toHaveTextContent('["apple"]');
+    }
+};
 
 export const Basic: Story = {
     play: async ({ parameters, canvas, userEvent }) => {

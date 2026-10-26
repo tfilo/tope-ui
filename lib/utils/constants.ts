@@ -1,6 +1,7 @@
 export const localization = {
     loading: 'Načítava sa...',
     noOptions: 'Žiadne možnosti',
+    unavailableOption: 'Táto možnosť už nie je dostupná. Odstráňte ju alebo vyberte inú.',
     selectFile: 'Vyberte súbor',
     emptyOptionLabel: '',
     textareaCounter: 'Zobrazuje aktuálny počet znakov a maximálny povolený počet znakov.',

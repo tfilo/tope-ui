@@ -54,7 +54,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
     const [isInitialized, setIsInitialized] = useState(false);
 
-    const [selectedOption, setSelectedOption] = useState<Option[]>([]);
+    const [selectedOption, setSelectedOption] = useState<(Option & { unavailable?: boolean })[]>([]);
     const [displayValue, setDisplayValue] = useState<string>('');
 
     // Handle input value changes by user
@@ -254,7 +254,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 if (!allSelected) {
                     const fetchedOptions = await Promise.all(newValues.map(async (v) => await onFetch(v, signal)));
                     if (!signal.aborted) {
-                        setSelectedOption(fetchedOptions.filter((o): o is Option => o !== null));
+                        setSelectedOption(
+                            fetchedOptions.map(
+                                (option, index) => option ?? { value: newValues[index], label: newValues[index], unavailable: true }
+                            )
+                        );
                     }
                 }
             }
@@ -405,7 +409,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             label={option.label}
                             disabled={disabled}
                             onRemove={() => handleRemoveOption(option)}
-                            variant='outline'
+                            variant={option.unavailable ? 'danger' : 'outline'}
+                            title={option.unavailable ? localization.unavailableOption : undefined}
                         />
                     ))}
                     <div className={theme.inputWrapper}>

@@ -107,6 +107,42 @@ export const WithoutValue: Story = {
     }
 };
 
+export const ExternalValueChange: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ['yyyy-MM-dd HH:mm:ss'],
+        inputIconTitle: 'Open calendar'
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: '2026-01-15T08:15:30' } });
+
+        return (
+            <>
+                <button
+                    type='button'
+                    onClick={() => form.setFieldValue('basic', '2027-06-20T17:45:50')}
+                >
+                    Set June date
+                </button>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.DateTimeInput {...args} />}
+                />
+                <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
+            </>
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Set June date' }));
+        await expect(canvas.getByRole('textbox')).toHaveValue('2027-06-20 17:45:50');
+
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: '12:00' }));
+
+        await expect(canvas.getByRole('status')).toHaveTextContent('2027-06-20T12:00:00');
+    }
+};
+
 export const WithLabel: Story = {
     args: {
         type: 'dateTime',

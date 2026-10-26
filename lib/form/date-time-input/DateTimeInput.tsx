@@ -776,6 +776,15 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
         // update only when not typing
         if (value !== unknownDate && !isTyping) {
             setInputValue(formatFromISO(value, inputFormatPattern));
+
+            const parsed = parseISO(value);
+            const valid = isValid(parsed);
+
+            setSelectedYear(valid ? getYear(parsed) : null);
+            setSelectedMonth(valid ? getMonth(parsed) : null);
+            setSelectedDate(valid ? getDate(parsed) : null);
+            setSelectedMinutes(valid && hasTime ? getHours(parsed) * 60 + getMinutes(parsed) : null);
+            setSelectedSeconds(valid && hasTime ? getSeconds(parsed) : null);
         }
     }
 

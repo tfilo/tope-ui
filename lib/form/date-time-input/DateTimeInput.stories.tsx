@@ -143,6 +143,28 @@ export const ExternalValueChange: Story = {
     }
 };
 
+export const PreserveTypedTimeWhenSelectingDay: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ['yyyy-MM-dd HH:mm:ss'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange: onChange,
+        defaultValue: '2026-01-15T08:15:30'
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.clear(canvas.getByRole('textbox'));
+        await userEvent.type(canvas.getByRole('textbox'), '2026-01-15 17:45:50');
+
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: '16', exact: true }));
+
+        await expect(canvas.getByRole('textbox')).toHaveValue('2026-01-16 17:45:50');
+        await expect(canvas.getByText('VALUE: "2026-01-16T17:45:50"')).toBeVisible();
+    }
+};
+
 export const WithLabel: Story = {
     args: {
         type: 'dateTime',

@@ -223,7 +223,7 @@ export const Select: React.FC<SelectProps> = ({
                         aria-controls={`${selectId}-options`}
                         aria-haspopup='listbox'
                         aria-required={required}
-                        additionalClassName={`${theme.button} flex-1 justify-end ${className ?? ''}`}
+                        additionalClassName={`${theme.button} ml-auto h-[30px] w-[30px] shrink-0 self-start ${className ?? ''}`}
                         onClick={handleClick}
                         onKeyDown={handleKeyDownOnOpenButton}
                     >
@@ -260,7 +260,7 @@ export const Select: React.FC<SelectProps> = ({
                                     role='group'
                                     aria-label={option.label}
                                 >
-                                    <div className={theme.option.noninteractive}>{option.label}</div>
+                                    <div className='border-b px-sm py-md font-bold'>{option.label}</div>
                                     <ul
                                         role='none'
                                         className={theme.options}

@@ -551,3 +551,55 @@ export const SearchCancellation: Story = {
         await expect(search.mock.lastCall?.[3].aborted).toBe(true);
     }
 };
+
+export const SelectedLabelFailure: Story = {
+    args: {
+        label: 'Selected option with retry',
+        onSearch: fn(async () => ({ options, page: 0, hasNextPage: false })),
+        onFetch: fn(async (value: string) => options.find((option) => option.value === value) ?? null)
+    },
+    beforeEach: ({ args }) => {
+        mocked(args.onFetch).mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: 'apple' } });
+        return (
+            <>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.Autocomplete {...args} />}
+                />
+                <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
+                <button
+                    type='button'
+                    onClick={() => form.setFieldValue('basic', 'banana')}
+                >
+                    Set Banana
+                </button>
+            </>
+        );
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+        await expect(canvas.queryByRole('button', { name: 'apple' })).toBeNull();
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await expect(args.onSearch).not.toHaveBeenCalled();
+
+        mocked(args.onFetch).mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Set Banana' }));
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('status')).toHaveTextContent('banana');
+        await userEvent.click(canvas.getByRole('button', { name: localization.retry }));
+        await expect(await canvas.findByRole('button', { name: 'Banana' })).toBeVisible();
+        await expect(args.onFetch).toHaveBeenLastCalledWith('banana', expect.any(AbortSignal));
+        await expect(canvas.getByRole('status')).toHaveTextContent('banana');
+        await expect(canvas.queryByRole('alert')).toBeNull();
+    }
+};

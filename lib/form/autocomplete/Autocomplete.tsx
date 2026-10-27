@@ -51,6 +51,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const [failedPage, setFailedPage] = useState<number | null>(null);
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
+    const [fetchFailed, setFetchFailed] = useState(false);
+    const [fetchAttempt, setFetchAttempt] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
     const [isInitialized, setIsInitialized] = useState(false);
@@ -251,6 +253,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const onValueChange = useEffectEvent(async (newValues: string[], signal: AbortSignal) => {
         try {
             setIsFetching(true);
+            setFetchFailed(false);
             if (newValues.length === 0) {
                 if (selectedOption.length > 0) {
                     setSelectedOption([]);
@@ -277,8 +280,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 setIsInitialized(true);
             }
         } catch (error) {
-            if (!signal.aborted) {
-                console.error(error);
+            if (!signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
+                setFetchFailed(true);
             }
         } finally {
             if (!signal.aborted) {
@@ -375,7 +378,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         return () => {
             abortController.abort();
         };
-    }, [value]);
+    }, [value, fetchAttempt]);
 
     // Trigger search when display value changes
     useEffect(() => {
@@ -411,6 +414,29 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         <ElementWrapper
             label={label}
             error={error ?? errors}
+            additionalError={
+                fetchFailed && (
+                    <div className={theme.fetchError}>
+                        <label
+                            htmlFor={autocompleteId}
+                            className={disabled ? 'text-disabled' : theme.option.errorMessage}
+                            role='alert'
+                        >
+                            {localization.autocompleteFetchError}
+                        </label>
+                        <Button
+                            variant='transparent'
+                            icon={ArrowPathIcon}
+                            showChildren={false}
+                            additionalClassName={`${theme.button} shrink-0`}
+                            disabled={disabled || isFetching}
+                            onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                        >
+                            {localization.retry}
+                        </Button>
+                    </div>
+                )
+            }
             required={props.required}
             disabled={disabled}
             elementId={autocompleteId}

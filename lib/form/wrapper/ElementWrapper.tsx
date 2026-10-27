@@ -28,10 +28,18 @@ const theme = {
 /**
  * ElementWrapper component is internal wrapper component to construct form elements with label and error message
  */
-export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, required, disabled, elementId, children }) => {
+export const ElementWrapper: React.FC<ElementWrapperProps> = ({
+    label,
+    error,
+    additionalError,
+    required,
+    disabled,
+    elementId,
+    children
+}) => {
     const hasLabel = isNotBlank(label);
     const hasError = Array.isArray(error) ? error.some(isNotBlank) : isNotBlank(error);
-    const state = hasError ? 'error' : 'default';
+    const state = hasError || additionalError ? 'error' : 'default';
 
     return (
         <div className={theme.wrapper}>
@@ -79,6 +87,7 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({ label, error, re
                         {error}
                     </label>
                 ))}
+            {additionalError}
         </div>
     );
 };

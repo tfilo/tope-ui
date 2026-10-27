@@ -37,6 +37,8 @@ interface BaseProps {
 
     /** Type of input - determine if the component should display and allow time selection.
      * If 'dateTime', it enables the time picker and uses time (e.g. 13:30).
+     * Form values are local calendar strings: date YYYY-MM-DD, dateTime YYYY-MM-DDTHH:mm:ss.
+     * Empty is ''; invalid typed input is 'UNKNOWN'. Offsets and Z timestamps are unsupported.
      * @default 'date'
      */
     type?: 'date' | 'dateTime';
@@ -52,6 +54,7 @@ interface BaseProps {
     slots?: number;
 
     /**
+     * Must contain a full date (and time in dateTime mode), without timezone or timestamp tokens.
      * Custom date-fns format pattern for the text input (e.g., 'dd.MM.yyyy').
      * If not provided, it falls back to a default based on the `type` prop.
      * If type is 'dateTime', default format pattern is 'dd.MM.yyyy HH:mm:ss'

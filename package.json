@@ -49,6 +49,7 @@
         "react-dom": "^19.3.0"
     },
     "dependencies": {
+        "@date-fns/utc": "2.1.1",
         "date-fns": "4.4.0"
     },
     "devDependencies": {

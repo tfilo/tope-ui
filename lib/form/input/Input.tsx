@@ -66,7 +66,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
     const _id = useId();
     const inputId = id || `input-${_id}`;
 
-    const field = useFieldContext<string | number | undefined>();
+    const field = useFieldContext<string | number | null>();
     const rawErrors = useSelector(field.store, (state) => state.meta.errors);
     const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
     const errors = isTouched
@@ -103,7 +103,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
                 onChange={(e) => {
                     if (props.type === 'number') {
                         const value = e.currentTarget.valueAsNumber;
-                        field.handleChange(Number.isNaN(value) ? undefined : value);
+                        field.handleChange(Number.isNaN(value) ? null : value);
                     } else {
                         field.handleChange(e.currentTarget.value);
                     }

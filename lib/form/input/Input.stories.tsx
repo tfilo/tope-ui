@@ -74,7 +74,7 @@ export const Numeric: Story = {
         onValueChange: fn()
     },
     render: (args, { parameters }) => {
-        const form = useAppForm({ defaultValues: { amount: 0 as number | undefined } });
+        const form = useAppForm({ defaultValues: { amount: null as number | null } });
 
         return (
             <form.AppField
@@ -86,12 +86,12 @@ export const Numeric: Story = {
     },
     play: async ({ canvas, userEvent, parameters }) => {
         const input = canvas.getByRole('spinbutton');
-        await expect(input).toHaveValue(0);
+        await expect(input).toHaveValue(null);
         await userEvent.clear(input);
         await userEvent.type(input, '42');
         await expect(parameters.onValueChange).toHaveBeenLastCalledWith(42);
         await userEvent.clear(input);
-        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(undefined);
+        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(null);
         await expect(input).toHaveValue(null);
         await userEvent.type(input, '-1.5');
         await expect(parameters.onValueChange).toHaveBeenLastCalledWith(-1.5);

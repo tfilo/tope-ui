@@ -13,7 +13,7 @@ export interface InputActionProps {
 }
 
 interface BaseProps {
-    /** Native input type. 'number' stores number | undefined (empty or invalid); other types store strings. */
+    /** Native input type. 'number' stores number | null (empty or invalid); other types store strings. */
     type?: InputHTMLAttributes<HTMLInputElement>['type'];
     /** Optional label for input component */
     label?: string;

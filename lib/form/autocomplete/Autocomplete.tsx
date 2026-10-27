@@ -428,7 +428,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             variant='transparent'
                             icon={ArrowPathIcon}
                             showChildren={false}
-                            additionalClassName={`${theme.button} shrink-0`}
+                            additionalClassName={theme.retryButton}
                             disabled={disabled || isFetching}
                             onClick={() => setFetchAttempt((attempt) => attempt + 1)}
                         >
@@ -538,7 +538,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                     variant='transparent'
                                     icon={ArrowPathIcon}
                                     showChildren={false}
-                                    additionalClassName={`${theme.button} shrink-0`}
+                                    additionalClassName={theme.retryButton}
                                     onClick={() => (failedPage === 0 ? handleSearch(displayValue, true) : handleLoadNextPage(failedPage))}
                                 >
                                     {localization.retry}

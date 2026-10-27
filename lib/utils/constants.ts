@@ -1,5 +1,8 @@
 export const localization = {
     loading: 'Načítava sa...',
+    autocompleteFetchError: 'Vybranú možnosť sa nepodarilo načítať.',
+    autocompleteSearchError: 'Možnosti sa nepodarilo načítať.',
+    retry: 'Skúsiť znova',
     noOptions: 'Žiadne možnosti',
     unavailableOption: 'Táto možnosť už nie je dostupná. Odstráňte ju alebo vyberte inú.',
     selectFile: 'Vyberte súbor',

@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
+import { ChevronDownIcon, ChevronUpIcon, CheckIcon, ArrowPathIcon } from '@heroicons/react/16/solid';
 
 import { isBlank, isNotBlank } from '../../utils/string-utils';
 import { localization } from '../../utils/constants';
@@ -48,8 +48,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const inputRef = useRef<HTMLInputElement>(null);
     const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
     const [isSearching, setIsSearching] = useState(false);
+    const [failedPage, setFailedPage] = useState<number | null>(null);
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
     const [isFetching, setIsFetching] = useState(false);
+    const [fetchFailed, setFetchFailed] = useState(false);
+    const [fetchAttempt, setFetchAttempt] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const [options, setOptions] = useState<OnSearchResult>({ hasNextPage: false, page: 0, options: [] });
     const [isInitialized, setIsInitialized] = useState(false);
@@ -73,6 +76,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Close dropdown and clear current option list
     const handleOptionsClose = () => {
         setIsOpen(false);
+        setFailedPage(null);
         setOptions({ hasNextPage: false, page: 0, options: [] });
     };
 
@@ -226,9 +230,15 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         try {
             setIsSearching(true);
+            setFailedPage(null);
+            setOptions({ hasNextPage: false, page: 0, options: [] });
             const options = await onSearch(query, 0, pageSize, controller.signal);
             if (!controller.signal.aborted) {
                 setOptions(options);
+            }
+        } catch (error) {
+            if (!controller.signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
+                setFailedPage(0);
             }
         } finally {
             if (!controller.signal.aborted) {
@@ -243,6 +253,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const onValueChange = useEffectEvent(async (newValues: string[], signal: AbortSignal) => {
         try {
             setIsFetching(true);
+            setFetchFailed(false);
             if (newValues.length === 0) {
                 if (selectedOption.length > 0) {
                     setSelectedOption([]);
@@ -269,8 +280,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                 setIsInitialized(true);
             }
         } catch (error) {
-            if (!signal.aborted) {
-                console.error(error);
+            if (!signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
+                setFetchFailed(true);
             }
         } finally {
             if (!signal.aborted) {
@@ -303,36 +314,49 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     });
 
+    const handleLoadNextPage = async (page: number) => {
+        setIsLoadingNextPage(true);
+        setFailedPage(null);
+        const controller = new AbortController();
+        nextPageAbortController.current?.abort();
+        nextPageAbortController.current = controller;
+        try {
+            const nextOptions = await onSearch(displayValue, page, pageSize, controller.signal);
+            if (!controller.signal.aborted) {
+                setOptions((oldOptions) => ({
+                    hasNextPage: nextOptions.hasNextPage,
+                    page: nextOptions.page,
+                    options: [...oldOptions.options, ...nextOptions.options]
+                }));
+            }
+        } catch (error) {
+            if (!controller.signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
+                setFailedPage(page);
+            }
+        } finally {
+            if (!controller.signal.aborted) {
+                setIsLoadingNextPage(false);
+            }
+        }
+    };
+
     // Handle scroll event to load next page of options
     const handleScroll = async (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
         const atBottom = scrollTop + clientHeight >= scrollHeight - 8;
 
-        if (atBottom && !isSearching && !isLoadingNextPage && options.hasNextPage) {
-            setIsLoadingNextPage(true);
-            const controller = new AbortController();
-            if (nextPageAbortController.current) {
-                nextPageAbortController.current.abort();
-            }
-            nextPageAbortController.current = controller;
-            try {
-                const nextOptions = await onSearch(displayValue, options.page + 1, pageSize, controller.signal);
-                if (!controller.signal.aborted) {
-                    setOptions((oldOptions) => {
-                        return {
-                            hasNextPage: nextOptions.hasNextPage,
-                            page: nextOptions.page,
-                            options: [...oldOptions.options, ...nextOptions.options]
-                        };
-                    });
-                }
-            } finally {
-                if (!controller.signal.aborted) {
-                    setIsLoadingNextPage(false);
-                }
-            }
+        if (atBottom && !isSearching && !isLoadingNextPage && failedPage === null && options.hasNextPage) {
+            await handleLoadNextPage(options.page + 1);
         }
     };
+
+    // Cancel pending searches on unmount, including pagination.
+    useEffect(() => {
+        return () => {
+            searchAbortController.current?.abort();
+            nextPageAbortController.current?.abort();
+        };
+    }, []);
 
     // Handle external value changes
     useEffect(() => {
@@ -354,11 +378,11 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         return () => {
             abortController.abort();
         };
-    }, [value]);
+    }, [value, fetchAttempt]);
 
     // Trigger search when display value changes
     useEffect(() => {
-        handleSearchEffectEvent(displayValue);
+        void handleSearchEffectEvent(displayValue);
     }, [displayValue]);
 
     // Trigger onChange when selectedOption changes
@@ -390,6 +414,29 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         <ElementWrapper
             label={label}
             error={error ?? errors}
+            additionalError={
+                fetchFailed && (
+                    <div className={theme.fetchError}>
+                        <label
+                            htmlFor={autocompleteId}
+                            className={disabled ? 'text-disabled' : theme.option.errorMessage}
+                            role='alert'
+                        >
+                            {localization.autocompleteFetchError}
+                        </label>
+                        <Button
+                            variant='transparent'
+                            icon={ArrowPathIcon}
+                            showChildren={false}
+                            additionalClassName={`${theme.button} shrink-0`}
+                            disabled={disabled || isFetching}
+                            onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                        >
+                            {localization.retry}
+                        </Button>
+                    </div>
+                )
+            }
             required={props.required}
             disabled={disabled}
             elementId={autocompleteId}
@@ -455,7 +502,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         id={`${autocompleteId}-options`}
                         className={theme.options}
                     >
-                        {!isSearching && !hasOptions && (
+                        {!isSearching && !hasOptions && failedPage === null && (
                             <li
                                 key='___no_options___'
                                 className={theme.option.noninteractive}
@@ -479,6 +526,25 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 </button>
                             </li>
                         ))}
+                        {failedPage !== null && (
+                            <li className={theme.option.error}>
+                                <span
+                                    role='alert'
+                                    className={theme.option.errorMessage}
+                                >
+                                    {localization.autocompleteSearchError}
+                                </span>
+                                <Button
+                                    variant='transparent'
+                                    icon={ArrowPathIcon}
+                                    showChildren={false}
+                                    additionalClassName={`${theme.button} shrink-0`}
+                                    onClick={() => (failedPage === 0 ? handleSearch(displayValue, true) : handleLoadNextPage(failedPage))}
+                                >
+                                    {localization.retry}
+                                </Button>
+                            </li>
+                        )}
                         {(isSearching || isLoadingNextPage) && (
                             <li
                                 key='___loading___'

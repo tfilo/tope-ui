@@ -1,4 +1,5 @@
-import { expect, fn } from 'storybook/test';
+import { useState } from 'react';
+import { expect, fn, mocked } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
@@ -453,5 +454,152 @@ export const AutocompleteOnly: Story = {
     parameters: {
         onChange: fn(),
         defaultValue: ''
+    }
+};
+
+export const SearchFailure: Story = {
+    args: {
+        label: 'Search with retry',
+        onSearch: fn(async () => ({ options: [options[0]], page: 0, hasNextPage: false })),
+        onFetch: async () => null
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        mocked(args.onSearch).mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteSearchError);
+        await expect(canvas.queryByText(localization.noOptions)).toBeNull();
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.queryByRole('alert')).toBeNull();
+    }
+};
+
+export const PaginationFailure: Story = {
+    args: {
+        label: 'Pagination with retry',
+        onSearch: fn(async () => ({ options: [options[10]], page: 1, hasNextPage: false })),
+        onFetch: async () => null
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        mocked(args.onSearch)
+            .mockResolvedValueOnce({ options: options.slice(0, 10), page: 0, hasNextPage: true })
+            .mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        const apple = await canvas.findByRole('button', { name: 'Apple' });
+        const popover = apple.closest('[popover]') as HTMLElement;
+        popover.scrollTop = popover.scrollHeight;
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteSearchError);
+        await expect(apple).toBeInTheDocument();
+        popover.dispatchEvent(new Event('scroll'));
+        await expect(args.onSearch).toHaveBeenCalledTimes(2);
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
+        await expect(await canvas.findByRole('button', { name: 'Dragonfruit' })).toBeInTheDocument();
+        await expect(args.onSearch).toHaveBeenLastCalledWith('', 1, 10, expect.any(AbortSignal));
+        await expect(canvas.queryByRole('alert')).toBeNull();
+    }
+};
+
+export const SearchCancellation: Story = {
+    args: {
+        label: 'Cancellable search',
+        onSearch: fn((query: string, _page: number, _pageSize: number, signal: AbortSignal) => {
+            if (query) {
+                return Promise.resolve({ options: [options[0]], page: 0, hasNextPage: false });
+            }
+            return new Promise<import('./Autocomplete.types').OnSearchResult>((_resolve, reject) => {
+                signal.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')), { once: true });
+            });
+        }),
+        onFetch: async () => null
+    },
+    render: (args) => {
+        const [visible, setVisible] = useState(true);
+        const form = useAppForm({ defaultValues: { basic: '' } });
+        return (
+            <>
+                <button
+                    type='button'
+                    onClick={() => setVisible(!visible)}
+                >
+                    Toggle autocomplete
+                </button>
+                {visible && (
+                    <form.AppField
+                        name='basic'
+                        children={(field) => <field.Autocomplete {...args} />}
+                    />
+                )}
+            </>
+        );
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}a');
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        const search = mocked(args.onSearch);
+        await expect(search.mock.calls[0][3].aborted).toBe(true);
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await userEvent.clear(canvas.getByRole('textbox'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Toggle autocomplete' }));
+        await expect(search.mock.lastCall?.[3].aborted).toBe(true);
+    }
+};
+
+export const SelectedLabelFailure: Story = {
+    args: {
+        label: 'Selected option with retry',
+        onSearch: fn(async () => ({ options, page: 0, hasNextPage: false })),
+        onFetch: fn(async (value: string) => options.find((option) => option.value === value) ?? null)
+    },
+    beforeEach: ({ args }) => {
+        mocked(args.onFetch).mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: 'apple' } });
+        return (
+            <>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.Autocomplete {...args} />}
+                />
+                <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
+                <button
+                    type='button'
+                    onClick={() => form.setFieldValue('basic', 'banana')}
+                >
+                    Set Banana
+                </button>
+            </>
+        );
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+        await expect(canvas.queryByRole('button', { name: 'apple' })).toBeNull();
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+        await expect(canvas.queryByRole('alert')).toBeNull();
+        await expect(args.onSearch).not.toHaveBeenCalled();
+
+        mocked(args.onFetch).mockRejectedValueOnce(new globalThis.Error('Network unavailable'));
+        await userEvent.click(canvas.getByRole('button', { name: 'Set Banana' }));
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('status')).toHaveTextContent('banana');
+        await userEvent.click(canvas.getByRole('button', { name: localization.retry }));
+        await expect(await canvas.findByRole('button', { name: 'Banana' })).toBeVisible();
+        await expect(args.onFetch).toHaveBeenLastCalledWith('banana', expect.any(AbortSignal));
+        await expect(canvas.getByRole('status')).toHaveTextContent('banana');
+        await expect(canvas.queryByRole('alert')).toBeNull();
     }
 };

@@ -468,7 +468,11 @@ export const SearchFailure: Story = {
         await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
         await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteSearchError);
         await expect(canvas.queryByText(localization.noOptions)).toBeNull();
-        await userEvent.click(canvas.getByRole('button', { name: localization.retry }));
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
         await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
         await expect(canvas.queryByRole('alert')).toBeNull();
     }
@@ -492,7 +496,11 @@ export const PaginationFailure: Story = {
         await expect(apple).toBeInTheDocument();
         popover.dispatchEvent(new Event('scroll'));
         await expect(args.onSearch).toHaveBeenCalledTimes(2);
-        await userEvent.click(canvas.getByRole('button', { name: localization.retry }));
+        const retry = canvas.getByRole('button', { name: localization.retry });
+        await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
+        await expect(retry).toHaveAttribute('title', localization.retry);
+        await expect(retry).toHaveTextContent('');
+        await userEvent.click(retry);
         await expect(await canvas.findByRole('button', { name: 'Dragonfruit' })).toBeInTheDocument();
         await expect(args.onSearch).toHaveBeenLastCalledWith('', 1, 10, expect.any(AbortSignal));
         await expect(canvas.queryByRole('alert')).toBeNull();

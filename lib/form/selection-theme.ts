@@ -7,6 +7,8 @@ export const selectionTheme = {
     optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
     options: 'flex flex-col',
     option: {
+        error: 'flex items-center justify-between gap-md py-md px-sm',
+        errorMessage: 'text-danger',
         noninteractive: 'text-disabled py-md px-sm',
         interactive: (disabled: boolean = false) =>
             `${disabled ? 'text-disabled' : 'has-hover:bg-secondary-extra-light has-focus-within:outline-2'} outline-primary rounded-sm py-md px-sm wrap-anywhere focus:z-10`,

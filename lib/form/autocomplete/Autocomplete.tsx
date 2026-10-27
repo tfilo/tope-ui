@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, CheckIcon } from '@heroicons/react/16/solid';
+import { ChevronDownIcon, ChevronUpIcon, CheckIcon, ArrowPathIcon } from '@heroicons/react/16/solid';
 
 import { isBlank, isNotBlank } from '../../utils/string-utils';
 import { localization } from '../../utils/constants';
@@ -501,10 +501,18 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             </li>
                         ))}
                         {failedPage !== null && (
-                            <li className={theme.option.noninteractive}>
-                                <span role='alert'>{localization.autocompleteSearchError}</span>
+                            <li className={theme.option.error}>
+                                <span
+                                    role='alert'
+                                    className={theme.option.errorMessage}
+                                >
+                                    {localization.autocompleteSearchError}
+                                </span>
                                 <Button
                                     variant='transparent'
+                                    icon={ArrowPathIcon}
+                                    showChildren={false}
+                                    additionalClassName={`${theme.button} shrink-0`}
                                     onClick={() => (failedPage === 0 ? handleSearch(displayValue, true) : handleLoadNextPage(failedPage))}
                                 >
                                     {localization.retry}

@@ -399,6 +399,13 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     }, [isOpen]);
 
+    // Keep a newly rendered search or pagination error visible inside the dropdown.
+    useEffect(() => {
+        if (failedPage !== null && popoverRef.current) {
+            popoverRef.current.scrollTop = popoverRef.current.scrollHeight;
+        }
+    }, [failedPage]);
+
     // Closes dropdown when disabled
     useEffect(() => {
         (async () => {
@@ -416,25 +423,25 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             error={error ?? errors}
             additionalError={
                 fetchFailed && (
-                    <div className={theme.fetchError}>
-                        <label
-                            htmlFor={autocompleteId}
+                    <button
+                        type='button'
+                        className={theme.fetchError}
+                        aria-label={localization.retry}
+                        title={localization.retry}
+                        disabled={disabled || isFetching}
+                        onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                    >
+                        <span
                             className={disabled ? 'text-disabled' : theme.option.errorMessage}
                             role='alert'
                         >
                             {localization.autocompleteFetchError}
-                        </label>
-                        <Button
-                            variant='transparent'
-                            icon={ArrowPathIcon}
-                            showChildren={false}
-                            additionalClassName={theme.retryButton}
-                            disabled={disabled || isFetching}
-                            onClick={() => setFetchAttempt((attempt) => attempt + 1)}
-                        >
-                            {localization.retry}
-                        </Button>
-                    </div>
+                        </span>
+                        <ArrowPathIcon
+                            className={disabled ? theme.retryIconDisabled : theme.retryIcon}
+                            aria-hidden='true'
+                        />
+                    </button>
                 )
             }
             required={props.required}
@@ -527,22 +534,25 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             </li>
                         ))}
                         {failedPage !== null && (
-                            <li className={theme.option.error}>
-                                <span
-                                    role='alert'
-                                    className={theme.option.errorMessage}
-                                >
-                                    {localization.autocompleteSearchError}
-                                </span>
-                                <Button
-                                    variant='transparent'
-                                    icon={ArrowPathIcon}
-                                    showChildren={false}
-                                    additionalClassName={theme.retryButton}
+                            <li>
+                                <button
+                                    type='button'
+                                    className={theme.option.error}
+                                    aria-label={localization.retry}
+                                    title={localization.retry}
                                     onClick={() => (failedPage === 0 ? handleSearch(displayValue, true) : handleLoadNextPage(failedPage))}
                                 >
-                                    {localization.retry}
-                                </Button>
+                                    <span
+                                        role='alert'
+                                        className={theme.option.errorMessage}
+                                    >
+                                        {localization.autocompleteSearchError}
+                                    </span>
+                                    <ArrowPathIcon
+                                        className={theme.retryIcon}
+                                        aria-hidden='true'
+                                    />
+                                </button>
                             </li>
                         )}
                         {(isSearching || isLoadingNextPage) && (

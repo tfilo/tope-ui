@@ -1,6 +1,8 @@
 import { useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+import { ArrowPathIcon } from '@heroicons/react/16/solid';
 
-import { config } from '../../utils/constants';
+import { config, localization } from '../../utils/constants';
+import { Button } from '../button';
 import type { RowObject, SortObject, TableProps } from './Table.types';
 import { TableCell } from './TableCell';
 import { TablePagination } from './TablePagination';
@@ -8,7 +10,10 @@ import { TableHeaderCell } from './TableHeaderCell';
 
 const theme = {
     wrapper: 'w-full',
-    scrollWrapper: 'w-full overflow-y-auto',
+    scrollWrapper: 'relative w-full overflow-y-auto',
+    loading: 'absolute inset-none z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm',
+    error: 'flex items-center justify-between gap-md border-b border-default p-md',
+    errorMessage: 'text-danger',
     table: 'w-full table-auto border-separate border-spacing-none',
     headerCell: (additional: string = '') => `border-b border-default p-md text-left font-bold text-default ${additional}`.trim(),
     bodyCell: (additional: string = '') => `border-b border-default p-md text-left text-default ${additional}`.trim()
@@ -67,6 +72,9 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
     const [page, setPage] = useState(0);
     const [totalRecords, setTotalRecords] = useState(0);
     const [data, setData] = useState<Readonly<TData[]>>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [fetchFailed, setFetchFailed] = useState(false);
+    const [fetchAttempt, setFetchAttempt] = useState(0);
     const [sort, setSort] = useState<SortObject<TData>[]>(() => {
         return columns
             .filter((col) => col.defaultSortDirection !== undefined)
@@ -134,13 +142,20 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
         if (hasFetch) {
             (async (signal: AbortSignal) => {
                 try {
+                    setIsLoading(true);
+                    setFetchFailed(false);
                     const res = await onFetch(page, pageSize, sort, signal);
                     if (!signal.aborted) {
                         onSetData(res.data, res.page, res.pageSize, res.totalRecords);
                     }
                 } catch (error) {
+                    if (!signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
+                        setData([]);
+                        setFetchFailed(true);
+                    }
+                } finally {
                     if (!signal.aborted) {
-                        console.error(error);
+                        setIsLoading(false);
                     }
                 }
             })(abortController.signal);
@@ -149,7 +164,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
         return () => {
             abortController.abort();
         };
-    }, [onFetch, hasFetch, page, pageSize, sort]);
+    }, [onFetch, hasFetch, page, pageSize, sort, fetchAttempt]);
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -189,8 +204,14 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
 
     return (
         <div className={theme.wrapper}>
-            <div className={theme.scrollWrapper}>
-                <table className={theme.table}>
+            <div
+                className={theme.scrollWrapper}
+                aria-busy={hasFetch ? isLoading : undefined}
+            >
+                <table
+                    className={theme.table}
+                    inert={hasFetch && isLoading}
+                >
                     <thead>
                         <tr>
                             {columns.map((col) => (
@@ -225,7 +246,34 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                         ))}
                     </tbody>
                 </table>
+                {hasFetch && isLoading && (
+                    <div
+                        className={theme.loading}
+                        role='status'
+                    >
+                        {localization.loading}
+                    </div>
+                )}
             </div>
+            {hasFetch && fetchFailed && (
+                <div className={theme.error}>
+                    <span
+                        className={theme.errorMessage}
+                        role='alert'
+                    >
+                        {localization.tableFetchError}
+                    </span>
+                    <Button
+                        variant='transparent'
+                        icon={ArrowPathIcon}
+                        showChildren={false}
+                        additionalClassName='min-w-[32px] min-h-[32px] shrink-0'
+                        onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                    >
+                        {localization.retry}
+                    </Button>
+                </div>
+            )}
             {!hasStaticData && (
                 <TablePagination
                     onPrevPage={onPrevPage}

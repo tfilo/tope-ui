@@ -1,4 +1,4 @@
-import { expect } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PencilIcon } from '@heroicons/react/16/solid';
 
@@ -176,6 +176,57 @@ const fetchMethod = async (page: number, pageSize: number, sort: SortObject<Data
         pageSize: pageSize,
         totalRecords: data.length
     };
+};
+
+const fetchWithDelay = async (...args: Parameters<typeof fetchMethod>) => {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return fetchMethod(...args);
+};
+
+const retryFetch = fn(fetchWithDelay);
+
+export const FetchRetry: Story = {
+    beforeEach: () => {
+        retryFetch.mockReset();
+        retryFetch.mockImplementation(fetchWithDelay);
+        retryFetch.mockRejectedValueOnce(new Error('Initial request failed'));
+        retryFetch.mockImplementationOnce(fetchWithDelay);
+        retryFetch.mockImplementationOnce(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            throw new Error('Page request failed');
+        });
+    },
+    args: {
+        // @ts-expect-error incorrect infering happens only in storybook args
+        columns,
+        onFetch: retryFetch,
+        pageSize: 5
+    },
+    play: async ({ canvas, userEvent }) => {
+        await expect(await canvas.findByRole('alert')).toHaveTextContent('Údaje sa nepodarilo načítať.');
+        await expect(canvas.queryByText('Alice')).not.toBeInTheDocument();
+        const retry = canvas.getByTitle('Skúsiť znova');
+        await expect(retry).toHaveAttribute('title', 'Skúsiť znova');
+        await expect(retry).toHaveTextContent('');
+
+        await userEvent.click(retry);
+        await expect(await canvas.findByRole('status')).toHaveTextContent('Načítava sa...');
+        await expect(await canvas.findByText('Alice')).toBeVisible();
+        await expect(canvas.queryByRole('alert')).not.toBeInTheDocument();
+
+        await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+        await expect(await canvas.findByRole('status')).toHaveTextContent('Načítava sa...');
+        await expect(canvas.getByText('Alice')).toBeInTheDocument();
+        await expect(await canvas.findByRole('alert')).toHaveTextContent('Údaje sa nepodarilo načítať.');
+        await expect(canvas.queryByText('Alice')).not.toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: 'Aktuálna strana' })).toHaveTextContent('2');
+
+        await userEvent.click(canvas.getByTitle('Skúsiť znova'));
+        await expect(await canvas.findByText('George')).toBeVisible();
+        await expect(canvas.queryByRole('alert')).not.toBeInTheDocument();
+        await expect(canvas.getByRole('button', { name: 'Aktuálna strana' })).toHaveTextContent('2');
+        await expect(retryFetch).toHaveBeenLastCalledWith(1, 5, [{ accessor: 'name', direction: 'asc' }], expect.any(AbortSignal));
+    }
 };
 
 export const StaticData: Story = {

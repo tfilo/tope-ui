@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { expect, fn, mocked } from 'storybook/test';
+import { expect, fn, mocked, waitFor } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
@@ -471,8 +471,8 @@ export const SearchFailure: Story = {
         const retry = canvas.getByRole('button', { name: localization.retry });
         await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
         await expect(retry).toHaveAttribute('title', localization.retry);
-        await expect(retry).toHaveTextContent('');
-        await userEvent.click(retry);
+        await expect(retry).toHaveTextContent(localization.autocompleteSearchError);
+        await userEvent.click(canvas.getByRole('alert'));
         await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
         await expect(canvas.queryByRole('alert')).toBeNull();
     }
@@ -494,13 +494,22 @@ export const PaginationFailure: Story = {
         popover.scrollTop = popover.scrollHeight;
         await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteSearchError);
         await expect(apple).toBeInTheDocument();
+        await expect(canvas.getByRole('alert').parentElement!.getBoundingClientRect().height).toBe(
+            apple.parentElement!.getBoundingClientRect().height
+        );
+        await waitFor(async () => {
+            const errorBounds = canvas.getByRole('alert').parentElement!.getBoundingClientRect();
+            const popoverBounds = popover.getBoundingClientRect();
+            await expect(errorBounds.bottom).toBeLessThanOrEqual(popoverBounds.bottom);
+            await expect(errorBounds.top).toBeGreaterThanOrEqual(popoverBounds.top);
+        });
         popover.dispatchEvent(new Event('scroll'));
         await expect(args.onSearch).toHaveBeenCalledTimes(2);
         const retry = canvas.getByRole('button', { name: localization.retry });
         await expect(canvas.getByRole('alert')).toHaveClass('text-danger');
         await expect(retry).toHaveAttribute('title', localization.retry);
-        await expect(retry).toHaveTextContent('');
-        await userEvent.click(retry);
+        await expect(retry).toHaveTextContent(localization.autocompleteSearchError);
+        await userEvent.click(canvas.getByRole('alert'));
         await expect(await canvas.findByRole('button', { name: 'Dragonfruit' })).toBeInTheDocument();
         await expect(args.onSearch).toHaveBeenLastCalledWith('', 1, 10, expect.any(AbortSignal));
         await expect(canvas.queryByRole('alert')).toBeNull();
@@ -527,6 +536,7 @@ export const SearchCancellation: Story = {
             <>
                 <button
                     type='button'
+                    className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
                     onClick={() => setVisible(!visible)}
                 >
                     Toggle autocomplete
@@ -572,6 +582,7 @@ export const SelectedLabelFailure: Story = {
                 <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
                 <button
                     type='button'
+                    className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
                     onClick={() => form.setFieldValue('basic', 'banana')}
                 >
                     Set Banana
@@ -581,12 +592,13 @@ export const SelectedLabelFailure: Story = {
     },
     play: async ({ args, canvas, userEvent }) => {
         await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('alert').parentElement!.getBoundingClientRect().height).toBe(20);
         await expect(canvas.getByRole('status')).toHaveTextContent('apple');
         await expect(canvas.queryByRole('button', { name: 'apple' })).toBeNull();
         const retry = canvas.getByRole('button', { name: localization.retry });
         await expect(retry).toHaveAttribute('title', localization.retry);
-        await expect(retry).toHaveTextContent('');
-        await userEvent.click(retry);
+        await expect(retry).toHaveTextContent(localization.autocompleteFetchError);
+        await userEvent.click(canvas.getByRole('alert'));
         await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
         await expect(canvas.getByRole('status')).toHaveTextContent('apple');
         await expect(canvas.queryByRole('alert')).toBeNull();

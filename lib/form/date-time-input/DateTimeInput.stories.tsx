@@ -119,6 +119,7 @@ export const ExternalValueChange: Story = {
         return (
             <>
                 <button
+                    className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
                     type='button'
                     onClick={() => form.setFieldValue('basic', '2027-06-20T17:45:50')}
                 >

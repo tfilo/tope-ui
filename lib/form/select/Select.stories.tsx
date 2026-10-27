@@ -33,6 +33,7 @@ const meta = {
                 />
                 {parameters.showReset && (
                     <button
+                        className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
                         type='button'
                         onClick={() => form.reset()}
                     >

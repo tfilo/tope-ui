@@ -6,6 +6,7 @@ export const selectionTheme = {
     wrapper: 'w-full flex flex-col relative',
     optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
     options: 'flex flex-col',
+    retryButton: 'size-2xl shrink-0 rounded-sm [&_svg]:w-xl',
     fetchError: 'flex items-center justify-between gap-md',
     option: {
         error: 'flex items-center justify-between gap-md py-md px-sm',

@@ -6,10 +6,12 @@ export const selectionTheme = {
     wrapper: 'w-full flex flex-col relative',
     optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
     options: 'flex flex-col',
-    retryButton: 'size-2xl shrink-0 rounded-sm [&_svg]:w-xl',
-    fetchError: 'flex items-center justify-between gap-md',
+    retryIcon: 'size-xl shrink-0 fill-danger',
+    retryIconDisabled: 'size-xl shrink-0 fill-disabled',
+    fetchError:
+        'w-full flex items-center justify-between gap-md text-left cursor-pointer disabled:cursor-default rounded-sm hover:bg-secondary-extra-light disabled:hover:bg-transparent',
     option: {
-        error: 'flex items-center justify-between gap-md py-md px-sm',
+        error: 'w-full flex items-center justify-between gap-md py-md px-sm text-left cursor-pointer rounded-sm hover:bg-secondary-extra-light focus:outline-2 outline-primary',
         errorMessage: 'text-danger',
         noninteractive: 'text-disabled py-md px-sm',
         interactive: (disabled: boolean = false) =>

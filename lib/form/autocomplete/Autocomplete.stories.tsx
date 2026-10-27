@@ -494,6 +494,9 @@ export const PaginationFailure: Story = {
         popover.scrollTop = popover.scrollHeight;
         await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteSearchError);
         await expect(apple).toBeInTheDocument();
+        await expect(canvas.getByRole('alert').parentElement!.getBoundingClientRect().height).toBe(
+            apple.parentElement!.getBoundingClientRect().height
+        );
         popover.dispatchEvent(new Event('scroll'));
         await expect(args.onSearch).toHaveBeenCalledTimes(2);
         const retry = canvas.getByRole('button', { name: localization.retry });
@@ -581,6 +584,7 @@ export const SelectedLabelFailure: Story = {
     },
     play: async ({ args, canvas, userEvent }) => {
         await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('alert').parentElement!.getBoundingClientRect().height).toBe(20);
         await expect(canvas.getByRole('status')).toHaveTextContent('apple');
         await expect(canvas.queryByRole('button', { name: 'apple' })).toBeNull();
         const retry = canvas.getByRole('button', { name: localization.retry });

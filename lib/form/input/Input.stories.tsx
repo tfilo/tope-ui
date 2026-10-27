@@ -64,6 +64,43 @@ export const Basic: Story = {
     }
 };
 
+export const Numeric: Story = {
+    args: {
+        label: 'Numeric input',
+        type: 'number',
+        step: 'any'
+    },
+    parameters: {
+        onValueChange: fn()
+    },
+    render: (args, { parameters }) => {
+        const form = useAppForm({ defaultValues: { amount: 0 as number | undefined } });
+
+        return (
+            <form.AppField
+                name='amount'
+                listeners={{ onChange: ({ value }) => parameters.onValueChange(value) }}
+                children={(field) => <field.Input {...args} />}
+            />
+        );
+    },
+    play: async ({ canvas, userEvent, parameters }) => {
+        const input = canvas.getByRole('spinbutton');
+        await expect(input).toHaveValue(0);
+        await userEvent.clear(input);
+        await userEvent.type(input, '42');
+        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(42);
+        await userEvent.clear(input);
+        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(undefined);
+        await expect(input).toHaveValue(null);
+        await userEvent.type(input, '-1.5');
+        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(-1.5);
+        await userEvent.clear(input);
+        await userEvent.type(input, '0');
+        await expect(parameters.onValueChange).toHaveBeenLastCalledWith(0);
+    }
+};
+
 export const Disabled: Story = {
     play: async ({ parameters, canvas, userEvent }) => {
         await userEvent.type(canvas.getByRole('textbox'), 'This is some text');

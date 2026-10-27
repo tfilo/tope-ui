@@ -66,7 +66,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
     const _id = useId();
     const inputId = id || `input-${_id}`;
 
-    const field = useFieldContext<string>();
+    const field = useFieldContext<string | number | undefined>();
     const rawErrors = useSelector(field.store, (state) => state.meta.errors);
     const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
     const errors = isTouched
@@ -99,8 +99,15 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
                 className={theme.input}
                 {...props}
                 name={field.name}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
+                value={field.state.value ?? ''}
+                onChange={(e) => {
+                    if (props.type === 'number') {
+                        const value = e.currentTarget.valueAsNumber;
+                        field.handleChange(Number.isNaN(value) ? undefined : value);
+                    } else {
+                        field.handleChange(e.currentTarget.value);
+                    }
+                }}
                 onBlur={field.handleBlur}
                 id={inputId}
             />

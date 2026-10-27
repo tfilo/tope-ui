@@ -94,6 +94,28 @@ Form elements can be used only using Tanstack Form. See example bellow:
 - **TextArea**
 - **ElementWrapper** - internal component
 
+#### Numeric Input values
+
+`<field.Input type="number" />` stores numbers in TanStack Form using the native
+`valueAsNumber`. Clearing the input, or entering a value the browser cannot parse
+as a number, stores `null`; it does not become `0` or `NaN`. Empty values
+display as an empty input. Other input types store strings.
+
+Allow the empty value in your form's type, for example:
+
+```tsx
+const form = useAppForm({
+    defaultValues: { amount: null as number | null }
+});
+```
+
+With Zod, use `z.number()` for a required value or `z.number().nullable()` when
+empty is allowed. Schema coercion used as a TanStack Form validator does not
+replace the stored form values with parsed output.
+
+If you previously used string defaults with `type="number"`, migrate them to
+`number | null` and remove code that expects numeric input values as strings.
+
 ### General
 
 - **Button**

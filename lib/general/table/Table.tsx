@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState, type ReactElement } from 'react';
+import { useEffect, useEffectEvent, useMemo, useState, type ReactElement } from 'react';
 import { ArrowPathIcon } from '@heroicons/react/16/solid';
 
 import { config, localization } from '../../utils/constants';
@@ -166,41 +166,33 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
         };
     }, [onFetch, hasFetch, page, pageSize, sort, fetchAttempt]);
 
-    useEffect(() => {
-        const abortController = new AbortController();
-        (async () => {
-            if (hasStaticData) {
-                const sorted = [..._data].sort((rowA, rowB) => {
-                    const _sort = [...sort];
-                    let sortResult = 0;
-                    let s: SortObject<TData> | undefined;
-                    do {
-                        s = _sort.shift();
-                        if (s !== undefined) {
-                            const accessor = s.accessor;
-                            const valueA = rowA[accessor];
-                            const valueB = rowB[accessor];
-                            const comparatorFn = columns.find((col) => col.accessor === accessor)?.compare ?? baseCompareFn;
+    const staticData = useMemo(() => {
+        if (_data === undefined) {
+            return undefined;
+        }
 
-                            if (s.direction === 'asc') {
-                                sortResult = comparatorFn(valueA, valueB);
-                            } else {
-                                sortResult = comparatorFn(valueB, valueA);
-                            }
-                        }
-                    } while (sortResult === 0 && s !== undefined);
-                    return sortResult;
-                });
-                if (!abortController.signal.aborted) {
-                    onSetData(sorted);
+        return [..._data].sort((rowA, rowB) => {
+            const _sort = [...sort];
+            let sortResult = 0;
+            let s: SortObject<TData> | undefined;
+            do {
+                s = _sort.shift();
+                if (s !== undefined) {
+                    const accessor = s.accessor;
+                    const valueA = rowA[accessor];
+                    const valueB = rowB[accessor];
+                    const comparatorFn = columns.find((col) => col.accessor === accessor)?.compare ?? baseCompareFn;
+
+                    if (s.direction === 'asc') {
+                        sortResult = comparatorFn(valueA, valueB);
+                    } else {
+                        sortResult = comparatorFn(valueB, valueA);
+                    }
                 }
-            }
-        })();
-
-        return () => {
-            abortController.abort();
-        };
-    }, [_data, columns, hasStaticData, sort]);
+            } while (sortResult === 0 && s !== undefined);
+            return sortResult;
+        });
+    }, [_data, columns, sort]);
 
     return (
         <div className={theme.wrapper}>
@@ -229,7 +221,7 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                         </tr>
                     </thead>
                     <tbody>
-                        {data.map((row) => (
+                        {(staticData ?? data).map((row) => (
                             <tr key={Object.values(row).join('_')}>
                                 {columns.map((col) => (
                                     <td

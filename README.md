@@ -116,6 +116,29 @@ replace the stored form values with parsed output.
 If you previously used string defaults with `type="number"`, migrate them to
 `number | null` and remove code that expects numeric input values as strings.
 
+#### DateTimeInput values
+
+`DateTimeInput` stores local calendar strings in TanStack Form:
+
+- `type="date"`: `YYYY-MM-DD`, for example `2026-01-31`.
+- `type="dateTime"`: `YYYY-MM-DDTHH:mm:ss`, for example `2026-01-31T23:30:00`.
+- Empty input stores `''`; invalid or incomplete typed input stores `'UNKNOWN'`.
+
+Values have no timezone meaning: the same calendar fields display on the server
+and in the browser, including times during daylight-saving transitions. Years
+must be between 1900 and 2100. Invalid external values display as empty and do not
+initialize the picker; the component does not rewrite the form value on mount.
+Use Zod validation to reject invalid values before submission.
+
+Timestamps with `Z` or an offset, fractional seconds, and datetime values without
+seconds are unsupported. Migrate those defaults/API values to the formats above;
+choose the intended calendar fields in the consuming application rather than
+silently removing an offset. Date mode accepts only a date, not a datetime.
+`inputFormat` controls display and typing, not storage, and must include the full
+date (and time for datetime mode). Timezone and timestamp format tokens are not
+supported. Internal UTC-backed arithmetic only preserves calendar fields; stored
+strings are not UTC timestamps.
+
 ### General
 
 - **Button**

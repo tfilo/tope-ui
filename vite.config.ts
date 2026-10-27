@@ -46,7 +46,8 @@ export default defineConfig({
                     'react/jsx-runtime': 'jsxRuntime',
                     'react/compiler-runtime': 'reactCompilerRuntime',
                     '@tanstack/react-form': 'TanStackReactForm',
-                    'date-fns': 'dateFns'
+                    'date-fns': 'dateFns',
+                    '@date-fns/utc': 'dateFnsUtc'
                 }
             }
         }

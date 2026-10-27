@@ -476,3 +476,26 @@ export const MoreCustomOptions: Story = {
         defaultValue: '2026-12-12T12:00:00'
     }
 };
+
+export const LocalCalendarTime: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ['yyyy-MM-dd HH:mm:ss'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange,
+        defaultValue: '2026-03-29T02:30:00'
+    },
+    play: async ({ canvas, userEvent }) => {
+        await expect(canvas.getByRole('textbox')).toHaveValue('2026-03-29 02:30:00');
+        await userEvent.clear(canvas.getByRole('textbox'));
+        await userEvent.type(canvas.getByRole('textbox'), '2026-03-29 02:30:00');
+        await userEvent.tab();
+        await expect(canvas.getByText('VALUE: "2026-03-29T02:30:00"')).toBeVisible();
+
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByRole('button', { name: '30' }));
+        await expect(canvas.getByText('VALUE: "2026-03-30T02:30:00"')).toBeVisible();
+    }
+};

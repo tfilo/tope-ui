@@ -159,10 +159,10 @@ export const PreserveTypedTimeWhenSelectingDay: Story = {
         await userEvent.type(canvas.getByRole('textbox'), '2026-01-15 17:45:50');
 
         await userEvent.click(canvas.getByTitle('Open calendar'));
-        await userEvent.click(canvas.getByRole('button', { name: '16' }));
+        await userEvent.click(canvas.getByRole('button', { name: '18' }));
 
-        await expect(canvas.getByRole('textbox')).toHaveValue('2026-01-16 17:45:50');
-        await expect(canvas.getByText('VALUE: "2026-01-16T17:45:50"')).toBeVisible();
+        await expect(canvas.getByRole('textbox')).toHaveValue('2026-01-18 17:45:50');
+        await expect(canvas.getByText('VALUE: "2026-01-18T17:45:50"')).toBeVisible();
     }
 };
 

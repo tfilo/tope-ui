@@ -662,7 +662,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
      * @param {Day} d - The newly selected day.
      */
     const changeDayHandler = (d: Day) => {
-        if (d.day) {
+        if (d.day !== null) {
             // change input text
             const usedYear = selectedYear ?? getYear(new Date());
             const usedMonth = selectedMonth ?? getMonth(new Date());

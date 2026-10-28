@@ -615,3 +615,78 @@ export const SelectedLabelFailure: Story = {
         await expect(canvas.queryByRole('alert')).toBeNull();
     }
 };
+
+export const ReadOnly: Story = {
+    args: {
+        label: 'Read-only autocomplete',
+        readOnly: true,
+        onSearch: fn(async () => ({ options, page: 0, hasNextPage: false })),
+        onFetch: async (value) => options.find((option) => option.value === value) ?? null
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: args.multiple ? ['apple', 'banana'] : 'apple' } });
+        return (
+            <>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.Autocomplete {...args} />}
+                />
+                <form.Subscribe selector={(state) => state.values.basic}>
+                    {(basic) => <output>{JSON.stringify(basic)}</output>}
+                </form.Subscribe>
+            </>
+        );
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        const input = canvas.getByRole('textbox');
+        await expect(input).toHaveAttribute('readonly');
+        await expect(input).not.toBeDisabled();
+        const dropdown = input.nextElementSibling as HTMLButtonElement;
+        await expect(dropdown).toBeDisabled();
+        await expect(canvas.queryByRole('button', { name: localization.remove('Apple') })).toBeNull();
+        await userEvent.click(dropdown);
+        await userEvent.type(input, '{ArrowDown}{Enter}');
+        await expect(input).toHaveFocus();
+        await expect(args.onSearch).not.toHaveBeenCalled();
+        await expect(canvas.getByRole('status')).toHaveTextContent(args.multiple ? '["apple","banana"]' : '"apple"');
+    }
+};
+
+export const ReadOnlyMultiple: Story = {
+    ...ReadOnly,
+    args: { ...ReadOnly.args, multiple: true }
+};
+
+export const BecomeReadOnly: Story = {
+    args: ReadOnly.args,
+    render: (args) => {
+        const [readOnly, setReadOnly] = useState(false);
+        const form = useAppForm({ defaultValues: { basic: 'apple' } });
+        return (
+            <>
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.Autocomplete {...args} readOnly={readOnly} />}
+                />
+                <button
+                    type='button'
+                    onClick={() => setReadOnly(true)}
+                >
+                    Make read-only
+                </button>
+                <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
+            </>
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        await expect(await canvas.findByRole('button', { name: 'Apple' })).toBeVisible();
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        const banana = await canvas.findByRole('button', { name: 'Banana' });
+        // Keep focus inside the popup so blur does not close it before the prop changes.
+        canvas.getByRole('button', { name: 'Make read-only' }).click();
+        await waitFor(() => expect(banana).not.toBeInTheDocument());
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}{Enter}');
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+    }
+};

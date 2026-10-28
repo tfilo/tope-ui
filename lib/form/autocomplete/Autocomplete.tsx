@@ -23,6 +23,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     onFetch,
     multiple = false,
     disabled = false,
+    readOnly = false,
     pageSize = 10,
     required,
     ...props
@@ -63,12 +64,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Handle input value changes by user
     const handleDisplayValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (readOnly) return;
         setIsOpen(true);
         setDisplayValue(e.currentTarget.value);
     };
 
     // Remove selected option and reset search state
     const handleRemoveOption = (option: Option) => {
+        if (readOnly) return;
         setSelectedOption(selectedOption.filter((o) => o.value !== option.value));
         setDisplayValue('');
         setOptions({ hasNextPage: false, page: 0, options: [] });
@@ -83,6 +86,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Open dropdown, fetch the initial options if needed, and focus the first available item
     const handleOptionsOpen = async () => {
+        if (readOnly) return;
         if (isOpen === false) {
             setIsOpen(true);
             await handleSearch(displayValue, true);
@@ -190,7 +194,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Handle option selection from dropdown
     const handleSelect = (option: Option | null) => {
-        if (option?.disabled) {
+        if (readOnly || option?.disabled) {
             return;
         }
         handleOptionsClose();
@@ -407,14 +411,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         }
     }, [failedPage]);
 
-    // Closes dropdown when disabled
+    // Close the dropdown when interaction becomes unavailable.
     useEffect(() => {
         (async () => {
-            if (disabled) {
+            if (disabled || readOnly) {
                 handleOptionsClose();
             }
         })();
-    }, [disabled]);
+    }, [disabled, readOnly]);
 
     const hasOptions = options.options.length > 0;
 
@@ -463,7 +467,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             key={option.value}
                             label={option.label}
                             disabled={disabled}
-                            onRemove={() => handleRemoveOption(option)}
+                            onRemove={readOnly ? undefined : () => handleRemoveOption(option)}
                             variant={option.unavailable ? 'danger' : 'outline'}
                             title={option.unavailable ? localization.unavailableOption : undefined}
                         />
@@ -473,6 +477,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             className={theme.input}
                             {...props}
                             aria-required={required}
+                            readOnly={readOnly}
                             value={displayValue}
                             name={field.name}
                             disabled={disabled || isFetching}
@@ -488,7 +493,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
                             onClick={() => (isOpen ? handleOptionsClose() : handleOptionsOpen())}
                             onKeyDown={handleKeyDownOnOpenButton}
-                            disabled={disabled || isFetching}
+                            disabled={disabled || readOnly || isFetching}
                             additionalClassName={theme.button}
                         >
                             {props.title}

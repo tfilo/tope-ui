@@ -523,11 +523,11 @@ export const TodayBorder: Story = {
     play: async ({ canvas, userEvent }) => {
         await userEvent.click(canvas.getByTitle('Open calendar'));
 
-        const [previousMonthDay, today] = canvas.getAllByRole('button', { name: '28', exact: true });
+        const [previousMonthDay, today] = canvas.getAllByRole('button', { name: '28' });
         await expect(previousMonthDay).toBeDisabled();
         await expect(previousMonthDay).not.toHaveClass('border-primary-light!');
         await expect(today).toBeEnabled();
         await expect(today).toHaveClass('border-primary-light!');
-        await expect(canvas.getByRole('button', { name: '27', exact: true })).toHaveClass('bg-primary-light!');
+        await expect(canvas.getByRole('button', { name: '27' })).toHaveClass('bg-primary-light!');
     }
 };

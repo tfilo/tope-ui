@@ -24,6 +24,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     multiple = false,
     disabled = false,
     pageSize = 10,
+    required,
     ...props
 }) => {
     const _id = useId();
@@ -444,7 +445,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     </button>
                 )
             }
-            required={props.required}
+            required={required}
             disabled={disabled}
             elementId={autocompleteId}
         >
@@ -471,6 +472,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         <input
                             className={theme.input}
                             {...props}
+                            aria-required={required}
                             value={displayValue}
                             name={field.name}
                             disabled={disabled || isFetching}

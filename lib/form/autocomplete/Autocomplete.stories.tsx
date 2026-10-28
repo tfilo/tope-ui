@@ -667,7 +667,12 @@ export const BecomeReadOnly: Story = {
             <>
                 <form.AppField
                     name='basic'
-                    children={(field) => <field.Autocomplete {...args} readOnly={readOnly} />}
+                    children={(field) => (
+                        <field.Autocomplete
+                            {...args}
+                            readOnly={readOnly}
+                        />
+                    )}
                 />
                 <button
                     type='button'

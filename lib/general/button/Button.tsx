@@ -42,7 +42,7 @@ export const Button = <T extends ElementType = 'button'>({
     const hasIcon = Icon !== null;
     const isButton = as === undefined || as === 'button';
 
-    const title = showChildren === false && typeof children === 'string' ? children : undefined;
+    const title = props.title ?? (showChildren === false && typeof children === 'string' ? children : undefined);
 
     return (
         <Component

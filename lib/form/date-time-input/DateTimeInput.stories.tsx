@@ -500,3 +500,34 @@ export const LocalCalendarTime: Story = {
         await expect(canvas.getByText('VALUE: "2026-03-30T02:30:00"')).toBeVisible();
     }
 };
+
+export const TodayBorder: Story = {
+    args: {
+        type: 'date',
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange,
+        defaultValue: '2026-10-27'
+    },
+    beforeEach: () => {
+        const OriginalDate = globalThis.Date;
+        // Freeze only the current date; keep timers and explicit date construction unchanged.
+        globalThis.Date = new Proxy(OriginalDate, {
+            construct: (target, args, newTarget) => Reflect.construct(target, args.length ? args : [2026, 9, 28, 12], newTarget)
+        });
+        return () => {
+            globalThis.Date = OriginalDate;
+        };
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+
+        const [previousMonthDay, today] = canvas.getAllByRole('button', { name: '28' });
+        await expect(previousMonthDay).toBeDisabled();
+        await expect(previousMonthDay).not.toHaveClass('border-primary-light!');
+        await expect(today).toBeEnabled();
+        await expect(today).toHaveClass('border-primary-light!');
+        await expect(canvas.getByRole('button', { name: '27' })).toHaveClass('bg-primary-light!');
+    }
+};

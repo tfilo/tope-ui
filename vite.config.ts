@@ -29,8 +29,8 @@ export default defineConfig({
         lib: {
             entry: resolve(__dirname, 'lib/main.ts'),
             name: 'TOPE-UI',
-            // the proper extensions will be added
-            fileName: (format, entryName) => `tope-ui-${entryName}.${format}.js`,
+            // Use .cjs so Node treats the UMD bundle as CommonJS.
+            fileName: (format, entryName) => `tope-ui-${entryName}.${format}.${format === 'umd' ? 'cjs' : 'js'}`,
             formats: ['es', 'umd']
         },
         license: true,

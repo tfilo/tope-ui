@@ -150,3 +150,13 @@ export const IconWithCustomWidth: Story = {
         additionalClassName: 'min-w-[24px] min-h-[24px]'
     }
 };
+
+export const CustomTitle: Story = {
+    args: {
+        children: 'Action',
+        title: 'Custom tooltip'
+    },
+    play: async ({ canvas }) => {
+        await expect(canvas.getByRole('button', { name: 'Action' })).toHaveAttribute('title', 'Custom tooltip');
+    }
+};

@@ -514,8 +514,7 @@ export const TodayBorder: Story = {
         const OriginalDate = globalThis.Date;
         // Freeze only the current date; keep timers and explicit date construction unchanged.
         globalThis.Date = new Proxy(OriginalDate, {
-            construct: (target, args, newTarget) =>
-                Reflect.construct(target, args.length ? args : [2026, 9, 28, 12], newTarget)
+            construct: (target, args, newTarget) => Reflect.construct(target, args.length ? args : [2026, 9, 28, 12], newTarget)
         });
         return () => {
             globalThis.Date = OriginalDate;

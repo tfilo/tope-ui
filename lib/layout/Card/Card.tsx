@@ -54,6 +54,7 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                 </Button>
             )}
             <BaseElement
+                type='button'
                 className={theme.card(hasOnClick)}
                 onClick={handleClick}
                 style={{

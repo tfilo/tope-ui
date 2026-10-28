@@ -1015,6 +1015,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                     {cd.map((d) => {
                                                         let dayBgColor = 'border-none';
                                                         if (
+                                                            d.day !== null &&
                                                             d.date === getDate(new Date()) &&
                                                             ((selectedMonth === getMonth(new Date()) &&
                                                                 selectedYear === getYear(new Date())) ||

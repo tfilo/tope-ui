@@ -294,6 +294,41 @@ export const StaticData: Story = {
     }
 };
 
+export const SimilarRows: Story = {
+    args: {
+        columns: [
+            { header: 'Name', accessor: 'name', sortable: true, defaultSortDirection: 'asc' },
+            { header: 'Other', accessor: 'other' }
+        ],
+        data: [
+            { name: 'a_b', other: 'c' },
+            { name: 'a', other: 'b_c' },
+            { name: 'z', other: 'q' }
+        ]
+    },
+    play: async ({ canvas, userEvent }) => {
+        const table = canvas.getByRole('table');
+        const sortByName = canvas.getByTitle('Name', { exact: false });
+        await expect(table.querySelectorAll('tbody tr')).toHaveLength(3);
+
+        await userEvent.click(sortByName);
+        await expect(table.querySelectorAll('tbody tr')).toHaveLength(3);
+        await expect(Array.from(table.querySelectorAll('tbody tr'), (row) => row.firstElementChild?.textContent)).toEqual([
+            'z',
+            'a_b',
+            'a'
+        ]);
+
+        await userEvent.click(sortByName);
+        await expect(table.querySelectorAll('tbody tr')).toHaveLength(3);
+        await expect(Array.from(table.querySelectorAll('tbody tr'), (row) => row.firstElementChild?.textContent)).toEqual([
+            'a_b',
+            'a',
+            'z'
+        ]);
+    }
+};
+
 export const FetchedData: Story = {
     play: async ({ canvas, userEvent }) => {
         const table = canvas.getByRole('table');

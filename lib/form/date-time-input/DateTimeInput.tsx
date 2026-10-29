@@ -770,8 +770,8 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     if (value !== prevValue) {
         setPrevValue(value);
-        // update only when not typing
-        if (value !== unknownDate && !isTyping) {
+        // Preserve typed text, but apply external clears immediately (for example, form.reset()).
+        if (value !== unknownDate && (!isTyping || value === '')) {
             setInputValue(formatFromISO(value, inputFormatPattern, hasTime));
 
             const parsed = parseLocalValue(value, hasTime);

@@ -144,6 +144,46 @@ export const ExternalValueChange: Story = {
     }
 };
 
+export const ResetWhileTyping: Story = {
+    args: {
+        type: 'date',
+        inputFormat: ['yyyy-MM-dd']
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { basic: '' } });
+
+        return (
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    form.reset();
+                }}
+            >
+                <form.AppField
+                    name='basic'
+                    children={(field) => <field.DateTimeInput {...args} />}
+                />
+                <button type='submit'>Submit and reset</button>
+                <form.Subscribe selector={(state) => state.values.basic}>
+                    {(basic) => <output>{JSON.stringify(basic)}</output>}
+                </form.Subscribe>
+            </form>
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        const input = canvas.getByRole('textbox');
+        await userEvent.type(input, '2027-06-20');
+        await expect(canvas.getByRole('status')).toHaveTextContent('"2027-06-20"');
+
+        await userEvent.keyboard('{Enter}');
+        await expect(input).toHaveFocus();
+        await expect(canvas.getByRole('status')).toHaveTextContent('""');
+        await expect(input).toHaveValue('');
+        await userEvent.tab();
+        await expect(input).toHaveValue('');
+    }
+};
+
 export const PreserveTypedTimeWhenSelectingDay: Story = {
     args: {
         type: 'dateTime',

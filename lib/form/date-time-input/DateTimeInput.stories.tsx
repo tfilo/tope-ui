@@ -166,6 +166,35 @@ export const PreserveTypedTimeWhenSelectingDay: Story = {
     }
 };
 
+export const SelectTimeInShorterMonth: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ['yyyy-MM-dd HH:mm:ss'],
+        inputIconTitle: 'Open calendar'
+    },
+    parameters: {
+        onChange
+    },
+    beforeEach: () => {
+        const OriginalDate = globalThis.Date;
+        // Freeze today at January 31 while keeping timers and explicit dates unchanged.
+        globalThis.Date = new Proxy(OriginalDate, {
+            construct: (target, args, newTarget) => Reflect.construct(target, args.length ? args : [2026, 0, 31, 12], newTarget)
+        });
+        return () => {
+            globalThis.Date = OriginalDate;
+        };
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.click(canvas.getByTitle('Open calendar'));
+        await userEvent.click(canvas.getByTitle('Nasledujúci mesiac'));
+        await userEvent.click(canvas.getByRole('button', { name: '12:00' }));
+
+        await expect(canvas.getByRole('textbox')).toHaveValue('2026-02-28 12:00:00');
+        await expect(canvas.getByText('VALUE: "2026-02-28T12:00:00"')).toBeVisible();
+    }
+};
+
 export const ClampSelectedMonth: Story = {
     args: {
         type: 'dateTime',

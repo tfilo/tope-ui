@@ -53,7 +53,13 @@ const baseCompareFn = (a: unknown, b: unknown): number => {
 /**
  * Table component that renders as Table with pagination if onFetch used or without if data provided. In case of data provided it handles sort internally, in case of onFetch it pass sort order together with pagination to onFetch method
  */
-export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _data, onFetch }: TableProps<TData>): ReactElement => {
+export const Table = <TData extends RowObject>({
+    columns,
+    pageSize = 10,
+    data: _data,
+    onFetch,
+    showHeader = true
+}: TableProps<TData>): ReactElement => {
     //const [pageSize, setPageSize] = useState(_pageSize);
 
     if (pageSize < 1) {
@@ -204,22 +210,24 @@ export const Table = <TData extends RowObject>({ columns, pageSize = 10, data: _
                     className={theme.table}
                     inert={hasFetch && isLoading}
                 >
-                    <thead>
-                        <tr>
-                            {columns.map((col) => (
-                                <th
-                                    key={`${col.accessor.toString()}_${col.header}`}
-                                    className={theme.headerCell(col.additionalClassName)}
-                                >
-                                    <TableHeaderCell
-                                        col={col}
-                                        sort={sort}
-                                        onSortChange={onSortChange}
-                                    />
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
+                    {showHeader && (
+                        <thead>
+                            <tr>
+                                {columns.map((col) => (
+                                    <th
+                                        key={`${col.accessor.toString()}_${col.header}`}
+                                        className={theme.headerCell(col.additionalClassName)}
+                                    >
+                                        <TableHeaderCell
+                                            col={col}
+                                            sort={sort}
+                                            onSortChange={onSortChange}
+                                        />
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                    )}
                     <tbody>
                         {(staticData ?? data).map((row) => (
                             <tr key={Object.values(row).join('_')}>

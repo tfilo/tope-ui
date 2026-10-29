@@ -1,6 +1,7 @@
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PencilIcon } from '@heroicons/react/16/solid';
+import { StrictMode } from 'react';
 
 import { Button } from '../button';
 import { Table } from './Table';
@@ -364,5 +365,33 @@ export const WithoutHeader: Story = {
     play: async ({ canvas }) => {
         await expect(canvas.queryAllByRole('columnheader')).toHaveLength(0);
         await expect(canvas.getByRole('cell', { name: 'Alice' })).toBeVisible();
+    }
+};
+
+export const StrictModeSortCycle: Story = {
+    args: {
+        columns: [{ header: 'Name', accessor: 'name', sortable: true, defaultSortDirection: 'asc' }],
+        data: [{ name: 'Bob' }, { name: 'Alice' }, { name: 'Charlie' }]
+    },
+    render: (args) => (
+        <StrictMode>
+            <Table {...args} />
+        </StrictMode>
+    ),
+    play: async ({ canvas, userEvent }) => {
+        const sort = canvas.getByTitle('Name', { exact: false });
+        const table = canvas.getByRole('table');
+
+        await expect(table.querySelector('tbody td')).toHaveTextContent('Alice');
+        for (const [direction, firstName] of [
+            ['Zoradiť zostupne', 'Charlie'],
+            ['Nezoradené', 'Bob'],
+            ['Zoradiť vzostupne', 'Alice'],
+            ['Zoradiť zostupne', 'Charlie']
+        ]) {
+            await userEvent.click(sort);
+            await expect(sort).toHaveAttribute('title', `Name - ${direction}`);
+            await expect(table.querySelector('tbody td')).toHaveTextContent(firstName);
+        }
     }
 };

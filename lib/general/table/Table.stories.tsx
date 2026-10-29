@@ -353,3 +353,16 @@ export const FetchedData: Story = {
         pageSize: 5
     }
 };
+
+export const WithoutHeader: Story = {
+    args: {
+        // @ts-expect-error incorrect infering happens only in storybook args
+        columns,
+        data,
+        showHeader: false
+    },
+    play: async ({ canvas }) => {
+        await expect(canvas.queryAllByRole('columnheader')).toHaveLength(0);
+        await expect(canvas.getByRole('cell', { name: 'Alice' })).toBeVisible();
+    }
+};

@@ -177,7 +177,8 @@ export const Table = <TData extends RowObject>({
             return undefined;
         }
 
-        return [..._data].sort((rowA, rowB) => {
+        // Keep each source index with its row so keys remain unique and stable while sorting.
+        return Array.from(_data, (row, index) => ({ row, index })).sort(({ row: rowA }, { row: rowB }) => {
             const _sort = [...sort];
             let sortResult = 0;
             let s: SortObject<TData> | undefined;
@@ -229,8 +230,8 @@ export const Table = <TData extends RowObject>({
                         </thead>
                     )}
                     <tbody>
-                        {(staticData ?? data).map((row) => (
-                            <tr key={Object.values(row).join('_')}>
+                        {(staticData ?? data.map((row, index) => ({ row, index }))).map(({ row, index }) => (
+                            <tr key={`${index}_${Object.values(row).join('_')}`}>
                                 {columns.map((col) => (
                                     <td
                                         key={`${col.accessor.toString()}_${col.header}`}

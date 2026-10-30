@@ -120,7 +120,7 @@ export const Table = <TData extends RowObject>({
                     direction: 'asc'
                 });
             } else if (result[idx].direction === 'asc') {
-                result[idx].direction = 'desc';
+                result[idx] = { ...result[idx], direction: 'desc' };
             } else {
                 result = result.filter((s) => s.accessor !== accessor);
             }

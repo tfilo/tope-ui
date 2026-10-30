@@ -1,11 +1,11 @@
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PencilIcon } from '@heroicons/react/16/solid';
-import { StrictMode } from 'react';
+import { StrictMode, useCallback, useState } from 'react';
 
 import { Button } from '../button';
 import { Table } from './Table';
-import { type SortObject } from './Table.types';
+import { type RowObject, type SortObject } from './Table.types';
 import { createColumns } from './table-utils';
 
 const meta = {
@@ -387,6 +387,60 @@ export const FetchedData: Story = {
         columns,
         onFetch: fetchMethod,
         pageSize: 5
+    }
+};
+
+export const FilteredFetchedData: Story = {
+    args: {
+        columns: [{ header: 'Name', accessor: 'name' }],
+        onFetch: fetchMethod,
+        pageSize: 5
+    },
+    render: (args) => {
+        const [underTwenty, setUnderTwenty] = useState(false);
+        const onFetch = useCallback(
+            async (page: number, pageSize: number) => {
+                const filteredData = underTwenty ? data.filter((person) => person.age < 20) : data;
+                return {
+                    data: filteredData.slice(page * pageSize, (page + 1) * pageSize),
+                    page,
+                    pageSize,
+                    totalRecords: filteredData.length
+                };
+            },
+            [underTwenty]
+        );
+
+        return (
+            <>
+                <label>
+                    <input
+                        type='checkbox'
+                        checked={underTwenty}
+                        onChange={(e) => setUnderTwenty(e.target.checked)}
+                    />
+                    Under 20 years old
+                </label>
+                <Table<RowObject>
+                    columns={args.columns}
+                    onFetch={onFetch}
+                    pageSize={args.pageSize}
+                />
+            </>
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        await expect(await canvas.findByRole('cell', { name: 'Bob' })).toBeVisible();
+        await userEvent.click(canvas.getByTitle('Nasledujúca strana'));
+        await expect(await canvas.findByRole('cell', { name: 'George' })).toBeVisible();
+        await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('2');
+
+        await userEvent.click(canvas.getByLabelText('Under 20 years old'));
+        await expect(await canvas.findByRole('cell', { name: 'Ethan' })).toBeVisible();
+        await expect(canvas.getByRole('table').querySelectorAll('tbody tr')).toHaveLength(3);
+        await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('1');
+        await expect(canvas.getByTitle('Predchádzajúca strana')).toBeDisabled();
+        await expect(canvas.getByTitle('Nasledujúca strana')).toBeDisabled();
     }
 };
 

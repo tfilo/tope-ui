@@ -701,7 +701,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     const changeTimeHandler = (minute: number) => {
         const usedYear = selectedYear ?? getYear(new Date());
         const usedMonth = selectedMonth ?? getMonth(new Date());
-        const usedDate = selectedDate ?? getDate(new Date());
+        const usedDate = selectedDate ?? Math.min(getDate(new Date()), getDaysInMonth(new UTCDate(usedYear, usedMonth)));
         // change input text
         const formattedDate = formatDate(
             usedYear,

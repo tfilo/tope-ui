@@ -616,6 +616,18 @@ export const SelectedLabelFailure: Story = {
     }
 };
 
+export const SelectAfterFetchFailure: Story = {
+    ...SelectedLabelFailure,
+    play: async ({ canvas, userEvent }) => {
+        await expect(await canvas.findByRole('alert')).toHaveTextContent(localization.autocompleteFetchError);
+        await expect(canvas.getByRole('status')).toHaveTextContent('apple');
+        await userEvent.type(canvas.getByRole('textbox'), '{ArrowDown}');
+        await userEvent.click(await canvas.findByRole('button', { name: 'Banana' }));
+        await expect(canvas.getByRole('status')).toHaveTextContent('banana');
+        await expect(canvas.queryByRole('alert')).toBeNull();
+    }
+};
+
 export const ReadOnly: Story = {
     args: {
         label: 'Read-only autocomplete',

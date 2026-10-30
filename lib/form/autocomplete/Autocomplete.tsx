@@ -287,6 +287,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         } catch (error) {
             if (!signal.aborted && !(error instanceof Error && error.name === 'AbortError')) {
                 setFetchFailed(true);
+                setIsInitialized(true);
             }
         } finally {
             if (!signal.aborted) {

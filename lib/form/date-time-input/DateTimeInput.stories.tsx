@@ -295,6 +295,23 @@ export const CustomInputFormat: Story = {
     }
 };
 
+export const QuotedLiteralInputFormat: Story = {
+    args: {
+        type: 'dateTime',
+        inputFormat: ["yyyy-MM-dd'T'HH:mm:ss"]
+    },
+    parameters: {
+        onChange
+    },
+    play: async ({ canvas, userEvent }) => {
+        await userEvent.type(canvas.getByRole('textbox'), '2026-10-29T12:30:0');
+        await expect(canvas.getByText('VALUE: "UNKNOWN"')).toBeVisible();
+
+        await userEvent.type(canvas.getByRole('textbox'), '0');
+        await expect(canvas.getByText('VALUE: "2026-10-29T12:30:00"')).toBeVisible();
+    }
+};
+
 export const CustomInputIconTitle: Story = {
     args: {
         type: 'dateTime',

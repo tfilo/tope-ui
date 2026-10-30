@@ -533,7 +533,11 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
             setSelectedMinutes(null);
             setSelectedSeconds(null);
             field.handleChange('');
-        } else if (rawValue.trim().length >= [...inputFormatPattern].sort((a, b) => a.length - b.length)[0].length) {
+        } else if (
+            inputFormatPattern.some(
+                (pattern) => rawValue.trim().length >= pattern.replace(/''|'/g, (quote) => (quote === "''" ? "'" : '')).length
+            )
+        ) {
             // Use a fixed calendar reference so parsing never inherits today or the machine timezone.
             const parsedDate = parseWithFormats(rawValue, inputFormatPattern);
 

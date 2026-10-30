@@ -1,14 +1,41 @@
 # TOPE-UI
 
-**Important:** library is in development phase, NOT READY TO BE USED YET!
-
 Personal React UI component library built with TypeScript, Vite, Tailwind CSS, and Storybook.
 
 ## Requirements
 
-- Node.js **24.x** (recommended)
+- React and React DOM `^19.3.0`.
+- TanStack React Form `^1.33.0`.
+- Node.js **24.x** is recommended for library development.
 
-## Install
+## Install in an application
+
+The release workflow publishes `@tfilo/tope-ui` to GitHub Packages. To install a
+published version, configure the registry in your application's `.npmrc`:
+
+```ini
+@tfilo:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+Set `NODE_AUTH_TOKEN` in your environment to a GitHub personal access token
+(classic) with `read:packages` permission and access to the package. Then install
+the library and its TanStack Form peer dependency in your React application:
+
+```bash
+npm install @tfilo/tope-ui @tanstack/react-form
+```
+
+Import components and hooks from `@tfilo/tope-ui`. Load the bundled stylesheet
+once in your application's root entry point or root route:
+
+```tsx
+import '@tfilo/tope-ui/style.css';
+```
+
+## Set up library development
+
+From a checkout of this repository, install the development dependencies:
 
 ```bash
 npm install
@@ -68,20 +95,44 @@ npm run test-storybook
 
 ### Form
 
-Form elements can be used only using Tanstack Form. See example bellow:
+Form components are connected to TanStack Form through the library's
+`useAppForm` hook. Render fields through `form.AppField` and the registered
+`field` components. They handle their own value, change, and blur bindings.
+Form buttons need the `form.AppForm` context.
 
-```html
-<form.AppField
-    name="basic"
-    children="{(field)"
-    =""
->
-    (<field.Input label="Basic example" />)} />
-    <form.AppForm>
-        <form.SubscribeButton>Submit</form.SubscribeButton>
-    </form.AppForm></form.AppField
->
+```tsx
+import { useAppForm } from '@tfilo/tope-ui';
+
+export function ExampleForm() {
+    const form = useAppForm({
+        defaultValues: { basic: '' },
+        onSubmit: ({ value }) => {
+            console.log(value);
+        }
+    });
+
+    return (
+        <form
+            onSubmit={(event) => {
+                event.preventDefault();
+                void form.handleSubmit();
+            }}
+            noValidate
+        >
+            <form.AppField
+                name="basic"
+                children={(field) => <field.Input label="Basic example" />}
+            />
+            <form.AppForm>
+                <form.SubscribeButton>Submit</form.SubscribeButton>
+            </form.AppForm>
+        </form>
+    );
+}
 ```
+
+See [the complete form and layout example](lib/Example.stories.tsx) and the
+component stories in `lib/` for more usage examples.
 
 - **Autocomplete**
 - **DateTimeInput**
@@ -150,9 +201,9 @@ strings are not UTC timestamps.
 
 ### Hooks
 
-- **form-context** - Tanstack form specific context
-- **form** - Tanstack form specific context
-- **useWindowSize** - Hook to detect breakpoint change in code when user resize window
+- **form-context** - shared TanStack Form field and form contexts
+- **form** - `useAppForm`, `withForm`, and `withFieldGroup`, with registered field and form components
+- **useWindowSize** - detects breakpoint changes when the user resizes the window
 
 ### Layout
 
@@ -169,8 +220,8 @@ strings are not UTC timestamps.
 
 #### Constants
 
-- **setLocalization** - allows to set custom localizations for hardcoded values, default in Slovak language
-- **setConfig** - allows to set custom configuration, currently just locale used in internal compare funcion for sorting table rows
+- **setLocalization** - updates the library's localized messages; defaults are in Slovak
+- **setConfig** - updates configuration, including the table sorting locale and accepted date input formats
 
 #### String utils
 
@@ -178,15 +229,33 @@ strings are not UTC timestamps.
 - **isNotEmpty**
 - **isBlank**
 - **isNotBlank**
-- **sb** - convert boolean to string 'true' | 'false'
+- **sb** - converts a boolean to the string `'true'` or `'false'`
 
 ## Styles
 
-The library builds a bundled stylesheet. Consumers can import:
+The library builds a bundled stylesheet. Import it once in your application:
 
-- `tope-ui/style.css`
-- Tailwind-based theme styles are defined in `lib/main.css` and `lib/theme.css`.
+```tsx
+import '@tfilo/tope-ui/style.css';
+```
+
+Tailwind-based styles and theme tokens are defined in `lib/main.css` and
+`lib/theme.css`.
 
 ## Localization
 
-Library provides default localization with hardcoded values. You can provide your own by calling setLocalization methods that will update original object holding locales.
+The library's default messages are in Slovak. Use `setLocalization` to override
+selected messages:
+
+```tsx
+import { setLocalization } from '@tfilo/tope-ui';
+
+setLocalization({
+    loading: 'Loading...',
+    retry: 'Try again'
+});
+```
+
+`setLocalization` merges the provided values into the shared localization object.
+Configure it consistently on the server and in the browser. These settings are
+shared across the application; they are not scoped to a component or request.

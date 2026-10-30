@@ -52,6 +52,7 @@ const baseCompareFn = (a: unknown, b: unknown): number => {
 
 /**
  * Table component that renders as Table with pagination if onFetch used or without if data provided. In case of data provided it handles sort internally, in case of onFetch it pass sort order together with pagination to onFetch method
+ * Keep onFetch stable (for example with useCallback); a new callback resets pagination to the first page.
  */
 export const Table = <TData extends RowObject>({
     columns,
@@ -76,6 +77,12 @@ export const Table = <TData extends RowObject>({
     }
 
     const [page, setPage] = useState(0);
+    const [previousOnFetch, setPreviousOnFetch] = useState(() => onFetch);
+    if (previousOnFetch !== onFetch) {
+        setPreviousOnFetch(() => onFetch);
+        setPage(0);
+    }
+
     const [totalRecords, setTotalRecords] = useState(0);
     const [data, setData] = useState<Readonly<TData[]>>([]);
     const [isLoading, setIsLoading] = useState(false);

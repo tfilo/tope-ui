@@ -15,15 +15,17 @@ const theme = {
     card: (hasOnClick: boolean) =>
         `rounded-sm border border-default ${hasOnClick ? 'card-main cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`,
     description: 'bg-secondary-light/20 p-lg text-justify text-base',
+    title: 'text-headline-5',
     descriptionText: 'text-default',
     spacer: 'flex-1'
 } as const;
 
-export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imageUrl }) => {
+export const Card: React.FC<CardProps> = ({ title, description, onClick, onAction, imageUrl }) => {
     const backgroundUrl = isNotBlank(imageUrl) ? imageUrl : placeholder;
     const hasOnClick = onClick !== undefined;
     const hasOnAction = onAction !== undefined;
     const BaseElement: ElementType = hasOnClick ? 'button' : 'div';
+    const hasTitle = isNotBlank(title);
     const hasDescription = isNotBlank(description);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -64,9 +66,10 @@ export const Card: React.FC<CardProps> = ({ description, onClick, onAction, imag
                 }}
             >
                 <div className={theme.spacer}></div>
-                {hasDescription && (
+                {(hasTitle || hasDescription) && (
                     <div className={theme.description}>
-                        <span className={theme.descriptionText}>{description}</span>
+                        {hasTitle && <div className={theme.title}>{title}</div>}
+                        {hasDescription && <span className={theme.descriptionText}>{description}</span>}
                     </div>
                 )}
             </BaseElement>

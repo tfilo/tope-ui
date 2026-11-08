@@ -11,6 +11,7 @@ export const localization = {
     textareaCounter: 'Zobrazuje aktuálny počet znakov a maximálny povolený počet znakov.',
     requiredField: 'Táto položka je poivnná.',
     remove: (name: string) => `Odstrániť ${name}`,
+    back: 'Späť',
     edit: 'Upraviť',
     profile: 'Profil',
     logout: 'Odhlásiť sa',

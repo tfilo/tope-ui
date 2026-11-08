@@ -67,6 +67,29 @@ export const WithoutTitle: Story = {
     }
 };
 
+export const WithBack: Story = {
+    args: {
+        title: 'Project details',
+        onBack: fn(),
+        children: 'Use the back button to return to the previous page.'
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Späť' }));
+        await expect(args.onBack).toHaveBeenCalledOnce();
+    }
+};
+
+export const WithBackWithoutTitle: Story = {
+    args: {
+        onBack: fn(async () => {}),
+        children: 'The back button also works without a page title and accepts an async callback.'
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        await userEvent.click(canvas.getByRole('button', { name: 'Späť' }));
+        await expect(args.onBack).toHaveBeenCalledOnce();
+    }
+};
+
 export const WithTitleAsH3: Story = {
     play: async ({ canvas }) => {
         await expect(canvas.getByText('This is H3 title').tagName).toBe('H3');

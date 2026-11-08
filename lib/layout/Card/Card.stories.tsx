@@ -52,3 +52,16 @@ export const NonInteractiveCard: Story = {
             'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Commodi alias, sed soluta non mollitia laborum necessitatibus officiis ...'
     }
 };
+
+export const WithTitle: Story = {
+    args: {
+        ...Default.args,
+        title: 'Project overview'
+    }
+};
+
+export const TitleOnly: Story = {
+    args: {
+        title: 'Project overview'
+    }
+};

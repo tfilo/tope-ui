@@ -4,7 +4,7 @@ export const selectionTheme = {
     inputWrapper: 'flex flex-1',
     button: 'min-w-[30px] min-h-[30px] rounded-sm',
     wrapper: 'w-full flex flex-col relative',
-    optionsWrapper: 'absolute border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
+    optionsWrapper: 'fixed border rounded-sm p-sm tope-ui-autocomplete shadow-sm',
     options: 'flex flex-col',
     retryIcon: 'size-xl shrink-0 fill-danger',
     retryIconDisabled: 'size-xl shrink-0 fill-disabled',

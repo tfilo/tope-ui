@@ -8,7 +8,8 @@ const theme = {
     base: 'border-b border-default flex flex-row gap-xl shadow',
     menu: 'min-w-0 flex-1 flex flex-row gap-lg overflow-y-auto p-lg',
     actions: 'shrink-0 flex flex-row gap-lg p-lg',
-    button: 'min-w-[32px] min-h-[32px] max-tablet:w-fit max-tablet:min-w-[32px] max-tablet:px-[0px]',
+    button: (dropdown = false) =>
+        `min-w-[32px] min-h-[32px] max-tablet:w-fit max-tablet:min-w-[32px] ${dropdown ? 'max-tablet:px-md' : 'max-tablet:px-none'}`,
     label: 'hidden text-inherit tablet:inline'
 } as const;
 
@@ -31,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                                 buttonProps={{
                                     variant: active ? 'primary' : 'outline',
                                     icon: m.icon,
-                                    additionalClassName: theme.button,
+                                    additionalClassName: theme.button(true),
                                     'aria-label': m.label,
                                     'aria-current': active ? 'page' : undefined,
                                     title: m.label
@@ -56,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             icon={m.icon}
                             onClick={m.onClick}
                             variant={active ? 'primary' : 'outline'}
-                            additionalClassName={theme.button}
+                            additionalClassName={theme.button()}
                             aria-label={m.label}
                             aria-current={active ? 'page' : undefined}
                             title={m.label}
@@ -71,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                     {onProfile !== null && (
                         <Button
                             icon={UserCircleIcon}
-                            additionalClassName={theme.button}
+                            additionalClassName={theme.button()}
                             aria-label={localization.profile}
                             title={localization.profile}
                             variant='outline'
@@ -83,7 +84,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                     {onLogout !== null && (
                         <Button
                             icon={ArrowLeftStartOnRectangleIcon}
-                            additionalClassName={theme.button}
+                            additionalClassName={theme.button()}
                             aria-label={localization.logout}
                             title={localization.logout}
                             variant='outline'

@@ -49,6 +49,12 @@ export const WithoutBorder: Story = {
     }
 };
 
+export const WithoutTitle: Story = {
+    args: {
+        children: 'A section can group content without displaying a heading.'
+    }
+};
+
 export const SectionInSection: Story = {
     args: {
         title: 'Main section',

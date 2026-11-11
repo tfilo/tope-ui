@@ -1,6 +1,16 @@
 @import 'tailwindcss';
 @import './theme.css';
 
+@keyframes tope-ui-reveal-page-loading {
+    from {
+        visibility: hidden;
+    }
+
+    to {
+        visibility: visible;
+    }
+}
+
 .tope-ui-dropdown {
     width: fit-content;
     min-width: calc(anchor-size(width) + 2px);

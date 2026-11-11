@@ -213,12 +213,42 @@ strings are not UTC timestamps.
 - **Grid**
 - **Header**
 - **Page**
+- **PageLoadingOverlay**
 - **Section**
 
 Header uses CSS media queries to show icon-only navigation below the tablet
 breakpoint (768px by default), including during server rendering. Button labels
 remain available to assistive technology and through native tooltips. Buttons
 and dropdowns outside Header keep their usual label visibility.
+
+#### Page loading overlay
+
+`PageLoadingOverlay` shows a centered spinner over the previous page with a
+translucent, blurred backdrop after 200ms. It renders nothing when `active` is
+false. Text defaults to the existing Slovak `localization.loading`; pass `label`
+for a translated message from your application.
+
+Keep Header outside a relatively positioned container and keep the previous
+page mounted inside it. The application supplies navigation state and makes the
+covered content `inert` to block clicks and keyboard focus while loading:
+
+```tsx
+import { Content, Header, PageLoadingOverlay } from '@tfilo/tope-ui';
+
+<>
+    <Header />
+    <main className="relative flex flex-1 flex-col">
+        <div inert={isNavigating} aria-busy={isNavigating}>
+            <Content>{children}</Content>
+        </div>
+        <PageLoadingOverlay active={isNavigating} />
+    </main>
+</>
+```
+
+The component uses CSS for the reveal delay and supports server rendering without
+browser APIs. Spinner animation respects reduced-motion preferences. Router state,
+data loading, and content interaction remain under the application's control.
 
 ### Utils
 

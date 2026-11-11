@@ -203,7 +203,6 @@ strings are not UTC timestamps.
 
 - **form-context** - shared TanStack Form field and form contexts
 - **form** - `useAppForm`, `withForm`, and `withFieldGroup`, with registered field and form components
-- **useWindowSize** - detects breakpoint changes when the user resizes the window
 
 ### Layout
 
@@ -215,6 +214,11 @@ strings are not UTC timestamps.
 - **Header**
 - **Page**
 - **Section**
+
+Header uses CSS media queries to show icon-only navigation below the tablet
+breakpoint (768px by default), including during server rendering. Button labels
+remain available to assistive technology and through native tooltips. Buttons
+and dropdowns outside Header keep their usual label visibility.
 
 ### Utils
 

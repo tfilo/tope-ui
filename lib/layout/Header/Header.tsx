@@ -1,14 +1,15 @@
 import { ArrowLeftStartOnRectangleIcon, UserCircleIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
-import { useWindowSize } from '../../hooks/use-window-size';
 import { Button, Dropdown } from '../../general';
 import type { HeaderProps } from './Header.types';
 
 const theme = {
     base: 'border-b border-default flex flex-row gap-xl shadow',
-    menu: 'flex-1 flex flex-row gap-lg overflow-y-auto p-lg',
-    actions: 'flex flex-row gap-lg p-lg'
+    menu: 'min-w-0 flex-1 flex flex-row gap-lg overflow-y-auto p-lg',
+    actions: 'shrink-0 flex flex-row gap-lg p-lg',
+    button: 'min-w-[32px] min-h-[32px] max-tablet:w-fit max-tablet:min-w-[32px] max-tablet:px-[0px]',
+    label: 'hidden tablet:inline'
 } as const;
 
 /**
@@ -16,8 +17,6 @@ const theme = {
  */
 export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null }) => {
     const hasProfileOrLogout = onProfile !== null || onLogout !== null;
-    const size = useWindowSize();
-    const isMobile = size === 'mobile';
 
     return (
         <header className={theme.base}>
@@ -30,7 +29,9 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                                 buttonProps={{
                                     variant: 'outline',
                                     icon: m.icon,
-                                    showChildren: !isMobile
+                                    additionalClassName: theme.button,
+                                    'aria-label': m.label,
+                                    title: m.label
                                 }}
                                 options={m.menu.map((mm) => {
                                     return {
@@ -40,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                                     };
                                 })}
                             >
-                                {m.label}
+                                <span className={theme.label}>{m.label}</span>
                             </Dropdown>
                         );
                     }
@@ -51,9 +52,11 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             icon={m.icon}
                             onClick={m.onClick}
                             variant='outline'
-                            showChildren={!isMobile}
+                            additionalClassName={theme.button}
+                            aria-label={m.label}
+                            title={m.label}
                         >
-                            {m.label}
+                            <span className={theme.label}>{m.label}</span>
                         </Button>
                     );
                 })}
@@ -63,21 +66,25 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                     {onProfile !== null && (
                         <Button
                             icon={UserCircleIcon}
-                            showChildren={!isMobile}
+                            additionalClassName={theme.button}
+                            aria-label={localization.profile}
+                            title={localization.profile}
                             variant='outline'
                             onClick={onProfile}
                         >
-                            {localization.profile}
+                            <span className={theme.label}>{localization.profile}</span>
                         </Button>
                     )}
                     {onLogout !== null && (
                         <Button
                             icon={ArrowLeftStartOnRectangleIcon}
-                            showChildren={!isMobile}
+                            additionalClassName={theme.button}
+                            aria-label={localization.logout}
+                            title={localization.logout}
                             variant='outline'
                             onClick={onLogout}
                         >
-                            {localization.logout}
+                            <span className={theme.label}>{localization.logout}</span>
                         </Button>
                     )}
                 </div>

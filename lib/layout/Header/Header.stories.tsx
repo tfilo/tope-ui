@@ -40,40 +40,37 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
     play: async ({ args, canvas, userEvent }) => {
-        const users = canvas.getByText('Users');
+        const users = canvas.getByRole('button', { name: 'Users' });
         await expect(users).toBeVisible();
-        await expect(users.tagName).toBe('BUTTON');
         await userEvent.click(users);
 
-        args.menu![0].menu!.forEach(async (item) => {
-            const el = canvas.getByText(item.label);
-            await expect(el).toBeVisible();
-            await expect(el.tagName).toBe('BUTTON');
-            await userEvent.click(el);
-            await expect(item.onClick).toHaveBeenCalled();
-        });
+        const item = args.menu![0].menu![0];
+        await userEvent.click(canvas.getByRole('button', { name: item.label }));
+        await expect(item.onClick).toHaveBeenCalled();
 
-        const map = canvas.getByText('Map');
+        if (window.matchMedia('(width < 48rem)').matches) {
+            await expect(canvas.getByText('Map')).not.toBeVisible();
+        } else {
+            await expect(canvas.getByText('Map')).toBeVisible();
+        }
+
+        const map = canvas.getByRole('button', { name: 'Map' });
         await expect(map).toBeVisible();
-        await expect(map.tagName).toBe('BUTTON');
         await userEvent.click(map);
         await expect(args.menu![1].onClick).toHaveBeenCalled();
 
-        const camera = canvas.getByText('Camera');
+        const camera = canvas.getByRole('button', { name: 'Camera' });
         await expect(camera).toBeVisible();
-        await expect(camera.tagName).toBe('BUTTON');
         await userEvent.click(camera);
         await expect(args.menu![2].onClick).toHaveBeenCalled();
 
-        const profile = canvas.getByText('Profil');
+        const profile = canvas.getByRole('button', { name: 'Profil' });
         await expect(profile).toBeVisible();
-        await expect(profile.tagName).toBe('BUTTON');
         await userEvent.click(profile);
         await expect(args.onProfile).toHaveBeenCalled();
 
-        const logout = canvas.getByText('Odhlásiť sa');
+        const logout = canvas.getByRole('button', { name: 'Odhlásiť sa' });
         await expect(logout).toBeVisible();
-        await expect(logout.tagName).toBe('BUTTON');
         await userEvent.click(logout);
         await expect(args.onLogout).toHaveBeenCalled();
     },

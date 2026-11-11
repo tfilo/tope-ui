@@ -78,3 +78,9 @@ dialog::backdrop {
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
 }
+
+/* Keep compact row action menus readable before their popover changes position. */
+.tope-ui-table-mobile .tope-ui-dropdown {
+    min-width: max-content;
+    max-width: calc(100vw - 32px);
+}

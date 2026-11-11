@@ -199,6 +199,35 @@ strings are not UTC timestamps.
 - **Table**
 - **Tag**
 
+#### Table row navigation and mobile layout
+
+For a dots-only actions menu, use `<Dropdown showChevron={false}>⋮</Dropdown>`
+with the usual `options` and an accessible trigger label in `buttonProps`.
+Other dropdowns continue to show their chevron by default.
+
+`Table` accepts two optional callbacks:
+
+- `onRowClick(row)` opens the row's detail using your application's router. Clickable rows support Enter and Space and have a subtle hover/focus highlight. Buttons, links, form controls, and dropdown actions inside the row keep their own behavior without opening the detail. Selecting text does not open the row.
+- `renderMobileRow(row)` renders a compact list item below the tablet breakpoint (768px). The normal columns remain visible on larger screens. Without this callback, tables retain their existing layout on every screen.
+
+Both layouts use the same fetched/sorted rows, loading state, error handling, and pagination. CSS switches their visibility without a window-size hook, including during SSR. Renderers should return presentational content; both layouts are mounted, so avoid side effects or duplicate fixed HTML IDs in cell/row renderers. Mobile rows replace column headings; include meaningful labels and units in their content. Desktop sorting stays in the table headings; apps needing mobile sorting can provide a separate control.
+
+```tsx
+<Table
+    columns={columns}
+    onFetch={fetchRecords}
+    onRowClick={(row) => openDetail(row.id)}
+    renderMobileRow={(row) => (
+        <div>
+            <strong>{row.title}</strong>
+            <p>{row.date} · {row.total}</p>
+        </div>
+    )}
+/>
+```
+
+See **General → Table → Responsive rows** in Storybook for a fuel-record example with independent row actions.
+
 ### Hooks
 
 - **form-context** - shared TanStack Form field and form contexts

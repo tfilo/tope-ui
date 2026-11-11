@@ -59,7 +59,9 @@ export const Table = <TData extends RowObject>({
     pageSize = 10,
     data: _data,
     onFetch,
-    showHeader = true
+    showHeader = true,
+    onRowClick,
+    renderMobileRow
 }: TableProps<TData>): ReactElement => {
     //const [pageSize, setPageSize] = useState(_pageSize);
 
@@ -208,6 +210,40 @@ export const Table = <TData extends RowObject>({
         });
     }, [_data, columns, sort]);
 
+    const rows = staticData ?? data.map((row, index) => ({ row, index }));
+    const rowClassName = onRowClick
+        ? 'cursor-pointer hover:bg-secondary-extra-light/50 focus-visible:bg-secondary-extra-light/50'
+        : undefined;
+
+    function rowInteraction(row: TData) {
+        if (!onRowClick) return {};
+
+        return {
+            tabIndex: 0,
+            onClick: (event: React.MouseEvent<HTMLElement>) => {
+                if (event.defaultPrevented) return;
+
+                const target = event.target;
+                if (
+                    target instanceof Element &&
+                    target.closest(
+                        'button, a, input, select, textarea, label, summary, [role="button"], [role="menu"], [role="menuitem"], [contenteditable="true"]'
+                    )
+                )
+                    return;
+                if (window.getSelection()?.toString()) return;
+
+                void onRowClick(row);
+            },
+            onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+                if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return;
+
+                event.preventDefault();
+                void onRowClick(row);
+            }
+        };
+    }
+
     return (
         <div className={theme.wrapper}>
             <div
@@ -215,7 +251,7 @@ export const Table = <TData extends RowObject>({
                 aria-busy={hasFetch ? isLoading : undefined}
             >
                 <table
-                    className={theme.table}
+                    className={`${theme.table}${renderMobileRow ? ' hidden tablet:table' : ''}`}
                     inert={hasFetch && isLoading}
                 >
                     {showHeader && (
@@ -237,8 +273,12 @@ export const Table = <TData extends RowObject>({
                         </thead>
                     )}
                     <tbody>
-                        {(staticData ?? data.map((row, index) => ({ row, index }))).map(({ row, index }) => (
-                            <tr key={`${index}_${Object.values(row).join('_')}`}>
+                        {rows.map(({ row, index }) => (
+                            <tr
+                                key={`${index}_${Object.values(row).join('_')}`}
+                                className={rowClassName}
+                                {...rowInteraction(row)}
+                            >
                                 {columns.map((col) => (
                                     <td
                                         key={`${col.accessor.toString()}_${col.header}`}
@@ -254,6 +294,22 @@ export const Table = <TData extends RowObject>({
                         ))}
                     </tbody>
                 </table>
+                {renderMobileRow && (
+                    <ul
+                        className='tope-ui-table-mobile tablet:hidden'
+                        inert={hasFetch && isLoading}
+                    >
+                        {rows.map(({ row, index }) => (
+                            <li
+                                key={`${index}_${Object.values(row).join('_')}`}
+                                className={`border-b border-default py-lg ${rowClassName ?? ''}`}
+                                {...rowInteraction(row)}
+                            >
+                                {renderMobileRow(row)}
+                            </li>
+                        ))}
+                    </ul>
+                )}
                 {hasFetch && isLoading && (
                     <div
                         className={theme.loading}

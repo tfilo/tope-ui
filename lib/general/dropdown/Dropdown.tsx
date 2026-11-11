@@ -23,7 +23,7 @@ const theme = {
 /**
  * Dropdown component that renders as button which open list of options when clicked. Using native popover feature.
  */
-export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonProps }) => {
+export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonProps, showChevron = true }) => {
     const baseId = useId();
     const popoverRef = useRef<HTMLDivElement>(null);
     const popoverId = `${baseId}-popover`;
@@ -36,7 +36,8 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                 popoverTarget={popoverId}
                 style={{ anchorName: `--dropdown_${baseId}` }}
             >
-                {buttonProps?.showChildren !== false && children} <ChevronDownIcon className={theme.icon} />
+                {buttonProps?.showChildren !== false && children}
+                {showChevron && <ChevronDownIcon className={theme.icon} />}
             </Button>
             <div
                 id={popoverId}

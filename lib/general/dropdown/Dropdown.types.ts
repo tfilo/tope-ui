@@ -4,6 +4,7 @@ import type { Icon } from '../../common/Icon';
 type OptionWithIconAndAction = {
     label: string;
     disabled?: boolean;
+    active?: boolean;
     icon?: Icon;
     onClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
 };

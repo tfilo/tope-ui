@@ -107,6 +107,47 @@ export const MenuOnly: Story = {
     }
 };
 
+export const ActiveItem: Story = {
+    args: {
+        menu: [
+            { label: 'Map', icon: MapIcon, onClick: fn(), active: true },
+            { label: 'Camera', icon: CameraIcon, onClick: fn() }
+        ]
+    },
+    play: async ({ canvas }) => {
+        await expect(canvas.getByRole('button', { name: 'Map' })).toHaveClass('bg-primary');
+        await expect(canvas.getByRole('button', { name: 'Map' })).toHaveAttribute('aria-current', 'page');
+        await expect(canvas.getByText('Map')).toHaveStyle({ color: 'rgb(255, 255, 255)' });
+        await expect(canvas.getByRole('button', { name: 'Camera' })).not.toHaveClass('bg-primary');
+    }
+};
+
+export const ActiveDropdown: Story = {
+    args: {
+        menu: [
+            {
+                label: 'Users',
+                icon: UsersIcon,
+                menu: [
+                    { label: 'User 1', icon: UserIcon, onClick: fn(), active: true },
+                    { label: 'User 2', icon: UserIcon, onClick: fn() }
+                ]
+            }
+        ]
+    },
+    play: async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole('button', { name: 'Users' });
+
+        await expect(trigger).toHaveClass('bg-primary');
+        await userEvent.click(trigger);
+        const activeItem = canvas.getByRole('button', { name: 'User 1' });
+
+        await expect(activeItem).toHaveAttribute('aria-current', 'page');
+        await expect(activeItem.parentElement).toHaveClass('bg-primary');
+        await expect(canvas.getByRole('button', { name: 'User 2' })).not.toHaveAttribute('aria-current');
+    }
+};
+
 export const LogoutOnly: Story = {
     args: {
         onLogout: fn()

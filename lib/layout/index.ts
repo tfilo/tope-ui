@@ -5,4 +5,5 @@ export * from './Flex';
 export * from './Grid';
 export * from './Header';
 export * from './Page';
+export * from './PageLoadingOverlay';
 export * from './Section';

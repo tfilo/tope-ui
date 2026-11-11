@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 type ColumnValue = string | number | boolean | bigint | number | undefined;
 export type RowObject = Record<string, ColumnValue>;
@@ -81,6 +81,10 @@ export type CellProps<TData extends RowObject> = {
 export type TableProps<TData extends RowObject> = {
     columns: { [K in keyof TData]: Column<TData, K> }[keyof TData][];
     showHeader?: boolean;
+    /** Open a row's detail. Interactive elements inside a row keep their own behavior. */
+    onRowClick?: (row: TData) => void | Promise<void>;
+    /** Optional compact layout below the tablet breakpoint. Shares table data and pagination. */
+    renderMobileRow?: (row: TData) => ReactNode;
 } & TableDataOrFetch<TData>;
 
 export type TablePaginationProps = {

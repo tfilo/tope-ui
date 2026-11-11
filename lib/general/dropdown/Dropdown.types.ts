@@ -10,6 +10,8 @@ type OptionWithIconAndAction = {
 };
 
 export type DropdownProps = React.PropsWithChildren<{
+    /** Show the down chevron next to the trigger content. Disable for a dots menu. */
+    showChevron?: boolean;
     buttonProps?: Omit<ButtonProps<'button'>, 'as' | 'ref' | 'children'>;
     options: OptionWithIconAndAction[];
 }>;

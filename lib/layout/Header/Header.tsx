@@ -5,11 +5,13 @@ import { Button, Dropdown } from '../../general';
 import type { HeaderProps } from './Header.types';
 
 const theme = {
-    base: 'border-b border-default flex flex-row gap-xl shadow',
-    menu: 'min-w-0 flex-1 flex flex-row gap-lg overflow-y-auto p-lg',
-    actions: 'shrink-0 flex flex-row gap-lg p-lg',
+    base: 'border-b border-light bg-white flex flex-row items-center gap-xl',
+    menu: 'min-w-0 flex flex-row gap-sm overflow-x-auto rounded-lg bg-secondary-extra-light mx-lg my-md p-sm empty:bg-transparent empty:m-none empty:p-none',
+    actions: 'ml-auto shrink-0 flex flex-row gap-lg p-lg',
     button: (dropdown = false) =>
-        `min-w-[32px] min-h-[32px] max-tablet:w-fit max-tablet:min-w-[32px] ${dropdown ? 'max-tablet:px-md' : 'max-tablet:px-none'}`,
+        `min-w-[32px] min-h-[32px] rounded-md! max-tablet:w-fit max-tablet:min-w-[32px] ${dropdown ? 'max-tablet:px-md' : 'max-tablet:px-none'}`,
+    activeButton: 'shadow-sm',
+    actionButton: 'text-secondary fill-secondary',
     label: 'hidden text-inherit tablet:inline'
 } as const;
 
@@ -30,9 +32,9 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             <Dropdown
                                 key={m.label}
                                 buttonProps={{
-                                    variant: active ? 'primary' : 'outline',
+                                    variant: active ? 'primary' : 'transparent',
                                     icon: m.icon,
-                                    additionalClassName: theme.button(true),
+                                    additionalClassName: `${theme.button(true)} ${active ? theme.activeButton : ''}`,
                                     'aria-label': m.label,
                                     'aria-current': active ? 'page' : undefined,
                                     title: m.label
@@ -56,8 +58,8 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             key={m.label}
                             icon={m.icon}
                             onClick={m.onClick}
-                            variant={active ? 'primary' : 'outline'}
-                            additionalClassName={theme.button()}
+                            variant={active ? 'primary' : 'transparent'}
+                            additionalClassName={`${theme.button()} ${active ? theme.activeButton : ''}`}
                             aria-label={m.label}
                             aria-current={active ? 'page' : undefined}
                             title={m.label}
@@ -72,10 +74,10 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                     {onProfile !== null && (
                         <Button
                             icon={UserCircleIcon}
-                            additionalClassName={theme.button()}
+                            additionalClassName={`${theme.button()} ${theme.actionButton}`}
                             aria-label={localization.profile}
                             title={localization.profile}
-                            variant='outline'
+                            variant='transparent'
                             onClick={onProfile}
                         >
                             <span className={theme.label}>{localization.profile}</span>
@@ -84,10 +86,10 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                     {onLogout !== null && (
                         <Button
                             icon={ArrowLeftStartOnRectangleIcon}
-                            additionalClassName={theme.button()}
+                            additionalClassName={`${theme.button()} ${theme.actionButton}`}
                             aria-label={localization.logout}
                             title={localization.logout}
-                            variant='outline'
+                            variant='transparent'
                             onClick={onLogout}
                         >
                             <span className={theme.label}>{localization.logout}</span>

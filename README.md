@@ -226,6 +226,10 @@ variant, and a dropdown trigger is primary when it or any of its options is
 active. Active dropdown options are highlighted as well. The application decides
 which items are active from its current route; Header does not depend on a router.
 
+Navigation items share a rounded `secondary-extra-light` background. Inactive
+items use transparent buttons, while Profile and Logout sit outside the group.
+These styles are scoped to Header and do not change standalone buttons or dropdowns.
+
 #### Page loading overlay
 
 `PageLoadingOverlay` shows a centered spinner over the previous page with a

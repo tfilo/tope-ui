@@ -9,7 +9,7 @@ const theme = {
     menu: 'min-w-0 flex-1 flex flex-row gap-lg overflow-y-auto p-lg',
     actions: 'shrink-0 flex flex-row gap-lg p-lg',
     button: 'min-w-[32px] min-h-[32px] max-tablet:w-fit max-tablet:min-w-[32px] max-tablet:px-[0px]',
-    label: 'hidden tablet:inline'
+    label: 'hidden text-inherit tablet:inline'
 } as const;
 
 /**
@@ -22,21 +22,25 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
         <header className={theme.base}>
             <nav className={theme.menu}>
                 {menu.map((m) => {
+                    const active = m.active || m.menu?.some((item) => item.active);
+
                     if (m.menu !== undefined) {
                         return (
                             <Dropdown
                                 key={m.label}
                                 buttonProps={{
-                                    variant: 'outline',
+                                    variant: active ? 'primary' : 'outline',
                                     icon: m.icon,
                                     additionalClassName: theme.button,
                                     'aria-label': m.label,
+                                    'aria-current': active ? 'page' : undefined,
                                     title: m.label
                                 }}
                                 options={m.menu.map((mm) => {
                                     return {
                                         label: mm.label,
                                         icon: mm.icon,
+                                        active: mm.active,
                                         onClick: mm.onClick
                                     };
                                 })}
@@ -51,9 +55,10 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             key={m.label}
                             icon={m.icon}
                             onClick={m.onClick}
-                            variant='outline'
+                            variant={active ? 'primary' : 'outline'}
                             additionalClassName={theme.button}
                             aria-label={m.label}
+                            aria-current={active ? 'page' : undefined}
                             title={m.label}
                         >
                             <span className={theme.label}>{m.label}</span>

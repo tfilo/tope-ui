@@ -6,12 +6,18 @@ import type { DropdownProps } from './Dropdown.types';
 
 const theme = {
     wrapper: 'relative',
-    button: 'w-full flex cursor-pointer flex-row gap-sm focus:outline-none disabled:cursor-default',
+    button: 'w-full flex cursor-pointer flex-row gap-sm text-inherit fill-inherit focus:outline-none disabled:cursor-default',
     icon: 'w-xl fill-inherit',
     dropdown: 'tope-ui-dropdown absolute rounded-sm shadow-sm border p-sm',
     dropdownItems: 'flex max-h-[min(200px,50vh)] w-full flex-col',
-    dropdownItem: (isDisabled: boolean = false) =>
-        `${isDisabled ? 'text-disabled' : 'has-focus-within:outline-2 has-hover:bg-secondary-extra-light'} rounded-sm px-sm py-md wrap-anywhere outline-primary focus:z-10`
+    dropdownItem: (isDisabled: boolean = false, active: boolean = false) => {
+        let state = 'has-focus-within:outline-2 has-hover:bg-secondary-extra-light';
+
+        if (active) state = 'bg-primary text-white fill-white has-focus-within:outline-2 has-hover:bg-primary-dark';
+        if (isDisabled) state = 'text-disabled';
+
+        return `${state} rounded-sm px-sm py-md wrap-anywhere outline-primary focus:z-10`;
+    }
 } as const;
 
 /**
@@ -47,10 +53,11 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                         return (
                             <li
                                 key={o.label}
-                                className={theme.dropdownItem(o.disabled)}
+                                className={theme.dropdownItem(o.disabled, o.active)}
                             >
                                 <button
                                     type='button'
+                                    aria-current={o.active ? 'page' : undefined}
                                     onClick={(e) => {
                                         popoverRef.current?.hidePopover();
                                         o.onClick(e);

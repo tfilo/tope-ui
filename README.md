@@ -221,6 +221,11 @@ breakpoint (768px by default), including during server rendering. Button labels
 remain available to assistive technology and through native tooltips. Buttons
 and dropdowns outside Header keep their usual label visibility.
 
+Header menu items accept `active?: boolean`. Active buttons use the primary
+variant, and a dropdown trigger is primary when it or any of its options is
+active. Active dropdown options are highlighted as well. The application decides
+which items are active from its current route; Header does not depend on a router.
+
 #### Page loading overlay
 
 `PageLoadingOverlay` shows a centered spinner over the previous page with a

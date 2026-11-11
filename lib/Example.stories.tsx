@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Column, Content, Flex, Grid, Header, Page, Section } from './layout';
-import { fn } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
 import { useAppForm } from './hooks';
 import type { OnSearchResult } from './form/autocomplete/Autocomplete.types';
 import type { Option } from './common';
@@ -10,7 +10,14 @@ const meta = {
     tags: ['autodocs'],
     parameters: {
         layout: 'fullscreen'
-    }
+    },
+    decorators: [
+        (Story) => (
+            <div className='bg-black/2'>
+                <Story />
+            </div>
+        )
+    ]
 } satisfies Meta;
 
 export default meta;
@@ -288,6 +295,17 @@ const onFetch = async (value: string) => {
 };
 
 export const Example: Story = {
+    play: async ({ canvas }) => {
+        const fields = [...canvas.getAllByRole('textbox'), ...canvas.getAllByRole('combobox'), ...canvas.getAllByRole('spinbutton')];
+
+        for (const field of fields) {
+            await expect(field.closest('.component')).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' });
+        }
+
+        const section = canvas.getByRole('heading', { name: 'Address' }).parentElement;
+
+        await expect(section).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' });
+    },
     render: () => {
         const form = useAppForm({
             defaultValues: {

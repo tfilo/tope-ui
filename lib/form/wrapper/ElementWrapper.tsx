@@ -4,7 +4,7 @@ import type { ElementWrapperProps } from './ElementWrapper.types';
 
 const theme = {
     wrapper: 'flex-1 flex flex-col gap-sm',
-    base: 'border rounded-sm flex flex-row',
+    base: 'border rounded-sm bg-white flex flex-row',
     state: {
         default: (isDisabled: boolean = false) => {
             if (isDisabled) {

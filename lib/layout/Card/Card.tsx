@@ -14,7 +14,7 @@ const theme = {
     actionBtn: 'right-sm top-sm absolute w-[32px]! h-[32px]! fill-black/20 hover:fill-black/80 focus:fill-black/80 rounded-sm',
     card: (hasOnClick: boolean) =>
         `rounded-sm border border-default ${hasOnClick ? 'card-main cursor-pointer' : 'cursor-default'} flex aspect-square w-full flex-col`,
-    description: 'bg-secondary-light/20 p-lg text-justify text-base',
+    description: 'bg-secondary-light/60 p-lg text-justify text-base',
     title: 'text-headline-5',
     descriptionText: 'text-default',
     spacer: 'flex-1'

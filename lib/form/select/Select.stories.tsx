@@ -1,4 +1,5 @@
 import { expect, fn } from 'storybook/test';
+import { Modal } from '../../general/modal';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { useAppForm } from '../../hooks/form';
@@ -297,5 +298,48 @@ export const KeyboardNavigation: Story = {
         await userEvent.keyboard('{Tab}');
         await userEvent.keyboard('{Tab}');
         await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    }
+};
+
+export const InsideModal: Story = {
+    args: {
+        label: 'Role',
+        options: [
+            { value: 'user', label: 'User' },
+            { value: 'admin', label: 'Administrator' }
+        ]
+    },
+    render: (args) => {
+        const form = useAppForm({ defaultValues: { role: 'admin' } });
+
+        return (
+            <Modal
+                openModal
+                title='Select inside a modal'
+                body={<form.AppField name='role'>{(field) => <field.Select {...args} />}</form.AppField>}
+            />
+        );
+    },
+    play: async ({ canvas, userEvent }) => {
+        const previousHeight = document.body.style.minHeight;
+
+        try {
+            document.body.style.minHeight = '200vh';
+            window.scrollTo(0, 200);
+
+            const trigger = canvas.getByRole('combobox');
+
+            await userEvent.click(trigger);
+
+            const popup = canvas.getByRole('listbox').closest<HTMLElement>('[popover]')!;
+
+            await expect(popup).toBeVisible();
+            await expect(Math.abs(popup.getBoundingClientRect().top - trigger.getBoundingClientRect().bottom)).toBeLessThan(16);
+            await userEvent.click(canvas.getByRole('option', { name: 'User' }));
+            await expect(trigger).toHaveFocus();
+        } finally {
+            document.body.style.minHeight = previousHeight;
+            window.scrollTo(0, 0);
+        }
     }
 };

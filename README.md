@@ -331,3 +331,7 @@ setLocalization({
 `setLocalization` merges the provided values into the shared localization object.
 Configure it consistently on the server and in the browser. These settings are
 shared across the application; they are not scoped to a component or request.
+
+### Starting a paginated table on another page
+
+For tables using `onFetch`, pass `initialPage` as a zero-based starting index (default `0`). For example, `<Table columns={columns} onFetch={onFetch} pageSize={25} initialPage={1} />` starts on the second page. It initializes state on mount; changing the prop later does not control pagination. Existing reset behavior when the fetch callback changes is preserved.

@@ -211,8 +211,9 @@ export const Table = <TData extends RowObject>({
     }, [_data, columns, sort]);
 
     const rows = staticData ?? data.map((row, index) => ({ row, index }));
+    // Paint focus inside the row and above sticky cells without intercepting clicks.
     const rowClassName = onRowClick
-        ? 'cursor-pointer hover:bg-secondary-extra-light/50 focus-visible:bg-secondary-extra-light/50'
+        ? 'relative cursor-pointer hover:bg-secondary-extra-light/50 focus-visible:bg-secondary-extra-light/50 focus:outline-none focus:after:pointer-events-none focus:after:absolute focus:after:inset-none focus:after:z-10 focus:after:rounded-sm focus:after:border-2 focus:after:border-primary'
         : undefined;
 
     function rowInteraction(row: TData) {
@@ -302,7 +303,7 @@ export const Table = <TData extends RowObject>({
                         {rows.map(({ row, index }) => (
                             <li
                                 key={`${index}_${Object.values(row).join('_')}`}
-                                className={`border-b border-default py-lg ${rowClassName ?? ''}`}
+                                className={`border-b border-default px-md py-lg ${rowClassName ?? ''}`}
                                 {...rowInteraction(row)}
                             >
                                 {renderMobileRow(row)}

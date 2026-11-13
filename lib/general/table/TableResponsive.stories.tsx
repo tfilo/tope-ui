@@ -56,6 +56,7 @@ const columns = createColumns<RecordRow>([
     {
         header: 'Akcie',
         accessor: 'status',
+        additionalClassName: 'w-none whitespace-nowrap border-l text-right sticky right-none bg-white shadow-lg shadow-secondary-light',
         cell: (row) => (
             <div className='flex gap-sm'>
                 <Button
@@ -133,6 +134,8 @@ export const FuelRecords: Story = {
         await expect(openDetail).toHaveBeenCalledTimes(1);
         const container = row.closest('tr, li')! as HTMLElement;
         container.focus();
+        await expect(getComputedStyle(container, '::after').borderTopWidth).toBe('2px');
+        await expect(getComputedStyle(container, '::after').pointerEvents).toBe('none');
         await userEvent.keyboard('{Enter}');
         await expect(openDetail).toHaveBeenCalledTimes(2);
         const edit = canvas.queryAllByRole('button', { name: 'Upraviť' });

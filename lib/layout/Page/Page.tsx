@@ -7,7 +7,7 @@ import { Button } from '../../general';
 import type { PageProps } from './Page.types';
 
 const theme = {
-    page: 'flex flex-1 flex-col gap-lg p-lg',
+    page: 'flex flex-1 flex-col gap-lg p-lg pt-xl tablet:pt-3xl',
     header: 'flex items-center gap-lg',
     title: 'text-headline-1'
 } as const;

@@ -484,3 +484,20 @@ export const StrictModeSortCycle: Story = {
         }
     }
 };
+
+export const InitialPage: Story = {
+    args: { columns: [], data: [] },
+    render: () => (
+        <Table<DataObject>
+            columns={columns}
+            onFetch={fetchMethod}
+            pageSize={5}
+            initialPage={1}
+        />
+    ),
+    play: async ({ canvas }) => {
+        await expect(await canvas.findByText('George')).toBeVisible();
+        await expect(canvas.getByLabelText('Aktuálna strana')).toHaveTextContent('2');
+        await expect(canvas.queryByText('Alice')).toBeNull();
+    }
+};

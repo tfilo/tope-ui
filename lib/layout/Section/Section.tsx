@@ -9,11 +9,11 @@ const theme = {
     },
     title: (hasBorder: boolean) => {
         return hasBorder
-            ? 'text-lg font-medium px-xl py-xl tablet:px-3xl tablet:py-2xl bg-primary-extra-light/10 border-b border-light shadow-[inset_3px_0_var(--color-primary)]'
+            ? 'text-lg font-medium p-lg bg-primary-extra-light/10 border-b border-light shadow-[inset_3px_0_var(--color-primary)]'
             : 'text-md font-bold py-lg border-b border-default';
     },
     content: (hasBorder: boolean) => {
-        return hasBorder ? 'p-xl tablet:p-3xl flex flex-col gap-lg' : 'flex flex-col gap-lg';
+        return hasBorder ? 'p-lg flex flex-col gap-lg' : 'flex flex-col gap-lg';
     }
 } as const;
 

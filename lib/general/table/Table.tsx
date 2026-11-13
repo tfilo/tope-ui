@@ -57,6 +57,7 @@ const baseCompareFn = (a: unknown, b: unknown): number => {
 export const Table = <TData extends RowObject>({
     columns,
     pageSize = 10,
+    initialPage = 0,
     data: _data,
     onFetch,
     showHeader = true,
@@ -78,7 +79,7 @@ export const Table = <TData extends RowObject>({
         throw new Error('Only data or onFetch must be provided, not both at a same time!');
     }
 
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(initialPage);
     const [previousOnFetch, setPreviousOnFetch] = useState(() => onFetch);
     if (previousOnFetch !== onFetch) {
         setPreviousOnFetch(() => onFetch);

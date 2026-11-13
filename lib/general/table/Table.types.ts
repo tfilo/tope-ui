@@ -27,6 +27,7 @@ type TableData<TData extends RowObject> = {
     onFetch?: never;
     /** Pagesize for paginated table */
     pageSize?: never;
+    initialPage?: never;
 };
 
 export type SortObject<TData extends RowObject> = { accessor: keyof TData; direction: 'asc' | 'desc' };
@@ -46,6 +47,8 @@ type TableFetch<TData extends RowObject> = {
         pageSize: number;
         totalRecords: number;
     }>;
+    /** Zero-based starting page. Read on mount only; defaults to 0. */
+    initialPage?: number;
     /** Pagesize for paginated table */
     pageSize?: number;
 };

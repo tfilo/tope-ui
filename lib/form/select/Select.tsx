@@ -221,7 +221,7 @@ export const Select: React.FC<SelectProps> = ({
                             onClick={handleClick}
                             onKeyDown={handleKeyDownOnOpenButton}
                         >
-                            <span className={`min-w-none truncate ${selectedOptions[0] ? '' : 'text-disabled'}`}>
+                            <span className={`min-w-none truncate py-xs ${selectedOptions[0] ? '' : 'text-disabled'}`}>
                                 {selectedOptions[0] ? getSelectedLabel(selectedOptions[0]) : placeholder}
                             </span>
                             {isOpen ? <ChevronUpIcon className='size-lg shrink-0' /> : <ChevronDownIcon className='size-lg shrink-0' />}

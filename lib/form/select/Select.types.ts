@@ -8,7 +8,7 @@ interface BaseProps {
     label?: string;
     /** Compact single selection without wrapping tags. Existing selects keep their default presentation. */
     compact?: boolean;
-    /** Label for the selected value; option labels in the dropdown remain unchanged. */
+    /** Label for selected values in regular and compact selects. Defaults to option.label; dropdown labels remain unchanged. */
     getSelectedLabel?: (option: Option) => string;
     /** Text shown when a compact select has no selected value. */
     placeholder?: string;

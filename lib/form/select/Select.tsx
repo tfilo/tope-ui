@@ -19,7 +19,7 @@ export const Select: React.FC<SelectProps> = ({
     allowEmptyOption = false,
     multiple = false,
     compact = false,
-    getSelectedLabel,
+    getSelectedLabel = (option: Option) => option.label,
     placeholder,
     disabled = false,
     required,
@@ -221,8 +221,8 @@ export const Select: React.FC<SelectProps> = ({
                             onClick={handleClick}
                             onKeyDown={handleKeyDownOnOpenButton}
                         >
-                            <span className='min-w-none truncate'>
-                                {selectedOptions[0] ? (getSelectedLabel?.(selectedOptions[0]) ?? selectedOptions[0].label) : placeholder}
+                            <span className={`min-w-none truncate ${selectedOptions[0] ? '' : 'text-disabled'}`}>
+                                {selectedOptions[0] ? getSelectedLabel(selectedOptions[0]) : placeholder}
                             </span>
                             {isOpen ? <ChevronUpIcon className='size-lg shrink-0' /> : <ChevronDownIcon className='size-lg shrink-0' />}
                         </Button>
@@ -231,7 +231,7 @@ export const Select: React.FC<SelectProps> = ({
                             {selectedOptions.map((option) => (
                                 <Tag
                                     key={option.value}
-                                    label={option.label}
+                                    label={getSelectedLabel(option)}
                                     disabled={disabled}
                                     variant='outline'
                                     onClick={handleTagClick}

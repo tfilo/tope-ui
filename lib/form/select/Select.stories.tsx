@@ -1,4 +1,4 @@
-import { expect, fn } from 'storybook/test';
+import { expect, fn, within } from 'storybook/test';
 import { Modal } from '../../general/modal';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -371,5 +371,29 @@ export const Compact: Story = {
         await userEvent.click(canvas.getByRole('option', { name: 'Kilogram (kg)' }));
         await expect(trigger).toHaveTextContent('kg');
         await expect(trigger).toHaveAttribute('title', 'Kilogram (kg)');
+    }
+};
+
+export const CustomSelectedLabels: Story = {
+    args: { ...Compact.args, compact: false, multiple: true },
+    parameters: { defaultValue: ['g'] },
+    play: async ({ canvas, userEvent }) => {
+        await expect(canvas.getByRole('button', { name: /^g$/ })).toBeVisible();
+        await userEvent.click(canvas.getByRole('combobox'));
+        await expect(canvas.getByRole('option', { name: 'Gram (g)' })).toBeVisible();
+        await userEvent.click(canvas.getByRole('option', { name: 'Kilogram (kg)' }));
+        await expect(canvas.getByRole('button', { name: /^g$/ })).toBeVisible();
+        await expect(canvas.getByRole('button', { name: /^kg$/ })).toBeVisible();
+    }
+};
+
+export const CompactPlaceholder: Story = {
+    args: { ...Compact.args, getSelectedLabel: undefined },
+    play: async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole('combobox');
+        await expect(within(trigger).getByText('Jednotka', { exact: true })).toHaveStyle({ color: 'rgb(153, 153, 153)' });
+        await userEvent.click(trigger);
+        await userEvent.click(canvas.getByRole('option', { name: 'Gram (g)' }));
+        await expect(within(trigger).getByText('Gram (g)', { exact: true })).not.toHaveStyle({ color: 'rgb(153, 153, 153)' });
     }
 };

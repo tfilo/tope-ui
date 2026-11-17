@@ -1,4 +1,5 @@
-import { expect } from 'storybook/test';
+import { PencilIcon, TrashIcon, ArrowDownTrayIcon } from '@heroicons/react/16/solid';
+import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Section } from './Section';
@@ -53,6 +54,39 @@ export const WithoutTitle: Story = {
     args: {
         children: 'A section can group content without displaying a heading.'
     }
+};
+
+export const WithActions: Story = {
+    args: {
+        title: 'Suroviny a postup prípravy domáceho receptu s čerstvými bylinkami a sezónnou zeleninou',
+        children: 'Obsah sekcie zostáva pod nadpisom. Ak je nadpis dlhý, zalomí sa a tlačidlá zostanú vpravo hore.',
+        actions: [
+            { icon: PencilIcon, title: 'Upraviť', onClick: fn() },
+            { icon: ArrowDownTrayIcon, title: 'Stiahnuť', onClick: fn(), disabled: true },
+            { icon: TrashIcon, title: 'Odstrániť', onClick: fn(), variant: 'danger' }
+        ]
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        const edit = canvas.getByRole('button', { name: 'Upraviť' });
+        await expect(edit).toHaveAttribute('title', 'Upraviť');
+        await expect(edit).toHaveAttribute('type', 'button');
+        await userEvent.click(edit);
+        await expect(args.actions![0].onClick).toHaveBeenCalledOnce();
+        const download = canvas.getByRole('button', { name: 'Stiahnuť' });
+        await expect(download).toBeDisabled();
+        await userEvent.click(download);
+        await expect(args.actions![1].onClick).not.toHaveBeenCalled();
+        await userEvent.click(canvas.getByRole('button', { name: 'Odstrániť' }));
+        await expect(args.actions![2].onClick).toHaveBeenCalledOnce();
+    }
+};
+
+export const ActionsWithoutBorder: Story = {
+    args: { ...WithActions.args, hasBorder: false }
+};
+
+export const ActionsWithoutTitle: Story = {
+    args: { ...WithActions.args, title: undefined }
 };
 
 export const SectionInSection: Story = {

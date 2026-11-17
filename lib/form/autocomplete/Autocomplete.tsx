@@ -531,6 +531,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                 className={theme.option.interactive(o.disabled)}
                             >
                                 <button
+                                    type='button'
                                     onClick={() => handleSelect(o)}
                                     onKeyDown={(e) => handleOptionKeyDown(e, o)}
                                     className={theme.option.button}

@@ -18,6 +18,9 @@ export const Select: React.FC<SelectProps> = ({
     options,
     allowEmptyOption = false,
     multiple = false,
+    compact = false,
+    getSelectedLabel = (option: Option) => option.label,
+    placeholder,
     disabled = false,
     required,
     className,
@@ -199,42 +202,81 @@ export const Select: React.FC<SelectProps> = ({
                     style={{ anchorName: `--select_${generatedId}` }}
                     onClick={handleControlClick}
                 >
-                    {selectedOptions.map((option) => (
-                        <Tag
-                            key={option.value}
-                            label={option.label}
+                    {compact && !multiple ? (
+                        <Button
+                            {...props}
+                            variant='transparent'
+                            role='combobox'
+                            id={selectId}
+                            ref={triggerRef}
+                            name={field.name}
                             disabled={disabled}
-                            variant='outline'
-                            onClick={handleTagClick}
-                            onRemove={canRemove ? () => handleRemoveOption(option) : undefined}
-                        />
-                    ))}
-                    <Button
-                        {...props}
-                        variant='transparent'
-                        showChildren={false}
-                        icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
-                        role='combobox'
-                        id={selectId}
-                        ref={triggerRef}
-                        name={field.name}
-                        disabled={disabled}
-                        aria-expanded={isOpen}
-                        aria-controls={`${selectId}-options`}
-                        aria-haspopup='listbox'
-                        aria-required={required}
-                        additionalClassName={`${theme.button} ml-auto h-[30px] w-[30px] shrink-0 self-start ${className ?? ''}`}
-                        onClick={handleClick}
-                        onKeyDown={handleKeyDownOnOpenButton}
-                    >
-                        {props.title}
-                    </Button>
+                            aria-expanded={isOpen}
+                            aria-controls={`${selectId}-options`}
+                            aria-haspopup='listbox'
+                            aria-required={required}
+                            aria-valuetext={selectedOptions[0]?.label}
+                            title={props.title ?? selectedOptions[0]?.label}
+                            className={`flex min-h-[30px] w-full min-w-none cursor-pointer items-center justify-between gap-xs rounded-sm px-sm text-left disabled:cursor-default ${className ?? ''}`}
+                            onClick={handleClick}
+                            onKeyDown={handleKeyDownOnOpenButton}
+                        >
+                            <span className={`min-w-none truncate ${selectedOptions[0] ? '' : 'text-disabled'}`}>
+                                {selectedOptions[0] ? getSelectedLabel(selectedOptions[0]) : placeholder}
+                            </span>
+                            {isOpen ? <ChevronUpIcon className='size-lg shrink-0' /> : <ChevronDownIcon className='size-lg shrink-0' />}
+                        </Button>
+                    ) : (
+                        <>
+                            {selectedOptions.map((option) => (
+                                <Tag
+                                    key={option.value}
+                                    label={getSelectedLabel(option)}
+                                    disabled={disabled}
+                                    variant='outline'
+                                    onClick={handleTagClick}
+                                    onRemove={canRemove ? () => handleRemoveOption(option) : undefined}
+                                />
+                            ))}
+                            <Button
+                                {...props}
+                                variant='transparent'
+                                showChildren={false}
+                                icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
+                                role='combobox'
+                                id={selectId}
+                                ref={triggerRef}
+                                name={field.name}
+                                disabled={disabled}
+                                aria-expanded={isOpen}
+                                aria-controls={`${selectId}-options`}
+                                aria-haspopup='listbox'
+                                aria-required={required}
+                                additionalClassName={`${theme.button} ml-auto h-[30px] w-[30px] shrink-0 self-start ${className ?? ''}`}
+                                onClick={handleClick}
+                                onKeyDown={handleKeyDownOnOpenButton}
+                            >
+                                {props.title}
+                            </Button>
+                        </>
+                    )}
                 </div>
                 <div
                     popover='manual'
                     ref={popoverRef}
                     className={theme.optionsWrapper}
-                    style={{ positionAnchor: `--select_${generatedId}`, maxHeight: '188px', overflowY: 'auto' }}
+                    style={{
+                        positionAnchor: `--select_${generatedId}`,
+                        maxHeight: '188px',
+                        overflowY: 'auto',
+                        ...(compact && !multiple
+                            ? {
+                                  left: 'clamp(12px, anchor(left), calc(100vw - 312px))',
+                                  right: 'auto',
+                                  width: 'min(300px, calc(100vw - 24px))'
+                              }
+                            : {})
+                    }}
                     onMouseDown={handlePopoverMouseDown}
                 >
                     <ul

@@ -98,3 +98,24 @@ export const ResponsiveLayout: Story = {
         </>
     )
 };
+
+export const OriginalLayout: Story = {
+    args: {
+        compactOnMobile: false,
+        title: 'Fotografia receptu',
+        description: 'Pôvodný štvorcový vzhľad aj na mobile.',
+        ariaLabel: 'Zobraziť fotografiu',
+        onClick: fn(),
+        onAction: fn()
+    },
+    play: async ({ args, canvas, userEvent }) => {
+        const card = canvas.getByRole('button', { name: 'Zobraziť fotografiu' });
+        const size = card.getBoundingClientRect();
+        await expect(size.width).toBe(size.height);
+        await userEvent.click(canvas.getByRole('button', { name: 'Upraviť' }));
+        await expect(args.onAction).toHaveBeenCalledOnce();
+        await expect(args.onClick).not.toHaveBeenCalled();
+        await userEvent.click(card);
+        await expect(args.onClick).toHaveBeenCalledOnce();
+    }
+};

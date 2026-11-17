@@ -302,7 +302,7 @@ export const Example: Story = {
             await expect(field.closest('.component')).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' });
         }
 
-        const section = canvas.getByRole('heading', { name: 'Address' }).parentElement;
+        const section = canvas.getByRole('heading', { name: 'Address' }).parentElement!.parentElement;
 
         await expect(section).toHaveStyle({ backgroundColor: 'rgb(255, 255, 255)' });
     },

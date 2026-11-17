@@ -6,6 +6,12 @@ import type { OptionGroup } from '../../common/OptionGroup';
 interface BaseProps {
     /** Optional label for select component */
     label?: string;
+    /** Compact single selection without wrapping tags. Existing selects keep their default presentation. */
+    compact?: boolean;
+    /** Label for the selected value; option labels in the dropdown remain unchanged. */
+    getSelectedLabel?: (option: Option) => string;
+    /** Text shown when a compact select has no selected value. */
+    placeholder?: string;
     /** Allow selecting multiple options */
     multiple?: boolean;
     /** Display the required indicator */

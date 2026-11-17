@@ -1,3 +1,4 @@
+import { TrashIcon } from '@heroicons/react/16/solid';
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
@@ -64,4 +65,36 @@ export const TitleOnly: Story = {
     args: {
         title: 'Project overview'
     }
+};
+
+export const RemoveAction: Story = {
+    args: { title: 'Recipe photo', actionIcon: TrashIcon, actionLabel: 'Remove photo', onAction: fn() },
+    play: async ({ args, canvas, userEvent }) => {
+        const remove = canvas.getByRole('button', { name: 'Remove photo' });
+        await userEvent.click(remove);
+        await expect(args.onAction).toHaveBeenCalledOnce();
+    }
+};
+
+export const ResponsiveLayout: Story = {
+    args: { onClick: fn(), onAction: fn() },
+    render: (args) => (
+        <>
+            <Card
+                {...args}
+                title='Raňajky'
+                description='Jednoduchý začiatok dňa.'
+            />
+            <Card
+                {...args}
+                title='Domáci chlieb s bylinkovým maslom a čerstvou zeleninou'
+                description='Chrumkavý chlieb podávame ešte teplý.'
+            />
+            <Card
+                {...args}
+                title='Zeleninová polievka'
+                description='Mrkvu, zemiaky a sezónnu zeleninu pomaly varíme v domácom vývare. Na záver pridáme čerstvé bylinky a podávame s krajcom domáceho chleba.'
+            />
+        </>
+    )
 };

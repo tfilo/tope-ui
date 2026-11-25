@@ -536,7 +536,7 @@ export const SearchCancellation: Story = {
             <>
                 <button
                     type='button'
-                    className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
+                    className='m-md cursor-pointer rounded-sm border px-md py-sm hover:bg-secondary-extra-light'
                     onClick={() => setVisible(!visible)}
                 >
                     Toggle autocomplete
@@ -582,7 +582,7 @@ export const SelectedLabelFailure: Story = {
                 <form.Subscribe selector={(state) => state.values.basic}>{(basic) => <output>{basic}</output>}</form.Subscribe>
                 <button
                     type='button'
-                    className='m-md rounded-sm border px-md py-sm cursor-pointer hover:bg-secondary-extra-light'
+                    className='m-md cursor-pointer rounded-sm border px-md py-sm hover:bg-secondary-extra-light'
                     onClick={() => form.setFieldValue('basic', 'banana')}
                 >
                     Set Banana

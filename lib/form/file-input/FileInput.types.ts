@@ -15,4 +15,8 @@ export interface FileInputProps {
     accept?: string;
     /** Optional error message for input component, if not blank, all input is in danger color */
     error?: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
+    /** Optional aria label for better accesibility */
+    'aria-label'?: string;
 }

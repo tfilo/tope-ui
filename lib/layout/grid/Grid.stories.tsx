@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Column } from '../Column';
+import { Column } from '../../layout/column';
 import { Grid } from './Grid';
 import { useAppForm } from '../../hooks';
 

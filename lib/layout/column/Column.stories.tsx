@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Grid } from '../Grid';
+import { Grid } from '../grid';
 import { Column } from './Column';
 
 const meta = {

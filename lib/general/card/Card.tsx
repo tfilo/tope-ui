@@ -5,7 +5,7 @@ import placeholder from '../../assets/placeholder.svg';
 
 import { isNotBlank } from '../../utils';
 import { localization } from '../../utils/constants';
-import { Button } from '../../general';
+import { Button } from '..';
 import type { CardProps } from './Card.types';
 
 const theme = {

@@ -1,5 +1,5 @@
 import { localization } from '../../utils/constants';
-import type { PageLoadingOverlayProps } from './PageLoadingOverlay.types';
+import type { LoadingOverlayProps } from './LoadingOverlay.types';
 
 const theme = {
     base: 'absolute inset-none z-20 animate-[tope-ui-reveal-page-loading_0s_200ms_both] bg-white/60 backdrop-blur-sm',
@@ -8,7 +8,7 @@ const theme = {
 } as const;
 
 /** Covers a relatively positioned page with a blurred loading overlay after 200ms. */
-export const PageLoadingOverlay: React.FC<PageLoadingOverlayProps> = ({ active, label = localization.loading }) => {
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ active, label = localization.loading }) => {
     if (!active) return null;
 
     return (

@@ -3,10 +3,10 @@ import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Card } from './Card';
-import { Grid } from '../Grid';
+import { Grid } from '../../layout/grid';
 
 const meta = {
-    title: 'Layout/Card',
+    title: 'General/Card',
     component: Card,
     tags: ['autodocs'],
     decorators: [

@@ -1,16 +1,16 @@
 import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { Button } from '../../general';
+import { Button } from '..';
 import { localization } from '../../utils/constants';
-import { Content } from '../Content';
-import { Header } from '../Header';
-import { Page } from '../Page';
-import { PageLoadingOverlay } from './PageLoadingOverlay';
+import { Content } from '../../layout/content';
+import { Header } from '../../layout/header';
+import { Page } from '../../layout/page';
+import { LoadingOverlay } from './LoadingOverlay';
 
 const meta = {
-    title: 'Layout/PageLoadingOverlay',
-    component: PageLoadingOverlay,
+    title: 'General/LoadingOverlay',
+    component: LoadingOverlay,
     tags: ['autodocs'],
     parameters: { layout: 'fullscreen' },
     args: { active: true },
@@ -38,7 +38,7 @@ const meta = {
             </div>
         )
     ]
-} satisfies Meta<typeof PageLoadingOverlay>;
+} satisfies Meta<typeof LoadingOverlay>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

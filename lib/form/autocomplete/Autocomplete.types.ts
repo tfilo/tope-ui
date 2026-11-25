@@ -19,6 +19,8 @@ interface BaseProps {
     onFetch: (value: string, abortSignal?: AbortSignal) => Promise<Option | null>;
     /** pageSize specify how many options to fetch per page, default is 10 */
     pageSize?: number;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 export interface AutocompleteProps

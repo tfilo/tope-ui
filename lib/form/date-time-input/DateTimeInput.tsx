@@ -29,7 +29,7 @@ import { isNotBlank } from '../../utils/string-utils';
 const theme = {
     action: {
         button: 'min-w-[30px] min-h-[30px]',
-        rightWrapper: 'relative flex flex-row border-l'
+        rightWrapper: 'border-l'
     },
     calendar: {
         wrapper: 'tope-ui-calendar absolute rounded-sm border shadow-sm',
@@ -53,7 +53,7 @@ const theme = {
     },
     fullWidth: 'w-full',
     flex: 'flex',
-    input: 'min-h-[30px] flex-1 px-md focus:outline-none'
+    input: 'min-w-[0px] min-h-[30px] flex-1 px-md focus:outline-none'
 } as const;
 
 const bgColor = {
@@ -263,6 +263,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
     placeholder,
     inputIconTitle,
     closeDateTimePickerIfSelected = true,
+    'data-testid': dataTestId,
     ...props
 }) => {
     const field = useFieldContext<string>();
@@ -349,7 +350,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
     const _id = useId();
     const baseId = id || _id;
-    const inputId = `input-${baseId}`;
+    const inputId = `date-input-${baseId}`;
 
     /** Determines the input placeholder string.
      * Logic flow:
@@ -797,10 +798,13 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                 required={props.required}
                 disabled={props.disabled}
                 elementId={inputId}
+                data-testid={dataTestId}
             >
                 <input
                     className={theme.input}
                     {...props}
+                    data-testid={dataTestId}
+                    aria-required={props.required}
                     type='text'
                     id={inputId}
                     placeholder={inputPlaceholder}
@@ -827,6 +831,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         disabled={props.disabled}
                         additionalClassName={theme.action.button}
                         style={{ anchorName: `--calendar_${baseId}` }}
+                        data-testid={dataTestId ? `${dataTestId}_btn` : undefined}
                     >
                         {inputIconTitle ?? (isOpen ? localization.dateTimeInput.closeCalendar : localization.dateTimeInput.openCalendar)}
                     </Button>
@@ -841,6 +846,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                     minHeight: '243px'
                 }}
                 ref={calendarRef}
+                data-testid={dataTestId ? `${dataTestId}_calendar` : undefined}
             >
                 {isOpen && (
                     <div className={theme.calendar.base}>
@@ -852,6 +858,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     icon={ChevronLeftIcon}
                                     onClick={() => changeMonthHandler(MonthDirection.PREVIOUS)}
                                     additionalClassName={theme.calendar.btnPrev}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_prev_btn` : undefined}
                                 >
                                     {localization.dateTimeInput.previousMonth}
                                 </Button>
@@ -870,6 +877,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                         })
                                     }
                                     additionalClassName={theme.calendar.btnMiddle}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_middle_btn` : undefined}
                                 >
                                     {selectedMonth === null
                                         ? `${localization.dateTimeInput.months[getMonth(new Date())]} `
@@ -882,6 +890,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     icon={ChevronRightIcon}
                                     onClick={() => changeMonthHandler(MonthDirection.NEXT)}
                                     additionalClassName={theme.calendar.btnNext}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_next_btn` : undefined}
                                 >
                                     {localization.dateTimeInput.nextMonth}
                                 </Button>
@@ -895,6 +904,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     icon={ChevronLeftIcon}
                                     onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) - 1)}
                                     additionalClassName={theme.calendar.btnPrev}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_prev_btn` : undefined}
                                 >
                                     {localization.dateTimeInput.previousYear}
                                 </Button>
@@ -913,6 +923,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                         })
                                     }
                                     additionalClassName={theme.calendar.btnMiddle}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_middle_btn` : undefined}
                                 >
                                     {selectedYear ?? getYear(new Date())}
                                 </Button>
@@ -922,13 +933,17 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     icon={ChevronRightIcon}
                                     onClick={() => changeYearHandler((selectedYear ?? getYear(new Date())) + 1)}
                                     additionalClassName={theme.calendar.btnNext}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_next_btn` : undefined}
                                 >
                                     {localization.dateTimeInput.nextYear}
                                 </Button>
                             </div>
                         )}
                         {pickerType === 'year' && (
-                            <ul className={theme.calendar.years}>
+                            <ul
+                                className={theme.calendar.years}
+                                data-testid={dataTestId ? `${dataTestId}_calendar_year_list` : undefined}
+                            >
                                 {yearsRange.map((year) => {
                                     let yearBgColor = '';
                                     if (year === getYear(new Date())) {
@@ -952,6 +967,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                 variant='outline'
                                                 additionalClassName={theme.calendar.yearBtn + ' ' + yearBgColor}
                                                 onClick={() => changeYearHandler(year)}
+                                                data-testid={dataTestId ? `${dataTestId}_calendar_year_list_item_${year}_btn` : undefined}
                                             >
                                                 {year}
                                             </Button>
@@ -962,7 +978,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                         )}
 
                         {pickerType === 'month' && (
-                            <ul className={theme.calendar.months}>
+                            <ul
+                                className={theme.calendar.months}
+                                data-testid={dataTestId ? `${dataTestId}_calendar_month_list` : undefined}
+                            >
                                 {allMonths.map((month) => {
                                     let monthBgColor = '';
                                     if (
@@ -985,6 +1004,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                 onClick={() => {
                                                     changeMonthAndYearHandler(selectedYear ?? getYear(new Date()), month);
                                                 }}
+                                                data-testid={dataTestId ? `${dataTestId}_calendar_month_list_item_${month.val}_btn` : undefined}
                                             >
                                                 {month.label.substring(0, 3)}
                                             </Button>
@@ -996,7 +1016,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
 
                         {pickerType === 'day' && (
                             <div className={theme.calendar.daysWrapper}>
-                                <table className={theme.calendar.days}>
+                                <table
+                                    className={theme.calendar.days}
+                                    data-testid={dataTestId ? `${dataTestId}_calendar_day_table` : undefined}
+                                >
                                     <thead>
                                         <tr>
                                             {days.map((d) => {
@@ -1005,6 +1028,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                         key={d}
                                                         className={theme.calendar.daysHeader}
                                                         aria-label={d}
+                                                        data-testid={
+                                                            dataTestId ? `${dataTestId}_calendar_day_table_header_${d.substring(0, 2)}` : undefined
+                                                        }
                                                     >
                                                         {d.substring(0, 2)}
                                                     </th>
@@ -1040,6 +1066,11 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                                     additionalClassName={dayBgColor + ' ' + theme.calendar.dayBtn}
                                                                     onClick={() => changeDayHandler(d)}
                                                                     disabled={d.day === null}
+                                                                    data-testid={
+                                                                        dataTestId
+                                                                            ? `${dataTestId}_calendar_day_table_body_${d.date}_${d.day}_btn`
+                                                                            : undefined
+                                                                    }
                                                                 >
                                                                     {d.date ?? ''}
                                                                 </Button>
@@ -1052,7 +1083,10 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                     </tbody>
                                 </table>
                                 {hasTime && (
-                                    <ul className={theme.calendar.times}>
+                                    <ul
+                                        className={theme.calendar.times}
+                                        data-testid={dataTestId ? `${dataTestId}_calendar_time_list` : undefined}
+                                    >
                                         {timeSlots.map((ts) => {
                                             const isSelected = ts.minute === selectedMinutes;
                                             const isNearestSlot = isSelected || ts.minute === getNearestSlot();
@@ -1069,6 +1103,7 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                             (isSelected ? 'bg-primary-light!' : '') + ' ' + theme.calendar.timeBtn
                                                         }
                                                         onClick={() => changeTimeHandler(ts.minute)}
+                                                        data-testid={dataTestId ? `${dataTestId}_calendar_time_list_item_${ts.minute}_btn` : undefined}
                                                     >
                                                         {ts.label}
                                                     </Button>

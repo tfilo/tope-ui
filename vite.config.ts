@@ -2,11 +2,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
-import tailwindcss from '@tailwindcss/vite';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import pkg from './package.json' with { type: 'json' };
 
 // Extract dependency names from package.json
@@ -19,10 +19,15 @@ export default defineConfig({
         include: ['react/compiler-runtime']
     },
     plugins: [
-        tailwindcss(),
         react(),
         babel({
             plugins: ['babel-plugin-react-compiler']
+        }),
+        viteStaticCopy({
+            targets: [
+                { src: 'lib/styles/theme.css', dest: '.', rename: { stripBase: true } },
+                { src: 'lib/styles/base.css', dest: '.', rename: { stripBase: true } }
+            ]
         })
     ],
     build: {

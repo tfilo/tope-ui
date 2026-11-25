@@ -26,6 +26,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     readOnly = false,
     pageSize = 10,
     required,
+    'data-testid': dataTestId,
     ...props
 }) => {
     const _id = useId();
@@ -48,7 +49,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     const optionsRef = useRef<HTMLUListElement>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const autocompleteId = isNotBlank(id) ? `${id}-visual` : `autocomplete-${_id}`;
+    const baseId = id || _id;
+    const autocompleteId = `autocomplete-${baseId}`;
     const [isSearching, setIsSearching] = useState(false);
     const [failedPage, setFailedPage] = useState<number | null>(null);
     const [isLoadingNextPage, setIsLoadingNextPage] = useState(false);
@@ -82,6 +84,8 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
         setIsOpen(false);
         setFailedPage(null);
         setOptions({ hasNextPage: false, page: 0, options: [] });
+        searchAbortController.current?.abort();
+        nextPageAbortController.current?.abort();
     };
 
     // Open dropdown, fetch the initial options if needed, and focus the first available item
@@ -367,7 +371,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
     // Handle external value changes
     useEffect(() => {
         const abortController = new AbortController();
-        (async () => {
+        void (async () => {
             const newValue: string[] = [];
             if (value === null || value === undefined || (typeof value === 'string' && isBlank(value))) {
                 // keep newValue empty
@@ -414,7 +418,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
 
     // Close the dropdown when interaction becomes unavailable.
     useEffect(() => {
-        (async () => {
+        void (async () => {
             if (disabled || readOnly) {
                 handleOptionsClose();
             }
@@ -436,6 +440,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         title={localization.retry}
                         disabled={disabled || isFetching}
                         onClick={() => setFetchAttempt((attempt) => attempt + 1)}
+                        data-testid={dataTestId ? `${dataTestId}_retry_btn` : undefined}
                     >
                         <span
                             className={disabled ? 'text-disabled' : theme.option.errorMessage}
@@ -453,6 +458,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             required={required}
             disabled={disabled}
             elementId={autocompleteId}
+            data-testid={dataTestId}
         >
             <div
                 className={theme.wrapper}
@@ -461,9 +467,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
             >
                 <div
                     className={theme.inputAndTagWrapper}
-                    style={{ anchorName: `--autocomplete_${_id}` }}
+                    style={{ anchorName: `--autocomplete_${baseId}` }}
                 >
-                    {selectedOption.map((option) => (
+                    {selectedOption.map((option, idx) => (
                         <Tag
                             key={option.value}
                             label={option.label}
@@ -471,12 +477,14 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             onRemove={readOnly ? undefined : () => handleRemoveOption(option)}
                             variant={option.unavailable ? 'danger' : 'outline'}
                             title={option.unavailable ? localization.unavailableOption : undefined}
+                            data-testid={dataTestId ? `${dataTestId}_tag_${idx}` : undefined}
                         />
                     ))}
                     <div className={theme.inputWrapper}>
                         <input
                             className={theme.input}
                             {...props}
+                            data-testid={dataTestId}
                             aria-required={required}
                             readOnly={readOnly}
                             value={displayValue}
@@ -488,7 +496,6 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             ref={inputRef}
                         />
                         <Button
-                            key={props.title}
                             variant='transparent'
                             showChildren={false}
                             icon={isOpen ? ChevronUpIcon : ChevronDownIcon}
@@ -496,8 +503,9 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             onKeyDown={handleKeyDownOnOpenButton}
                             disabled={disabled || readOnly || isFetching}
                             additionalClassName={theme.button}
+                            data-testid={dataTestId ? `${dataTestId}_btn` : undefined}
                         >
-                            {props.title}
+                            {isOpen ? localization.closeDropdown : localization.openDropdown}
                         </Button>
                     </div>
                 </div>
@@ -506,7 +514,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                     ref={popoverRef}
                     className={theme.optionsWrapper}
                     style={{
-                        positionAnchor: `--autocomplete_${_id}`,
+                        positionAnchor: `--autocomplete_${baseId}`,
                         maxHeight: `${Math.min(pageSize - 1, 5) * 36 + 8}px`
                     }}
                     onScroll={handleScroll}
@@ -516,11 +524,13 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                         ref={optionsRef}
                         id={`${autocompleteId}-options`}
                         className={theme.options}
+                        data-testid={dataTestId ? `${dataTestId}_options` : undefined}
                     >
                         {!isSearching && !hasOptions && failedPage === null && (
                             <li
                                 key='___no_options___'
                                 className={theme.option.noninteractive}
+                                data-testid={dataTestId ? `${dataTestId}_option_noOptions` : undefined}
                             >
                                 {localization.noOptions}
                             </li>
@@ -536,6 +546,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                     onKeyDown={(e) => handleOptionKeyDown(e, o)}
                                     className={theme.option.button}
                                     disabled={o.disabled}
+                                    data-testid={dataTestId ? `${dataTestId}_option_${o.value}_btn` : undefined}
                                 >
                                     {o.label}
                                     {selectedOption.some((so) => so.value === o.value) && <CheckIcon className={theme.option.buttonIcon} />}
@@ -550,6 +561,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                                     aria-label={localization.retry}
                                     title={localization.retry}
                                     onClick={() => (failedPage === 0 ? handleSearch(displayValue, true) : handleLoadNextPage(failedPage))}
+                                    data-testid={dataTestId ? `${dataTestId}_option_error_btn` : undefined}
                                 >
                                     <span
                                         role='alert'
@@ -568,6 +580,7 @@ export const Autocomplete: React.FC<AutocompleteProps> = ({
                             <li
                                 key='___loading___'
                                 className={theme.option.noninteractive}
+                                data-testid={dataTestId ? `${dataTestId}_option_loading` : undefined}
                             >
                                 {localization.loading}
                             </li>

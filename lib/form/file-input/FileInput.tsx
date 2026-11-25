@@ -1,4 +1,4 @@
-import React, { useEffect, useId } from 'react';
+import React, { useEffect, useId, useMemo } from 'react';
 import { ArrowUpTrayIcon } from '@heroicons/react/16/solid';
 
 import { localization } from '../../utils/constants';
@@ -25,19 +25,37 @@ const theme = {
  * containing optional label and error message. Internally uses hidden file input to handle file selection and displays selected files as tags.
  * Supports both single and multiple file selection.
  */
-export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, multiple, disabled, required, readOnly }) => {
+export const FileInput: React.FC<FileInputProps> = ({
+    id,
+    label,
+    error,
+    accept,
+    multiple,
+    disabled,
+    required,
+    readOnly,
+    'data-testid': dataTestId,
+    'aria-label': ariaLabel
+}) => {
     const _id = useId();
     const hiddenFileInputRef = React.useRef<HTMLInputElement | null>(null);
-    const inputId = id || `input-${_id}`;
+    const baseId = id || _id;
+    const inputId = `file-input-${baseId}`;
     const hasLabel = isNotBlank(label);
-    const hasError = isNotBlank(error);
+    const hasExternalError = isNotBlank(error);
 
     const field = useFieldContext<File | File[] | null>();
     const rawErrors = useSelector(field.store, (state) => state.meta.errors);
     const isTouched = useSelector(field.store, (state) => state.meta.isTouched);
-    const errors = isTouched
-        ? rawErrors.map((e) => (typeof e === 'string' ? e : e?.message)).filter((e): e is string => typeof e === 'string' && e.length > 0)
-        : [];
+    const errors = useMemo(
+        () =>
+            isTouched
+                ? rawErrors
+                      .map((e) => (typeof e === 'string' ? e : e?.message))
+                      .filter((e): e is string => typeof e === 'string' && e.length > 0)
+                : [],
+        [isTouched, rawErrors]
+    );
 
     const handleSelect = () => {
         hiddenFileInputRef.current?.click();
@@ -70,22 +88,31 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, 
             document.getElementById(inputId)?.focus();
         };
         document.getElementById(`${inputId}-label`)?.addEventListener('click', handleClick);
-        if (hasError) {
-            document.getElementById(`${inputId}-error`)?.addEventListener('click', handleClick);
+        if (hasExternalError) {
+            document.getElementById(`${inputId}-error-0`)?.addEventListener('click', handleClick);
         }
+        errors.forEach((_, idx) => {
+            document.getElementById(`${inputId}-error-${idx}`)?.addEventListener('click', handleClick);
+        });
         return () => {
             document.getElementById(`${inputId}-label`)?.removeEventListener('click', handleClick);
-            document.getElementById(`${inputId}-error`)?.removeEventListener('click', handleClick);
+            document.getElementById(`${inputId}-error-0`)?.removeEventListener('click', handleClick);
+            errors.forEach((_, idx) => {
+                document.getElementById(`${inputId}-error-${idx}`)?.removeEventListener('click', handleClick);
+            });
         };
-    }, [inputId, hasError]);
+    }, [inputId, hasExternalError, errors]);
 
     const labeledByArr = [];
     if (hasLabel) {
         labeledByArr.push(`${inputId}-label`);
     }
-    if (hasError) {
-        labeledByArr.push(`${inputId}-error`);
+    if (hasExternalError) {
+        labeledByArr.push(`${inputId}-error-0`);
     }
+    errors.forEach((_, idx) => {
+        labeledByArr.push(`${inputId}-error-${idx}`);
+    });
     const labeledBy = labeledByArr.length > 0 ? labeledByArr.join(' ') : undefined;
 
     return (
@@ -95,21 +122,26 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, 
             required={required}
             disabled={disabled}
             elementId={inputId}
+            data-testid={dataTestId}
         >
             <div
                 className={theme.input}
                 id={inputId}
                 role='textbox'
+                aria-label={ariaLabel}
                 aria-labelledby={labeledBy}
+                aria-required={required}
                 tabIndex={0}
                 onBlur={field.handleBlur}
+                data-testid={dataTestId}
             >
-                {inputValue.map((option) => (
+                {inputValue.map((option, idx) => (
                     <Tag
                         key={option.name}
                         label={option.name}
                         disabled={disabled}
                         onRemove={readOnly ? undefined : () => handleRemoveFile(option)}
+                        data-testid={dataTestId ? `${dataTestId}_tag_${idx}` : undefined}
                     />
                 ))}
             </div>
@@ -122,6 +154,7 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, 
                 accept={accept}
                 multiple={multiple}
                 disabled={disabled}
+                data-testid={dataTestId ? `${dataTestId}_hidden-input` : undefined}
             />
             <div className={theme.action.rightWrapper}>
                 <Button
@@ -132,6 +165,7 @@ export const FileInput: React.FC<FileInputProps> = ({ id, label, error, accept, 
                     disabled={disabled || readOnly}
                     additionalClassName={theme.action.button}
                     onBlur={field.handleBlur}
+                    data-testid={dataTestId ? `${dataTestId}_btn` : undefined}
                 >
                     {localization.selectFile}
                 </Button>

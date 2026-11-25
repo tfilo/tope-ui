@@ -2,8 +2,8 @@ import { expect, fn } from 'storybook/test';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MapIcon } from '@heroicons/react/16/solid';
 
-import { Page } from '../Page/Page';
-import { Header } from '../Header';
+import { Page } from '../page/Page';
+import { Header } from '../header';
 import { Content } from './Content';
 
 const meta = {

@@ -35,7 +35,8 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({
     required,
     disabled,
     elementId,
-    children
+    children,
+    'data-testid': dataTestId
 }) => {
     const hasLabel = isNotBlank(label);
     const hasError = Array.isArray(error) ? error.some(isNotBlank) : isNotBlank(error);
@@ -48,6 +49,7 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({
                     htmlFor={elementId}
                     id={`${elementId}-label`}
                     className={theme.label(disabled)}
+                    data-testid={dataTestId ? `${dataTestId}_label` : undefined}
                 >
                     {label}
                     {required && (
@@ -67,10 +69,12 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({
                         {error.map((err, idx) => {
                             return (
                                 <label
+                                    key={`${err}_${idx}`}
                                     htmlFor={elementId}
                                     id={`${elementId}-error-${idx}`}
                                     className={theme.error(disabled)}
                                     role='alert'
+                                    data-testid={dataTestId ? `${dataTestId}_error_${idx}` : undefined}
                                 >
                                     {err}
                                 </label>
@@ -80,9 +84,10 @@ export const ElementWrapper: React.FC<ElementWrapperProps> = ({
                 ) : (
                     <label
                         htmlFor={elementId}
-                        id={`${elementId}-error`}
+                        id={`${elementId}-error-0`}
                         className={theme.error(disabled)}
                         role='alert'
+                        data-testid={dataTestId ? `${dataTestId}_error_0` : undefined}
                     >
                         {error}
                     </label>

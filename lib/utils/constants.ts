@@ -39,7 +39,9 @@ export const localization = {
     modal: {
         cancelLabel: 'Zrušiť',
         confirmLabel: 'Potvrdiť'
-    }
+    },
+    openDropdown: 'Otvoriť zoznam možností',
+    closeDropdown: 'Zatvoriť zoznam možností'
 };
 
 export const config: {

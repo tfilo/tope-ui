@@ -21,6 +21,10 @@ const theme = {
 export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null }) => {
     const hasProfileOrLogout = onProfile !== null || onLogout !== null;
 
+    if (menu.length === 0 && !hasProfileOrLogout) {
+        return null;
+    }
+
     return (
         <header className={theme.base}>
             <nav className={theme.menu}>

@@ -35,7 +35,8 @@ export const Card: React.FC<CardProps> = ({
     onAction,
     imageUrl,
     actionIcon = PencilSquareIcon,
-    actionLabel = localization.edit
+    actionLabel = localization.edit,
+    'data-testid': dataTestId
 }) => {
     const backgroundUrl = isNotBlank(imageUrl) ? imageUrl : placeholder;
     const hasOnClick = onClick !== undefined;
@@ -67,6 +68,7 @@ export const Card: React.FC<CardProps> = ({
                     additionalClassName={theme.actionBtn}
                     showChildren={false}
                     onClick={handleAction}
+                    data-testid={dataTestId ? `${dataTestId}_action` : undefined}
                 >
                     {actionLabel}
                 </Button>
@@ -81,6 +83,7 @@ export const Card: React.FC<CardProps> = ({
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}
+                data-testid={dataTestId}
             >
                 <div
                     className={theme.spacer(compactOnMobile)}

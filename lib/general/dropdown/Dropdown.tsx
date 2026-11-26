@@ -23,7 +23,7 @@ const theme = {
 /**
  * Dropdown component that renders as button which open list of options when clicked. Using native popover feature.
  */
-export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonProps, showChevron = true }) => {
+export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonProps, showChevron = true, 'data-testid': dataTestId }) => {
     const baseId = useId();
     const popoverRef = useRef<HTMLDivElement>(null);
     const popoverId = `${baseId}-popover`;
@@ -35,6 +35,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                 showChildren={true}
                 popoverTarget={popoverId}
                 style={{ anchorName: `--dropdown_${baseId}` }}
+                data-testid={dataTestId}
             >
                 {buttonProps?.showChildren !== false && children}
                 {showChevron && <ChevronDownIcon className={theme.icon} />}
@@ -49,7 +50,7 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                 }}
             >
                 <ul className={theme.dropdownItems}>
-                    {options.map((o) => {
+                    {options.map((o, idx) => {
                         const Icon = o.icon ?? null;
                         return (
                             <li
@@ -61,10 +62,11 @@ export const Dropdown: React.FC<DropdownProps> = ({ children, options, buttonPro
                                     aria-current={o.active ? 'page' : undefined}
                                     onClick={(e) => {
                                         popoverRef.current?.hidePopover();
-                                        o.onClick(e);
+                                        void o.onClick(e);
                                     }}
                                     className={theme.button}
                                     disabled={o.disabled}
+                                    data-testid={dataTestId ? `${dataTestId}_option_${idx}` : undefined}
                                 >
                                     {Icon && <Icon className={theme.icon} />}
                                     {o.label}

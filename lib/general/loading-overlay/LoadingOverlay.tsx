@@ -8,11 +8,14 @@ const theme = {
 } as const;
 
 /** Covers a relatively positioned page with a blurred loading overlay after 200ms. */
-export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ active, label = localization.loading }) => {
+export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ active, label = localization.loading, 'data-testid': dataTestId }) => {
     if (!active) return null;
 
     return (
-        <div className={theme.base}>
+        <div
+            className={theme.base}
+            data-testid={dataTestId}
+        >
             <div
                 role='status'
                 className={theme.content}

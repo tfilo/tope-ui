@@ -14,8 +14,8 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
     /** The main content of the modal (text, components, or HTML) */
     body: ReactNode;
     /** Defines the maximum width of the modal
-     * - 'normal': max-width 768px
-     * - 'large': max-width 1280px
+     * - 'normal': max-width 600px
+     * - 'large': max-width 1200px
      * @default 'normal'
      */
     size?: 'normal' | 'large';
@@ -35,7 +35,8 @@ export interface ModalProps extends Omit<DialogHTMLAttributes<HTMLDialogElement>
      * @default 'Cancel' (localized) if cancelLabel is undefined
      */
     cancelLabel?: string | null;
-    /** The icon component to be displayed next to the title (e.g., InformationCircleIcon)
-     */
+    /** The icon component to be displayed next to the title (e.g., InformationCircleIcon) */
     icon?: Icon;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }

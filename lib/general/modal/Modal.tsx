@@ -34,6 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
     cancelLabel,
     confirmLabel,
     icon,
+    'data-testid': dataTestId,
     ...props
 }) => {
     const dialogRef = useRef<HTMLDialogElement>(null);
@@ -76,6 +77,7 @@ export const Modal: React.FC<ModalProps> = ({
             onCancel={handleOnCancel}
             closedby={closedby}
             className={theme.dialog(size)}
+            data-testid={dataTestId}
         >
             <div className={theme.wrapper}>
                 <Icon className={`${theme.icon.base} ${theme.icon.color[variant]}`} />
@@ -89,6 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
                     <Button
                         onClick={() => onCloseHandler(false)}
                         variant='secondary'
+                        data-testid={dataTestId ? `${dataTestId}_cancel` : undefined}
                     >
                         {cancelLabel ?? localization.modal.cancelLabel}
                     </Button>
@@ -96,6 +99,7 @@ export const Modal: React.FC<ModalProps> = ({
                 <Button
                     onClick={() => onCloseHandler(true)}
                     variant={variant}
+                    data-testid={dataTestId ? `${dataTestId}_confirm` : undefined}
                 >
                     {confirmLabel ?? localization.modal.confirmLabel}
                 </Button>

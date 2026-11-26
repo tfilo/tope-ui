@@ -16,6 +16,13 @@ const theme = {
 /**
  * Renders grid element as div with children
  */
-export const Grid: React.FC<GridProps> = ({ children, maxRows = 4 }) => {
-    return <div className={theme.base(maxRows)}>{children}</div>;
+export const Grid: React.FC<GridProps> = ({ children, maxRows = 4, 'data-testid': dataTestId }) => {
+    return (
+        <div
+            className={theme.base(maxRows)}
+            data-testid={dataTestId}
+        >
+            {children}
+        </div>
+    );
 };

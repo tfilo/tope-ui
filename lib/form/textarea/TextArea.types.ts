@@ -5,6 +5,8 @@ interface BaseProps {
     label?: string;
     /** Optional error message for textarea component, if not blank, all input is in danger color */
     error?: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 export interface TextAreaProps

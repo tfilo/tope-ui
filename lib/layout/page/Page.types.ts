@@ -8,4 +8,6 @@ export type PageProps = PropsWithChildren<{
     // Header element to use, defaults to h1
     titleType?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
     onBack?: () => void | Promise<void>;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }>;

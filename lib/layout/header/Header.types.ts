@@ -27,4 +27,6 @@ export type HeaderProps = {
     menu?: MenuItem[];
     onLogout?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
     onProfile?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 };

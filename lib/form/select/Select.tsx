@@ -26,6 +26,7 @@ export const Select: React.FC<SelectProps> = ({
     className,
     onClick,
     onKeyDown,
+    'data-testid': dataTestId,
     ...props
 }) => {
     const generatedId = useId();
@@ -177,6 +178,7 @@ export const Select: React.FC<SelectProps> = ({
                 className={theme.option.button}
                 onClick={() => handleSelect(option)}
                 onKeyDown={(e) => handleOptionKeyDown(e, option)}
+                data-testid={dataTestId ? `${dataTestId}_option_${option.value}_btn` : undefined}
             >
                 {option.label}
                 {values.includes(option.value) && <CheckIcon className={theme.option.buttonIcon} />}
@@ -191,6 +193,7 @@ export const Select: React.FC<SelectProps> = ({
             required={required}
             disabled={disabled}
             elementId={selectId}
+            data-testid={dataTestId}
         >
             <div
                 className={theme.wrapper}
@@ -215,11 +218,11 @@ export const Select: React.FC<SelectProps> = ({
                             aria-controls={`${selectId}-options`}
                             aria-haspopup='listbox'
                             aria-required={required}
-                            aria-valuetext={selectedOptions[0]?.label}
                             title={props.title ?? selectedOptions[0]?.label}
                             className={`flex min-h-[30px] w-full min-w-none cursor-pointer items-center justify-between gap-xs rounded-sm px-sm text-left disabled:cursor-default ${className ?? ''}`}
                             onClick={handleClick}
                             onKeyDown={handleKeyDownOnOpenButton}
+                            data-testid={dataTestId}
                         >
                             <span className={`min-w-none truncate py-xs ${selectedOptions[0] ? '' : 'text-disabled'}`}>
                                 {selectedOptions[0] ? getSelectedLabel(selectedOptions[0]) : placeholder}
@@ -228,7 +231,7 @@ export const Select: React.FC<SelectProps> = ({
                         </Button>
                     ) : (
                         <>
-                            {selectedOptions.map((option) => (
+                            {selectedOptions.map((option, idx) => (
                                 <Tag
                                     key={option.value}
                                     label={getSelectedLabel(option)}
@@ -236,6 +239,7 @@ export const Select: React.FC<SelectProps> = ({
                                     variant='outline'
                                     onClick={handleTagClick}
                                     onRemove={canRemove ? () => handleRemoveOption(option) : undefined}
+                                    data-testid={dataTestId ? `${dataTestId}_tag_${idx}` : undefined}
                                 />
                             ))}
                             <Button
@@ -255,6 +259,7 @@ export const Select: React.FC<SelectProps> = ({
                                 additionalClassName={`${theme.button} ml-auto h-[30px] w-[30px] shrink-0 self-start ${className ?? ''}`}
                                 onClick={handleClick}
                                 onKeyDown={handleKeyDownOnOpenButton}
+                                data-testid={dataTestId}
                             >
                                 {props.title}
                             </Button>
@@ -286,21 +291,24 @@ export const Select: React.FC<SelectProps> = ({
                         aria-multiselectable={multiple || undefined}
                         aria-label={label || props['aria-label']}
                         className={theme.options}
+                        data-testid={dataTestId ? `${dataTestId}_options` : undefined}
                     >
                         {flatOptions.length === 0 && (
                             <li
                                 role='none'
                                 className={theme.option.noninteractive}
+                                data-testid={dataTestId ? `${dataTestId}_option_noOptions` : undefined}
                             >
                                 {localization.noOptions}
                             </li>
                         )}
-                        {options.map((option) =>
+                        {options.map((option, idx) =>
                             'options' in option ? (
                                 <li
                                     key={option.label}
                                     role='group'
                                     aria-label={option.label}
+                                    data-testid={dataTestId ? `${dataTestId}_option_group_${idx}` : undefined}
                                 >
                                     <div className='border-b px-sm py-md font-bold'>{option.label}</div>
                                     <ul

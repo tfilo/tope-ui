@@ -30,11 +30,13 @@ export const Flex: React.FC<FlexProps> = ({
     gap = 'md',
     justify = direction === 'row' ? 'end' : 'none',
     additionalClassName = '',
-    children
+    children,
+    'data-testid': dataTestId
 }) => {
     return (
         <div
             className={`w-full flex ${theme.direction[direction]} ${theme.gap[gap]} ${theme.justify[justify]} ${additionalClassName}`.trim()}
+            data-testid={dataTestId}
         >
             {children}
         </div>

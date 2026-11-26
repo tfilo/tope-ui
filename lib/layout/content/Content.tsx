@@ -5,6 +5,18 @@ const theme = {
 /**
  * Content component renders as HTMLDivElement element and limits max width of content
  */
-export const Content: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return <div className={theme.base}>{children}</div>;
+export const Content: React.FC<
+    React.PropsWithChildren<{
+        /** Optional attribute for Playwright testing */
+        'data-testid'?: string;
+    }>
+> = ({ children, 'data-testid': dataTestId }) => {
+    return (
+        <div
+            className={theme.base}
+            data-testid={dataTestId}
+        >
+            {children}
+        </div>
+    );
 };

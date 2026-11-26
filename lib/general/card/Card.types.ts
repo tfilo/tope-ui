@@ -11,4 +11,6 @@ export type CardProps = {
     actionIcon?: Icon;
     actionLabel?: string;
     onAction?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => Promise<void> | void;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 };

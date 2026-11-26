@@ -1,13 +1,20 @@
 # Autocomplete
 
-Searchable select with async option loading, pagination, and single or multiple selection. Selected options are shown as tags inside the input area.
-
 ## When to use
 
-- Option list is large or comes from an API (server-side search + pagination).
-- You need single (`string`) or multi (`string[]`) selection bound to a form field.
+Use `Autocomplete` when the user picks one value (or several) from a **large or remote dataset** that is loaded on demand: countries, customers, products, users, etc.
 
-Do NOT use for short, static lists. Use the library's Select component for those.
+- Options are loaded asynchronously by a search callback (`onSearch`) as the user types, with **pagination on scroll**.
+- The form stores only the option `value` (an ID/code). The label is resolved by a second callback (`onFetch`), so a pre-filled value (edit forms, form reset) is displayed correctly even if it is not in the first page of search results.
+- Supports single selection (value is a `string`) and multiple selection (`multiple`, value is a `string[]`), displayed as removable tags.
+
+Do **not** use it when:
+
+- The option list is small and static, use `Select` (`references/select.md`).
+- The user enters free text that is not picked from a list, use `Input` (`references/input.md`).
+- You need a standalone, uncontrolled component. `Autocomplete` only works inside a TanStack Form field.
+
+Runtime requirements: React 19.2+ (uses `useEffectEvent`) and a modern browser (uses the Popover API and CSS anchor positioning for the dropdown).
 
 ## Import
 
@@ -17,7 +24,7 @@ Component should be always imported using useAppForm and used using form.AppFiel
 import { useAppForm } from '@tfilo/tope-ui';
 ```
 
-## Critical: must be used inside a TanStack Form field
+Important: must be used inside a TanStack Form field.
 
 `Autocomplete` reads its state via `useFieldContext()`. It has **no `value` or `onChange` props**, and it does not work standalone.
 
@@ -42,25 +49,130 @@ import { useAppForm } from '@tfilo/tope-ui';
 </form.AppField>
 ```
 
+Multiple selection. The default value must be an array:
+
+```tsx
+const form = useAppForm({
+    defaultValues: {
+        countries: [] as string[]
+    },
+    onSubmit: ({ value }) => {
+        // value.countries is string[]
+    }
+});
+
+<form.AppField name='countries'>
+    {(field) => (
+        <field.Autocomplete
+            label='Countries'
+            multiple
+            onSearch={searchCountries}
+            onFetch={fetchCountry}
+        />
+    )}
+</form.AppField>;
+```
+
+Validation is done by TanStack Form validators on the field. Errors are displayed under the input automatically:
+
+```tsx
+<form.AppField
+    name='country'
+    validators={{
+        onChange: ({ value }) => (value === '' ? 'Country is required' : undefined)
+    }}
+>
+    {(field) => (
+        <field.Autocomplete
+            label='Country'
+            required
+            onSearch={searchCountries}
+            onFetch={fetchCountry}
+        />
+    )}
+</form.AppField>
+```
+
 ## Props
 
-| Prop                       | Type                                                                                                   | Required | Default     | Description                                                                                                                                                                                                           |
-| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `onSearch`                 | `(query: string, page: number, pageSize: number, abortSignal: AbortSignal) => Promise<OnSearchResult>` | yes      |             | Loads options for the dropdown.                                                                                                                                                                                       |
-| `onFetch`                  | `(value, abortSignal?) => Promise<Option \| null>`                                                     | yes      |             | Resolves a single option by its value, to render tags for existing form values.                                                                                                                                       |
-| `label`                    | `string`                                                                                               | no       | `undefined` | Renders as label of component (`<label htmlFor>` bound to the input).                                                                                                                                                 |
-| `error`                    | `string`                                                                                               | no       | `undefined` | External error. **Overrides** form validation errors when not `undefined` (even an empty string hides form errors). Shown regardless of touched state.                                                                |
-| `multiple`                 | `boolean`                                                                                              | no       | `false`     | Multi-select. Field value becomes `string[]`.                                                                                                                                                                         |
-| `pageSize`                 | `number`                                                                                               | no       | `10`        | Passed to `onSearch`. Also affects dropdown max height, see [Dropdown height](#dropdown-height).                                                                                                                      |
-| `disabled`                 | `boolean`                                                                                              | no       | `false`     | Disables input, toggle button, tags (and their remove action) and the retry button, applies disabled styling, and closes the dropdown.                                                                                |
-| `readOnly`                 | `boolean`                                                                                              | no       | `false`     | Disables opening, searching, selecting and tag removal. Closes the dropdown.                                                                                                                                          |
-| `required`                 | `boolean`                                                                                              | no       | `undefined` | Adds `*` to the label and sets `aria-required` on the input. Visual only, validation is done by the form.                                                                                                             |
-| `id`                       | `string`                                                                                               | no       | auto        | Base id (auto-generated with `useId` when omitted). Never used as-is, see [IDs](#ids). Pass it explicitly when you need stable selectors.                                                                             |
-| `data-testid`              | `string`                                                                                               | no       | `undefined` | Playwright attribute. Set on the input and used as prefix for data-testid of all inner elements, see [data-testid](#playwright-testing---data-testid-attribute).                                                                                     |
-| `title`                    | `string`                                                                                               | no       | `undefined` | Spread onto the `<input>` as `title`. Provide it when you don't provide `label` so the input remains accessible.                                                                                                      |
-| other `<input>` attributes | –                                                                                                      | no       | `undefined` | Spread onto the `<input>` (e.g. `placeholder`, `autoComplete`). `name`, `id`, `value`, `readOnly`, `disabled`, `onChange`, `onKeyDown` and `ref` are always controlled by the component and override anything passed. |
+| Prop          | Type                                                                                                       | Required | Default                | Description                                                                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------- | -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onSearch`    | `(query: string, page: number, pageSize: number, abortSignal: AbortSignal) => Promise<OnSearchResult>`     | Yes      | -                      | Loads one page of options for the typed query. See [onSearch contract](#onsearch-contract).                                                                                  |
+| `onFetch`     | `(value: string, abortSignal?: AbortSignal) => Promise<Option \| null>`                                     | Yes      | -                      | Resolves a single option by its value, used to display the current value. See [onFetch contract](#onfetch-contract).                                                         |
+| `label`       | `string`                                                                                                   | No       | -                      | Label rendered above the input and linked to it via `htmlFor`.                                                                                                               |
+| `required`    | `boolean`                                                                                                  | No       | `false`                | **Visual only**: shows a red asterisk and sets `aria-required`. It does not validate, add a validator to the field.                                                          |
+| `error`       | `string`                                                                                                   | No       | -                      | Externally provided error message. When set (not `undefined`), it **replaces** the field validation errors. Leave it `undefined` to show errors from TanStack Form validators. |
+| `multiple`    | `boolean`                                                                                                  | No       | `false`                | Enables multiple selection. Field value must then be `string[]`.                                                                                                             |
+| `pageSize`    | `number`                                                                                                   | No       | `10`                   | Number of options requested per page. Also controls dropdown height (see [Behavior notes](#behavior-notes)).                                                                 |
+| `disabled`    | `boolean`                                                                                                  | No       | `false`                | Disables the input, the open button and tag removal. Styled as disabled.                                                                                                     |
+| `readOnly`    | `boolean`                                                                                                  | No       | `false`                | Value is displayed but cannot be changed. Dropdown cannot be opened and tags have no remove button.                                                                         |
+| `id`          | `string`                                                                                                   | No       | generated by `useId()` | Base id. The real DOM id of the input is `autocomplete-{id}` (the label points to it).                                                                                       |
+| `data-testid` | `string`                                                                                                   | No       | -                      | Base test id, all inner elements derive their test id from it. See [Testing](#testing).                                                                                      |
+| other props   | `InputHTMLAttributes<HTMLInputElement>` without `value`, `onChange`, `ref`                                 | No       | -                      | Spread to the inner `<input>`, e.g. `placeholder`, `autoComplete`, `aria-*`, `title`.                                                                                        |
 
-### Types
+Props that are always overridden internally even if passed: `name` (taken from the field), `value`, `onChange`, `onKeyDown`, `id` (prefixed), `disabled` (also disabled while the current value is being fetched), `readOnly`, `data-testid`. Do not pass `className`, it would replace the library's input styling.
+
+### onSearch contract
+
+```ts
+onSearch(query: string, page: number, pageSize: number, abortSignal: AbortSignal): Promise<OnSearchResult>
+```
+
+- `page` is **zero-based**. The first request is `page = 0`, scrolling to the bottom of the dropdown requests `page + 1`.
+- It is called with an **empty `query`** when the dropdown is opened without typed text, so the empty query must return a sensible default list.
+- It is called on every keystroke without debouncing. The previous request is aborted, so **always pass `abortSignal` to `fetch`/your HTTP client**. Aborted requests are ignored silently.
+- Return `page` equal to the requested page and `hasNextPage: true` while more pages exist. Next page is loaded only when `hasNextPage` is `true`.
+- If the promise rejects (other than abort), the dropdown shows a localized error with a retry button.
+
+```tsx
+import type { OnSearchResult } from '@tfilo/tope-ui';
+
+const searchCountries = async (query: string, page: number, pageSize: number, signal: AbortSignal): Promise<OnSearchResult> => {
+    const res = await fetch(`/api/countries?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`, { signal });
+    if (!res.ok) throw new Error('Search failed');
+    const data: { items: { code: string; name: string }[]; totalPages: number } = await res.json();
+    return {
+        page,
+        hasNextPage: page + 1 < data.totalPages,
+        options: data.items.map((c) => ({ value: c.code, label: c.name }))
+    };
+};
+```
+
+### onFetch contract
+
+```ts
+onFetch(value: string, abortSignal?: AbortSignal): Promise<Option | null>
+```
+
+- Called for every value in the field (once for `string`, once per item for `string[]`) on mount and whenever the field value changes from outside (e.g. `form.reset()`, `form.setFieldValue`, loaded default values). It is not called for values the user just picked from the dropdown.
+- Return `null` when the value no longer exists. The value is then shown as a red "unavailable" tag, using the raw value as its label.
+- If the promise rejects (other than abort), an error with a retry button is shown below the input, and the input is disabled until the retry succeeds.
+
+```tsx
+import type { Option } from '@tfilo/tope-ui';
+
+const fetchCountry = async (value: string, signal?: AbortSignal): Promise<Option | null> => {
+    const res = await fetch(`/api/countries/${encodeURIComponent(value)}`, { signal });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error('Fetch failed');
+    const c: { code: string; name: string } = await res.json();
+    return { value: c.code, label: c.name };
+};
+```
+
+### Behavior notes
+
+- The selected option(s) are displayed as tags inside the field, also in single mode. The text in the input is only the current search query and is cleared when the input loses focus.
+- Selecting an already selected option **unselects** it. In single mode, selecting another option replaces the current one.
+- The dropdown closes after each selection, also in `multiple` mode.
+- Options with `disabled: true` are shown but cannot be selected.
+- Keyboard: `ArrowDown` opens the dropdown and moves through options, `ArrowUp` moves back (and returns to the input from the first option), `Enter` in the input selects the first found option when text is typed, `Escape` closes the dropdown.
+- The field is marked as touched when focus leaves the whole component, validation errors from the field are displayed only after that (or after a form submit attempt).
+- Dropdown height is limited to `min(pageSize - 1, 5)` rows, so the list can scroll and trigger loading of the next page. Do not use very small `pageSize` values (below 5).
+- Texts (no options, loading, retry, errors, open/close dropdown aria labels) come from the library localization (`setLocalization`), Slovak by default.
+
+## Types
 
 ```ts
 export interface Option {
@@ -69,136 +181,61 @@ export interface Option {
     disabled?: boolean;
 }
 
-type OnSearchResult = {
+export type OnSearchResult = {
+    /** true when another page can be requested */
     hasNextPage: boolean;
-    page: number; // page that was just loaded (0-based)
+    /** page number of this result, same as the requested page (zero-based) */
+    page: number;
     options: Option[];
 };
+
+interface BaseProps {
+    label?: string;
+    error?: string;
+    onSearch: (query: string, page: number, pageSize: number, abortSignal: AbortSignal) => Promise<OnSearchResult>;
+    onFetch: (value: string, abortSignal?: AbortSignal) => Promise<Option | null>;
+    pageSize?: number;
+    'data-testid'?: string;
+}
+
+export interface AutocompleteProps
+    extends Omit<InputHTMLAttributes<HTMLInputElement>, keyof BaseProps | 'ref' | 'value' | 'onChange'>, BaseProps {}
 ```
 
-## IDs
+## Testing
 
-`id` is a base id. The component derives every id from `autocomplete-${id}` (when `id` is omitted, `useId()` is used instead):
+All test ids are derived from the `data-testid` prop. In the table `{testid}` is the value passed to `data-testid`; without the prop no test ids are rendered.
 
-| Element                   | Id / name                         |
-| ------------------------- | --------------------------------- |
-| `<input>`                 | `autocomplete-${id}`              |
-| Label                     | `autocomplete-${id}-label`        |
-| Error messages (by index) | `autocomplete-${id}-error-${idx}` |
-| Options list (`<ul>`)     | `autocomplete-${id}-options`      |
-| CSS anchor name (popover) | `--autocomplete_${id}`            |
+| Element                                                         | data-testid                    |
+| --------------------------------------------------------------- | ------------------------------ |
+| Input element                                                   | `{testid}`                     |
+| Label                                                           | `{testid}_label`               |
+| Validation / `error` message (`idx` is zero-based)              | `{testid}_error_{idx}`         |
+| Open/close dropdown button                                      | `{testid}_btn`                 |
+| Selected option tag (`idx` is zero-based, in order of display)  | `{testid}_tag_{idx}`           |
+| Options list (`<ul>` in the dropdown)                           | `{testid}_options`             |
+| Option button (`value` is `Option.value`)                       | `{testid}_option_{value}_btn`  |
+| "No options" row                                                | `{testid}_option_noOptions`    |
+| "Loading" row (while searching or loading next page)            | `{testid}_option_loading`      |
+| Retry button after failed search or next page load              | `{testid}_option_error_btn`    |
+| Retry button after failed `onFetch`                             | `{testid}_retry_btn`           |
 
-- `<input id='autocomplete-country'>` for `id='country'`. Do not look the input up by the raw `id`.
-- Label and error `<label>` elements use `htmlFor` pointing to the input id.
-- Auto-generated ids are not stable between renders/environments. Use an explicit `id` or `data-testid` for tests and when referencing the element.
-- Use unique `id` per field on a page, the anchor name for the dropdown position is derived from it.
+Options are rendered only while the dropdown is open and are cleared when it closes. Wait for `{testid}_option_loading` to disappear before clicking an option.
 
-## Playwright testing - data-testid attribute
+Cypress example, selecting an option by typing:
 
-When `data-testid='x'` is passed, it is set on the `<input>` itself and these attributes are derived for inner elements:
-
-| Element                                                | data-testid             |
-| ------------------------------------------------------ | ----------------------- |
-| `<input>`                                              | `x`                     |
-| Label                                                  | `x_label`               |
-| Error messages (by index, form errors or `error` prop) | `x_error_${idx}`        |
-| Retry button shown when `onFetch` failed               | `x_retry_btn`           |
-| Selected tag (by index)                                | `x_tag_${idx}`          |
-| Open/close (chevron) button                            | `x_btn`                 |
-| Options list `<ul>`                                    | `x_options`             |
-| Option `<button>`                                      | `x_option_${value}_btn` |
-| "No options" row                                       | `x_option_noOptions`    |
-| "Loading" row                                          | `x_option_loading`      |
-| Search/pagination retry `<button>`                     | `x_option_error_btn`    |
-
-`${value}` is `option.value`, `${idx}` is 0-based. Without `data-testid`, none of these attributes are rendered.
-
-## Callback contracts
-
-### `onSearch(query, page, pageSize, abortSignal)`
-
-- `page` is **0-based**. The first call uses `page = 0`. Next pages use `result.page + 1`.
-- Return `page` equal to the page you loaded and `hasNextPage` accurately. Pagination stops when it is `false`.
-- Called on **every** input change while the dropdown is open, with no debounce. Debounce on the consumer side if the API is expensive.
-- **Always forward `abortSignal`** to `fetch` or the query function. Running search and next-page requests are aborted when the user types again, closes the dropdown, or the component unmounts. Aborted results are ignored.
-- Throwing (other than `AbortError`) shows an inline retry row at the end of the dropdown list. Retry repeats the failed page (first page repeats the search).
-
-### `onFetch(value, abortSignal?)`
-
-- Called to resolve a form value into a displayable option, on mount and whenever the form value changes externally (e.g. `form.reset`, `setFieldValue`).
-- Called once per value (in parallel) for multiple. Values are trimmed and blank values are ignored.
-- Skipped when the form value is exactly the current selection (same values, same count), so selecting in the UI does not trigger a refetch.
-- Return `null` when the option does not exist. A tag is shown with `value` as label, in `danger` variant, with the `unavailableOption` tooltip.
-- Throwing (other than `AbortError`) shows an error with a retry button below the input (`localization.autocompleteFetchError`) and the wrapper switches to the error state. If one of multiple values fails, the whole fetch is considered failed.
-- The input, toggle button and retry button are disabled while fetching.
-- The component does not write to the form field until the initial `onFetch` has finished (successfully or not). Selection made by the user before that is not possible because the input is disabled.
-
-Example with `fetch`:
-
-```tsx
-const searchCountries = async (query: string, page: number, pageSize: number, signal: AbortSignal): Promise<OnSearchResult> => {
-    const res = await fetch(`/api/countries?q=${encodeURIComponent(query)}&page=${page}&size=${pageSize}`, { signal });
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
-    return {
-        page,
-        hasNextPage: data.hasNext,
-        options: data.items.map((c: Country) => ({ value: c.code, label: c.name }))
-    };
-};
-
-const fetchCountry = async (value: string, signal?: AbortSignal): Promise<Option | null> => {
-    const res = await fetch(`/api/countries/${value}`, { signal });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error('Fetch failed');
-    const c = await res.json();
-    return { value: c.code, label: c.name };
-};
+```ts
+cy.get('[data-testid="country"]').type('Slov');
+cy.get('[data-testid="country_option_loading"]').should('not.exist');
+cy.get('[data-testid="country_option_SK_btn"]').click();
+cy.get('[data-testid="country_tag_0"]').should('contain.text', 'Slovakia');
 ```
 
-With TanStack Query, use `queryClient.fetchQuery({ queryKey, queryFn: ({ signal }) => ..., staleTime })` inside these callbacks and pass the abort signal through. Do not use `useQuery` for this. The component controls when requests happen.
+Playwright example, selecting an option by typing:
 
-## Behavior
-
-- **Opening:** click the chevron button, press `ArrowDown` in the input, or start typing. Opening triggers a search with the current text. The chevron button toggles (click again closes).
-- **Selection:** clicking a selected option again unselects it. In single mode, selecting replaces the previous value. After every selection, in both modes, the dropdown closes, typed text is cleared and focus returns to the input. In multiple mode, reopen the dropdown to pick another option.
-- **Tags:** each selected option is a removable `Tag` (not removable when `readOnly`). Removing a tag clears typed text. Removing the only tag in single mode sets the field to `''`.
-- **Unavailable values:** values for which `onFetch` returned `null` are shown as `danger` tags with `unavailableOption` tooltip. They stay in the field value until removed.
-- **Pagination:** loads the next page when the dropdown scrolls within 8px of the bottom (and `hasNextPage` is `true`, nothing is loading and no error is pending).
-- **Rows in dropdown:** `loading` row while searching or loading next page, `noOptions` row when search finished with no results, retry row when search/pagination failed.
-- **Blur:** leaving the component (focus moves outside of input, tags, button and dropdown) closes the dropdown, clears typed text and calls `field.handleBlur()` (marks the field touched). Selecting an option does not mark the field touched by itself.
-- **Errors:** form errors are shown only after the field is touched, one message per line (strings or objects with `message`, e.g. Standard Schema issues). The `error` prop, if set, replaces them and is shown immediately. When any error is shown (or `onFetch` failed) the whole control is rendered in `danger` color.
-- **Disabled option:** `option.disabled` makes it non-selectable and skipped by keyboard navigation.
-- **Form submit:** `Enter` in the input never submits the surrounding form (default is prevented).
-- Dropdown uses the Popover API (`popover='manual'`) and CSS anchor positioning. Requires a modern browser.
-
-### Dropdown height
-
-Max height is `min(pageSize - 1, 5) * 36 + 8` px, so at most 5 rows are visible and the list scrolls. Use `pageSize` of at least 6 for the full 5 rows. Very small values (`1`, `2`) make the dropdown too small to be usable.
-
-## Keyboard
-
-| Key                     | Context                | Action                                                                                                                                  |
-| ----------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `ArrowDown`             | input / chevron button | Open the dropdown (if closed) and focus the first enabled option                                                                        |
-| `ArrowDown` / `ArrowUp` | option                 | Move focus. Skips disabled options. `ArrowUp` on the first option returns to the input and closes the dropdown.                         |
-| `Enter`                 | input                  | Selects the first loaded option if text is entered (does nothing if that option is disabled). Without text it just closes the dropdown. |
-| `Enter`                 | option                 | Select the focused option                                                                                                               |
-| `Escape`                | input / option         | Close the dropdown (returns focus to the input from an option). Typed text is kept.                                                     |
-
-## Localization
-
-Texts come from `localization` in `utils/constants`: `retry`, `autocompleteFetchError`, `autocompleteSearchError`, `noOptions`, `loading`, `unavailableOption`, `openDropdown`, `closeDropdown`, and `requiredField` (used by the label wrapper for the required `*`). Do not hardcode these strings. Override them via the library's localization mechanism.
-
-## Common mistakes
-
-- Passing `value`/`onChange`/`ref`. They are not accepted, so bind through the form field.
-- Passing `name`, `id`, `onKeyDown` expecting them to be applied to the input as-is. The component controls them.
-- Using it outside a form field context. It throws or misbehaves.
-- Forgetting `multiple` while the field's default value is an array (or the reverse). Single expects `string`, multiple expects `string[]`.
-- Not forwarding `abortSignal`, which causes race conditions and wasted requests.
-- Returning wrong `page` or `hasNextPage` from `onSearch`, which leads to duplicate pages or endless loading.
-- Unstable or non-existent values in the form: they render as danger "unavailable" tags because `onFetch` returned `null`.
-- Passing `error=''` to "clear" the error: it still overrides form validation errors. Pass `undefined` instead.
-- Targeting the input by the raw `id` in tests. The real id is `autocomplete-${id}`.
-- Very small `pageSize` (below 6), which shrinks the dropdown height.
+```ts
+await page.getByTestId('country').fill('Slov');
+await expect(page.getByTestId('country_option_loading')).toHaveCount(0);
+await page.getByTestId('country_option_SK_btn').click();
+await expect(page.getByTestId('country_tag_0')).toContainText('Slovakia');
+```

@@ -26,9 +26,9 @@ interface BaseProps {
     /** Optional error message for input component, if not blank, all input is in danger color */
     error?: string;
     /** Optional buttons or icons at start of input */
-    startAction?: Array<InputActionProps> | InputActionProps;
+    startAction?: Array<Omit<InputActionProps, '_idx' | '_position'>> | Omit<InputActionProps, '_idx' | '_position'>;
     /** Optional buttons or icons at end of input */
-    endAction?: Array<InputActionProps> | InputActionProps;
+    endAction?: Array<Omit<InputActionProps, '_idx' | '_position'>> | Omit<InputActionProps, '_idx' | '_position'>;
     /** Optional attribute for Playwright testing */
     'data-testid'?: string;
 }

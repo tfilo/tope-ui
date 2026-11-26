@@ -18,7 +18,7 @@ const theme = {
 /**
  * Header component renders as HTMLHeaderElement element with optional menu, profile and logout buttons
  */
-export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null }) => {
+export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onProfile = null, 'data-testid': dataTestId }) => {
     const hasProfileOrLogout = onProfile !== null || onLogout !== null;
 
     if (menu.length === 0 && !hasProfileOrLogout) {
@@ -28,7 +28,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
     return (
         <header className={theme.base}>
             <nav className={theme.menu}>
-                {menu.map((m) => {
+                {menu.map((m, idx) => {
                     const active = m.active || m.menu?.some((item) => item.active);
 
                     if (m.menu !== undefined) {
@@ -51,6 +51,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                                         onClick: mm.onClick
                                     };
                                 })}
+                                data-testid={dataTestId ? `${dataTestId}_menu_item_${idx}` : undefined}
                             >
                                 <span className={theme.label}>{m.label}</span>
                             </Dropdown>
@@ -67,6 +68,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             aria-label={m.label}
                             aria-current={active ? 'page' : undefined}
                             title={m.label}
+                            data-testid={dataTestId ? `${dataTestId}_menu_item_${idx}` : undefined}
                         >
                             <span className={theme.label}>{m.label}</span>
                         </Button>
@@ -83,6 +85,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             title={localization.profile}
                             variant='transparent'
                             onClick={onProfile}
+                            data-testid={dataTestId ? `${dataTestId}_profile` : undefined}
                         >
                             <span className={theme.label}>{localization.profile}</span>
                         </Button>
@@ -95,6 +98,7 @@ export const Header: React.FC<HeaderProps> = ({ menu = [], onLogout = null, onPr
                             title={localization.logout}
                             variant='transparent'
                             onClick={onLogout}
+                            data-testid={dataTestId ? `${dataTestId}_logout` : undefined}
                         >
                             <span className={theme.label}>{localization.logout}</span>
                         </Button>

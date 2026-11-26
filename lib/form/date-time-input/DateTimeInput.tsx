@@ -1004,7 +1004,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                 onClick={() => {
                                                     changeMonthAndYearHandler(selectedYear ?? getYear(new Date()), month);
                                                 }}
-                                                data-testid={dataTestId ? `${dataTestId}_calendar_month_list_item_${month.val}_btn` : undefined}
+                                                data-testid={
+                                                    dataTestId ? `${dataTestId}_calendar_month_list_item_${month.val}_btn` : undefined
+                                                }
                                             >
                                                 {month.label.substring(0, 3)}
                                             </Button>
@@ -1029,7 +1031,9 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                         className={theme.calendar.daysHeader}
                                                         aria-label={d}
                                                         data-testid={
-                                                            dataTestId ? `${dataTestId}_calendar_day_table_header_${d.substring(0, 2)}` : undefined
+                                                            dataTestId
+                                                                ? `${dataTestId}_calendar_day_table_header_${d.substring(0, 2)}`
+                                                                : undefined
                                                         }
                                                     >
                                                         {d.substring(0, 2)}
@@ -1103,7 +1107,11 @@ export const DateTimeInput: React.FC<DateTimeInputProps> = ({
                                                             (isSelected ? 'bg-primary-light!' : '') + ' ' + theme.calendar.timeBtn
                                                         }
                                                         onClick={() => changeTimeHandler(ts.minute)}
-                                                        data-testid={dataTestId ? `${dataTestId}_calendar_time_list_item_${ts.minute}_btn` : undefined}
+                                                        data-testid={
+                                                            dataTestId
+                                                                ? `${dataTestId}_calendar_time_list_item_${ts.minute}_btn`
+                                                                : undefined
+                                                        }
                                                     >
                                                         {ts.label}
                                                     </Button>

@@ -30,4 +30,6 @@ interface FlexBaseCol {
 export type FlexProps = PropsWithChildren<FlexBaseRow | FlexBaseCol> & {
     /** Optional additional CSS class name(s) applied to the container. */
     additionalClassName?: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 };

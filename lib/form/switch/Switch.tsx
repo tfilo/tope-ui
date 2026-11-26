@@ -54,7 +54,7 @@ const theme = {
     error: (isDisabled: boolean = false) => (isDisabled ? 'text-disabled' : 'text-danger')
 } as const;
 
-export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, ...props }) => {
+export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disabled, 'data-testid': dataTestId, ...props }) => {
     const _id = useId();
     const baseId = id || _id;
     const inputId = `input-${baseId}`;
@@ -89,11 +89,13 @@ export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disa
                     }}
                     id={inputId}
                     onBlur={field.handleBlur}
+                    data-testid={dataTestId}
                 />
                 <label
                     htmlFor={inputId}
                     id={`${inputId}-switch`}
                     className={`${theme.base(!(disabled || props.readOnly))} ${borderColor}`}
+                    data-testid={dataTestId ? `${dataTestId}_switch` : undefined}
                 >
                     <span className={theme.srOnly}>{localization.switch}</span>
                     <span className={`${theme.circle.base(field.state.value)} ${circleColor}`}></span>
@@ -104,6 +106,7 @@ export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disa
                         htmlFor={inputId}
                         id={`${inputId}-label`}
                         className={theme.label(disabled)}
+                        data-testid={dataTestId ? `${dataTestId}_label` : undefined}
                     >
                         {label}
                         {required && (
@@ -123,10 +126,12 @@ export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disa
                         errors.map((err, idx) => {
                             return (
                                 <label
+                                    key={`${err}_${idx}`}
                                     htmlFor={inputId}
                                     id={`${inputId}-error-${idx}`}
                                     className={theme.error(disabled)}
                                     role='alert'
+                                    data-testid={dataTestId ? `${dataTestId}_error_${idx}` : undefined}
                                 >
                                     {err}
                                 </label>
@@ -138,6 +143,7 @@ export const Switch: React.FC<SwitchProps> = ({ id, label, error, required, disa
                             id={`${inputId}-error`}
                             className={theme.error(disabled)}
                             role='alert'
+                            data-testid={dataTestId ? `${dataTestId}_error_0` : undefined}
                         >
                             {error}
                         </label>

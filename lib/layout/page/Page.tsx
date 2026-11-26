@@ -15,12 +15,15 @@ const theme = {
 /**
  * Page component renders as HTMLDivElement element with body and optional title
  */
-export const Page: React.FC<PageProps> = ({ children, title, titleType = 'h1', onBack }) => {
+export const Page: React.FC<PageProps> = ({ children, title, titleType = 'h1', onBack, 'data-testid': dataTestId }) => {
     const hasTitle = isNotBlank(title);
     const Title: ElementType = titleType;
 
     return (
-        <div className={theme.page}>
+        <div
+            className={theme.page}
+            data-testid={dataTestId}
+        >
             {(hasTitle || onBack) && (
                 <div className={theme.header}>
                     {onBack && (
@@ -29,11 +32,19 @@ export const Page: React.FC<PageProps> = ({ children, title, titleType = 'h1', o
                             variant='transparent'
                             showChildren={false}
                             onClick={onBack}
+                            data-testid={dataTestId ? `${dataTestId}_back` : undefined}
                         >
                             {localization.back}
                         </Button>
                     )}
-                    {hasTitle && <Title className={theme.title}>{title}</Title>}
+                    {hasTitle && (
+                        <Title
+                            className={theme.title}
+                            data-testid={dataTestId ? `${dataTestId}_title` : undefined}
+                        >
+                            {title}
+                        </Title>
+                    )}
                 </div>
             )}
             {children}

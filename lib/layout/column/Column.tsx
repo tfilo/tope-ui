@@ -15,6 +15,13 @@ const theme = {
     }
 };
 
-export const Column: React.FC<ColumnProps> = ({ children, colspan = 1, className = '' }) => {
-    return <div className={[theme.base(colspan), className].join(' ').trim()}>{children}</div>;
+export const Column: React.FC<ColumnProps> = ({ children, colspan = 1, className = '', 'data-testid': dataTestId }) => {
+    return (
+        <div
+            className={[theme.base(colspan), className].join(' ').trim()}
+            data-testid={dataTestId}
+        >
+            {children}
+        </div>
+    );
 };

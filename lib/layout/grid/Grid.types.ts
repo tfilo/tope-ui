@@ -5,4 +5,6 @@ import type { PropsWithChildren } from 'react';
  */
 export type GridProps = PropsWithChildren<{
     maxRows?: 4 | 2 | 1;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }>;

@@ -22,6 +22,8 @@ interface BaseProps {
     options: (Option | OptionGroup)[];
     /** Allow clearing the selection, including removing the last selected tag. No empty dropdown option is rendered. */
     allowEmptyOption?: boolean;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 export interface SelectProps

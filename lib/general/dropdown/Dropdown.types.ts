@@ -14,4 +14,6 @@ export type DropdownProps = React.PropsWithChildren<{
     showChevron?: boolean;
     buttonProps?: Omit<ButtonProps<'button'>, 'as' | 'ref' | 'children'>;
     options: OptionWithIconAndAction[];
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }>;

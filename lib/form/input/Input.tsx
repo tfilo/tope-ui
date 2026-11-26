@@ -17,7 +17,7 @@ const theme = {
     input: 'flex-1 focus:outline-none px-md min-h-[30px]'
 } as const;
 
-const InputAction: React.FC<InputActionProps> = (props) => {
+const InputAction: React.FC<InputActionProps> = ({ 'data-testid': dataTestId, _idx, _position, ...props }) => {
     const [processing, setProcessing] = useState(false);
 
     const handleClick = async () => {
@@ -38,6 +38,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
                 <Icon
                     className={theme.action.icon}
                     title={props.title}
+                    data-testid={dataTestId ? `${dataTestId}_${_position}_action_${_idx}` : undefined}
                 />
             </div>
         );
@@ -52,6 +53,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
             onClick={handleClick}
             disabled={processing || props.disabled}
             additionalClassName={theme.action.button}
+            data-testid={dataTestId ? `${dataTestId}_${_position}_action_${_idx}` : undefined}
         >
             {props.title}
         </Button>
@@ -62,7 +64,7 @@ const InputAction: React.FC<InputActionProps> = (props) => {
  * Input component that renders as HTMLInputElement element wrapped by parent div
  * containing optional label and error message.
  */
-export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, ...props }) => {
+export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label, error, 'data-testid': dataTestId, ...props }) => {
     const _id = useId();
     const inputId = id || `input-${_id}`;
 
@@ -83,6 +85,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
             required={props.required}
             disabled={props.disabled}
             elementId={inputId}
+            data-testid={dataTestId}
         >
             {startActionsArray.length > 0 && (
                 <div className={theme.action.leftWrapper}>
@@ -91,6 +94,9 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
                             {...action}
                             key={`${action.title}_${idx}`}
                             disabled={action.disabled || props.disabled}
+                            data-testid={dataTestId}
+                            _idx={idx}
+                            _position='start'
                         />
                     ))}
                 </div>
@@ -98,6 +104,7 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
             <input
                 className={theme.input}
                 {...props}
+                data-testid={dataTestId}
                 name={field.name}
                 value={field.state.value ?? ''}
                 onChange={(e) => {
@@ -118,6 +125,9 @@ export const Input: React.FC<InputProps> = ({ id, startAction, endAction, label,
                             {...action}
                             key={`${action.title}_${idx}`}
                             disabled={action.disabled || props.disabled}
+                            data-testid={dataTestId}
+                            _idx={idx}
+                            _position='end'
                         />
                     ))}
                 </div>

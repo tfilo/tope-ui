@@ -25,14 +25,16 @@ export const Tag: React.FC<TagProps> = ({
     disabled,
     variant = 'primary',
     className = [theme.base(variant), theme.variant[variant]].join(' '),
+    'data-testid': dataTestId,
     ...props
 }) => {
     const isClickable = onClick !== undefined && typeof onClick === 'function';
 
     return (
         <span
-            className={className}
             {...props}
+            className={className}
+            data-testid={dataTestId}
         >
             <button
                 type='button'
@@ -49,6 +51,7 @@ export const Tag: React.FC<TagProps> = ({
                     className={theme.removeButton}
                     onClick={onRemove}
                     aria-label={localization.remove(label)}
+                    data-testid={dataTestId ? `${dataTestId}_remove` : undefined}
                 >
                     <XMarkIcon className={theme.removeIcon(variant)} />
                 </button>

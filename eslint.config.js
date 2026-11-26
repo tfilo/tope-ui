@@ -16,7 +16,7 @@ export default defineConfig([
         settings: {
             // Define the tailwindcss settings with the MANDATORY `cssConfigPath`
             tailwindcss: {
-                cssConfigPath: path.resolve(import.meta.dirname, 'lib/theme.css')
+                cssConfigPath: path.resolve(import.meta.dirname, 'lib/styles/theme.css')
             }
         },
         rules: {

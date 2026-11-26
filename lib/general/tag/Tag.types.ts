@@ -13,4 +13,6 @@ export interface TagProps {
     variant?: 'primary' | 'secondary' | 'danger' | 'outline';
     /** Class name for custom styling */
     className?: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }

@@ -17,4 +17,6 @@ export type ElementWrapperProps = PropsWithChildren<{
     disabled?: boolean;
     /** ID of the wrapped element — used to associate the label via htmlFor. */
     elementId: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }>;

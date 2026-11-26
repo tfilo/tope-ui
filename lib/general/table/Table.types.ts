@@ -88,6 +88,8 @@ export type TableProps<TData extends RowObject> = {
     onRowClick?: (row: TData) => void | Promise<void>;
     /** Optional compact layout below the tablet breakpoint. Shares table data and pagination. */
     renderMobileRow?: (row: TData) => ReactNode;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 } & TableDataOrFetch<TData>;
 
 export type TablePaginationProps = {
@@ -96,6 +98,8 @@ export type TablePaginationProps = {
     onPageChange: (page: number) => void;
     page: number;
     totalPages: number;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 };
 
 export type TableHeaderCellComponent = <TData extends RowObject>(props: TableHeaderCellProps<TData>) => ReactElement;

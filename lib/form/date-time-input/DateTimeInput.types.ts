@@ -83,6 +83,9 @@ interface BaseProps {
      * @default true
      */
     closeDateTimePickerIfSelected?: boolean;
+
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 /** Properties for the DateTimeInput component. */

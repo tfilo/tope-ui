@@ -5,6 +5,8 @@ interface BaseProps {
     label?: string;
     /** Optional error message for Switch component, if not blank, Switch is in danger color */
     error?: string;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 /** Properties for the Switch component. */

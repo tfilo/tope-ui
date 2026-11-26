@@ -23,14 +23,111 @@ Set `NODE_AUTH_TOKEN` in your environment to a GitHub personal access token
 the library and its TanStack Form peer dependency in your React application:
 
 ```bash
-npm install @tfilo/tope-ui @tanstack/react-form
+npm i --save @tfilo/tope-ui @tanstack/react-form
 ```
 
 Import components and hooks from `@tfilo/tope-ui`. Load the bundled stylesheet
-once in your application's root entry point or root route:
+once in your application's main css file like this:
 
-```tsx
-import '@tfilo/tope-ui/style.css';
+```css
+@import 'tailwindcss';
+@import '@tfilo/tope-ui/theme.css';
+@import '@tfilo/tope-ui/base.css';
+
+@source '../node_modules/@tfilo/tope-ui/dist';
+
+@theme static {
+    /* Optionally customize theme to your liking ussing some or all variables mentioned bellow */
+    /*
+    --color-primary: #0852ba;
+    --color-primary-dark: #083c82;
+    --color-primary-light: #3686f7;
+    --color-primary-extra-light: #8ebbfa;
+
+    --color-secondary: #57585c;
+    --color-secondary-dark: #444446;
+    --color-secondary-light: #b1b6bd;
+    --color-secondary-extra-light: #ebebed;
+
+    --color-success: #006600;
+    --color-success-dark: #004700;
+    --color-success-light: #b3e1b1;
+
+    --color-warning: oklch(85.2% 0.199 91.936);
+    --color-warning-dark: oklch(85.2% 0.199 91.936);
+    --color-warning-light: oklch(85.2% 0.199 91.936);
+
+    --color-danger: #a72416;
+    --color-danger-dark: #7c1a0e;
+    --color-danger-light: #ed9891;
+
+    --color-transparent: transparent;
+    --color-black: #000;
+    --color-white: #fff;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    --text-color-default: #222;
+    --text-color-disabled: #999;
+    --fill-disabled: #999;
+
+    --border-color-default: #d1d5db;
+    --border-color-dark: #9ca3af;
+    --border-color-light: #e5e7eb;
+
+    --text-headline-1: 2.25rem;
+    --text-headline-1--line-height: 2.5rem;
+    --text-headline-1--font-weight: var(--font-weight-bold);
+
+    --text-headline-2: 2rem;
+    --text-headline-2--line-height: 2.25rem;
+    --text-headline-2--font-weight: var(--font-weight-bold);
+
+    --text-headline-3: 1.75rem;
+    --text-headline-3--line-height: 2rem;
+    --text-headline-3--font-weight: var(--font-weight-bold);
+
+    --text-headline-4: 1.5rem;
+    --text-headline-4--line-height: 1.75rem;
+    --text-headline-4--font-weight: var(--font-weight-bold);
+
+    --text-headline-5: 1.25rem;
+    --text-headline-5--line-height: 1.5rem;
+    --text-headline-5--font-weight: var(--font-weight-bold);
+
+    --text-sm: 0.75rem;
+    --text-sm--line-height: 0.875rem; 
+
+    --text-base: 1rem; 
+    --text-base--line-height: 1.25rem;
+
+    --text-lg: 1.25rem;
+    --text-lg--line-height: 1.5rem;
+
+    --radius-none: 0rem;
+    --radius-xs: 0.125rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem; 
+    --radius-full: calc(infinity * 1px);
+
+    --spacing-none: 0rem;
+    --spacing-xs: 0.125rem;
+    --spacing-sm: 0.25rem;
+    --spacing-md: 0.5rem;
+    --spacing-lg: 0.75rem;
+    --spacing-xl: 1rem; 
+    --spacing-2xl: 1.25rem;
+    --spacing-3xl: 1.5rem;
+
+    --breakpoint-mobile: 32rem;
+    --breakpoint-tablet: 48rem;
+    --breakpoint-desktop: 80rem;
+    */
+}
 ```
 
 ## Set up library development
@@ -120,8 +217,8 @@ export function ExampleForm() {
             noValidate
         >
             <form.AppField
-                name="basic"
-                children={(field) => <field.Input label="Basic example" />}
+                name='basic'
+                children={(field) => <field.Input label='Basic example' />}
             />
             <form.AppForm>
                 <form.SubscribeButton>Submit</form.SubscribeButton>
@@ -193,8 +290,10 @@ strings are not UTC timestamps.
 ### General
 
 - **Button**
+- **Card**
 - **Dropdown**
 - **List**
+- **LoadingOverlay**
 - **Modal**
 - **Table**
 - **Tag**
@@ -220,7 +319,9 @@ Both layouts use the same fetched/sorted rows, loading state, error handling, an
     renderMobileRow={(row) => (
         <div>
             <strong>{row.title}</strong>
-            <p>{row.date} · {row.total}</p>
+            <p>
+                {row.date} · {row.total}
+            </p>
         </div>
     )}
 />
@@ -235,14 +336,12 @@ See **General → Table → Responsive rows** in Storybook for a fuel-record exa
 
 ### Layout
 
-- **Card**
 - **Column**
 - **Content**
 - **Flex**
 - **Grid**
 - **Header**
 - **Page**
-- **PageLoadingOverlay**
 - **Section**
 
 Header uses CSS media queries to show icon-only navigation below the tablet
@@ -261,7 +360,7 @@ These styles are scoped to Header and do not change standalone buttons or dropdo
 
 #### Page loading overlay
 
-`PageLoadingOverlay` shows a centered spinner over the previous page with a
+`LoadingOverlay` shows a centered spinner over the previous page with a
 translucent, blurred backdrop after 200ms. It renders nothing when `active` is
 false. Text defaults to the existing Slovak `localization.loading`; pass `label`
 for a translated message from your application.
@@ -271,17 +370,20 @@ page mounted inside it. The application supplies navigation state and makes the
 covered content `inert` to block clicks and keyboard focus while loading:
 
 ```tsx
-import { Content, Header, PageLoadingOverlay } from '@tfilo/tope-ui';
+import { Content, Header, LoadingOverlay } from '@tfilo/tope-ui';
 
 <>
     <Header />
-    <main className="relative flex flex-1 flex-col">
-        <div inert={isNavigating} aria-busy={isNavigating}>
+    <main className='relative flex flex-1 flex-col'>
+        <div
+            inert={isNavigating}
+            aria-busy={isNavigating}
+        >
             <Content>{children}</Content>
         </div>
-        <PageLoadingOverlay active={isNavigating} />
+        <LoadingOverlay active={isNavigating} />
     </main>
-</>
+</>;
 ```
 
 The component uses CSS for the reveal delay and supports server rendering without
@@ -305,11 +407,7 @@ data loading, and content interaction remain under the application's control.
 
 ## Styles
 
-The library builds a bundled stylesheet. Import it once in your application:
-
-```tsx
-import '@tfilo/tope-ui/style.css';
-```
+The library builds a bundled stylesheet. Import it once in your application main css file:
 
 Tailwind-based styles and theme tokens are defined in `lib/main.css` and
 `lib/theme.css`.

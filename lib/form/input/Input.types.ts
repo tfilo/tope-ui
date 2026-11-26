@@ -2,6 +2,10 @@ import type { InputHTMLAttributes } from 'react';
 import type { Icon } from '../../common/Icon';
 
 export interface InputActionProps {
+    /** IDX, internal prop */
+    _idx: number;
+    /** Position, internal prop */
+    _position: 'start' | 'end';
     /** Icon element */
     icon: Icon;
     /** Optional method to handle click on icon */
@@ -10,6 +14,8 @@ export interface InputActionProps {
     title: string;
     /** Allows to disable click action */
     disabled?: boolean;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 interface BaseProps {
@@ -20,9 +26,11 @@ interface BaseProps {
     /** Optional error message for input component, if not blank, all input is in danger color */
     error?: string;
     /** Optional buttons or icons at start of input */
-    startAction?: Array<InputActionProps> | InputActionProps;
+    startAction?: Array<Omit<InputActionProps, '_idx' | '_position'>> | Omit<InputActionProps, '_idx' | '_position'>;
     /** Optional buttons or icons at end of input */
-    endAction?: Array<InputActionProps> | InputActionProps;
+    endAction?: Array<Omit<InputActionProps, '_idx' | '_position'>> | Omit<InputActionProps, '_idx' | '_position'>;
+    /** Optional attribute for Playwright testing */
+    'data-testid'?: string;
 }
 
 export interface InputProps

@@ -62,7 +62,8 @@ export const Table = <TData extends RowObject>({
     onFetch,
     showHeader = true,
     onRowClick,
-    renderMobileRow
+    renderMobileRow,
+    'data-testid': dataTestId
 }: TableProps<TData>): ReactElement => {
     //const [pageSize, setPageSize] = useState(_pageSize);
 
@@ -255,6 +256,7 @@ export const Table = <TData extends RowObject>({
                 <table
                     className={`${theme.table}${renderMobileRow ? ' hidden tablet:table' : ''}`}
                     inert={hasFetch && isLoading}
+                    data-testid={dataTestId}
                 >
                     {showHeader && (
                         <thead>
@@ -263,6 +265,7 @@ export const Table = <TData extends RowObject>({
                                     <th
                                         key={`${col.accessor.toString()}_${col.header}`}
                                         className={theme.headerCell(col.additionalClassName)}
+                                        data-testid={dataTestId ? `${dataTestId}_header_cell_${col.accessor.toString()}` : undefined}
                                     >
                                         <TableHeaderCell
                                             col={col}
@@ -275,16 +278,17 @@ export const Table = <TData extends RowObject>({
                         </thead>
                     )}
                     <tbody>
-                        {rows.map(({ row, index }) => (
+                        {rows.map(({ row, index: rowIndex }) => (
                             <tr
-                                key={`${index}_${Object.values(row).join('_')}`}
+                                key={`${rowIndex}_${Object.values(row).join('_')}`}
                                 className={rowClassName}
                                 {...rowInteraction(row)}
                             >
-                                {columns.map((col) => (
+                                {columns.map((col, colIndex) => (
                                     <td
                                         key={`${col.accessor.toString()}_${col.header}`}
                                         className={theme.bodyCell(col.additionalClassName)}
+                                        data-testid={dataTestId ? `${dataTestId}_body_cell_${rowIndex}_${colIndex}` : undefined}
                                     >
                                         <TableCell
                                             row={row}
@@ -306,6 +310,7 @@ export const Table = <TData extends RowObject>({
                                 key={`${index}_${Object.values(row).join('_')}`}
                                 className={`border-b border-default px-md py-lg ${rowClassName ?? ''}`}
                                 {...rowInteraction(row)}
+                                data-testid={dataTestId ? `${dataTestId}_mobile_row_${index}` : undefined}
                             >
                                 {renderMobileRow(row)}
                             </li>
@@ -316,13 +321,17 @@ export const Table = <TData extends RowObject>({
                     <div
                         className={theme.loading}
                         role='status'
+                        data-testid={dataTestId ? `${dataTestId}_loader` : undefined}
                     >
                         {localization.loading}
                     </div>
                 )}
             </div>
             {hasFetch && fetchFailed && (
-                <div className={theme.error}>
+                <div
+                    className={theme.error}
+                    data-testid={dataTestId ? `${dataTestId}_fetch_error` : undefined}
+                >
                     <span
                         className={theme.errorMessage}
                         role='alert'
@@ -347,6 +356,7 @@ export const Table = <TData extends RowObject>({
                     onPageChange={onPageChange}
                     page={page}
                     totalPages={totalPages}
+                    data-testid={dataTestId ? `${dataTestId}_pagination` : undefined}
                 />
             )}
         </div>

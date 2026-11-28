@@ -2,7 +2,7 @@
 
 ## Project
 
-TOPE-UI (`@tfilo/tope-ui`) is a personal React UI component library in active development. Read `README.md` and the relevant implementation and stories before making changes. Do not assume the library is production-ready.
+TOPE-UI (`@tfilo/tope-ui`) is a personal React UI component library. Read `README.md` and the relevant implementation and stories before making changes.
 
 The stack is React 19, TypeScript, Vite, Tailwind CSS 4, TanStack React Form, and Storybook. Node.js 24.x is recommended. Use npm and the existing `package-lock.json`.
 
@@ -36,7 +36,7 @@ These priorities apply to every agent working on this repository, including revi
 
 ## Repository map
 
-- `lib/main.ts`: runtime entry point and stylesheet import.
+- `lib/main.ts`: runtime entry point.
 - `lib/index.ts`: public exports shared by the runtime entry and declaration build.
 - `lib/general/`: reusable components such as Button, Dropdown, Modal, and Table.
 - `lib/form/`: form components connected to TanStack Form.
@@ -45,8 +45,9 @@ These priorities apply to every agent working on this repository, including revi
 - `lib/layout/`: page structure and responsive layout components.
 - `lib/common/`: shared types such as Icon, Option, and OptionGroup.
 - `lib/utils/`: utilities, configuration, and localization.
-- `lib/main.css` and `lib/theme.css`: global styles and theme tokens.
+- `lib/styles/base.css` and `lib/styles/theme.css`: global styles and theme tokens.
 - `lib/**/*.stories.tsx`: usage examples, documentation, and interaction tests.
+- `lib/**/*.ssr.test.tsx`: vitests ssr tests only where really needed to confirm server side rendering behavior.
 - `lib/Example.stories.tsx`: a complete form and layout example.
 - `.storybook/`: Storybook configuration.
 - `vite.config.ts`: library build and Storybook browser test configuration.
@@ -59,6 +60,7 @@ These priorities apply to every agent working on this repository, including revi
 - `npm run build-storybook`: generate the static Storybook in `storybook-static/`.
 - `npm run lint`: check library code with ESLint.
 - `npm run prettier`: check formatting.
+- `npm run test:ssr`: run vitest tests focused on server side rendering
 - `npm run test-storybook`: run the Storybook tests with Vitest and Playwright Chromium.
 
 Browser tests require the browser matching the installed Playwright version. If the executable is missing, `npx playwright install chromium --only-shell` installs the required headless shell. Do not install system packages or additional browsers unless needed for the task.
@@ -68,7 +70,7 @@ Run checks appropriate to the change. For component behavior changes, run the bu
 ## Implementation conventions
 
 - Follow nearby code and existing component patterns rather than introducing a new structure.
-- Components commonly have a component file, a `.types.ts` file, a `.stories.tsx` file, and an `index.ts` barrel. Follow the local folder's naming and capitalization.
+- Components commonly have a component file, a `.types.ts` file, a `.stories.tsx` file, a `.ssr.test.tsx` file and an `index.ts` barrel. Follow the local folder's naming and capitalization.
 - Keep public exports consistent with the existing barrel structure and `lib/main.ts`.
 - Use strict TypeScript and preserve useful type inference, especially for TanStack Form fields and polymorphic component props.
 - Use existing Tailwind utilities, theme tokens, and component-local theme objects. Check the custom spacing, color, typography, and breakpoint tokens before selecting classes.
@@ -77,15 +79,20 @@ Run checks appropriate to the change. For component behavior changes, run the bu
 - Preserve accessible labels, keyboard behavior, focus handling, and native element semantics in line with the priorities above. For behavior changes, add or update only the simple, relevant tests needed to cover basic functionality or a meaningful regression.
 - Preserve existing public APIs and defaults unless the requested task calls for changing them. Explain breaking changes and consumer migration needs.
 - Keep changes focused. Avoid unrelated refactors, dependency changes, or generated output edits.
+- Prefer putting tailwind classes in `theme` constant rather than long inline classes. As example see Input.tsx
 
 ## Localization
 
-- Put new user-facing messages in the global localization object.
+- Put new user-facing messages in the global localization object `utils/constants.ts`.
 - Write default localized messages in Slovak.
 
 ## Consumer integration
 
-Consumers import components and hooks from `@tfilo/tope-ui`, and bundled styles from `@tfilo/tope-ui/style.css`. Verify package exports when updating consumer documentation; the README currently uses an unscoped stylesheet example.
+Exports & Imports: Consumers import JS/TS from `@tfilo/tope-ui` and CSS from `@tfilo/tope-ui/theme.css` and `@tfilo/tope-ui/base.css`.
+
+Raw CSS in dist: dist must contain an exact, uncompiled copy of src/styles. Never bundle or pre-compile Tailwind classes into dist. Consumer apps compile these raw styles during their own build to enable easy theme customization.
+
+Docs: Verify package.json exports before updating docs.
 
 The owner's applications use TanStack Start and Zod validation with TanStack Form. Preserve compatibility with that setup. When changing relevant code, check browser globals during server rendering, deterministic hydration, field value types, and display of Zod validation issues. Verify the current implementation rather than assuming a component is server-rendering safe.
 

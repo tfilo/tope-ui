@@ -182,6 +182,12 @@ Run Storybook-powered tests (via Vitest):
 npm run test-storybook
 ```
 
+Run SSR test using vitest:
+
+```bash
+npm run test:ssr
+```
+
 ## Components
 
 ### Common
@@ -407,10 +413,10 @@ data loading, and content interaction remain under the application's control.
 
 ## Styles
 
-The library builds a bundled stylesheet. Import it once in your application main css file:
+The library provide raw styles, consumer application must compile it by itself, see [Install in an application](#install-in-an-application) :
 
-Tailwind-based styles and theme tokens are defined in `lib/main.css` and
-`lib/theme.css`.
+Tailwind-based styles, custom styles and theme tokens are defined in `lib/styles/base.css` and
+`lib/styles/theme.css`.
 
 ## Localization
 
